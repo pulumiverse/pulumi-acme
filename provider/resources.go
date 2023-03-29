@@ -105,13 +105,18 @@ func Provider() tfbridge.ProviderInfo {
 			// 		"tags": {Type: tfbridge.MakeType(mainPkg, "Tags")},
 			// 	},
 			// },
+			"acme_certificate":  {Tok: tfbridge.MakeResource(mainPkg, mainMod, "Certificate")},
+			"acme_registration": {Tok: tfbridge.MakeResource(mainPkg, mainMod, "Registration")},
 		},
 		DataSources: map[string]*tfbridge.DataSourceInfo{
 			// Map each resource in the Terraform provider to a Pulumi function. An example
 			// is below.
 			// "aws_ami": {Tok: tfbridge.MakeDataSource(mainPkg, mainMod, "getAmi")},
+			"acme_certificate":  {Tok: tfbridge.MakeDataSource(mainPkg, mainMod, "getCertificate")},
+			"acme_registration": {Tok: tfbridge.MakeDataSource(mainPkg, mainMod, "getRegistration")},
 		},
 		JavaScript: &tfbridge.JavaScriptInfo{
+			PackageName: "@pulumiverse/acme",
 			// List any npm dependencies and their versions
 			Dependencies: map[string]string{
 				"@pulumi/pulumi": "^3.0.0",
@@ -126,6 +131,7 @@ func Provider() tfbridge.ProviderInfo {
 			//Overlay: &tfbridge.OverlayInfo{},
 		},
 		Python: &tfbridge.PythonInfo{
+			PackageName: "pulumiverse_acme",
 			// List any Python dependencies and their version ranges
 			Requires: map[string]string{
 				"pulumi": ">=3.0.0,<4.0.0",
@@ -141,6 +147,7 @@ func Provider() tfbridge.ProviderInfo {
 			GenerateResourceContainerTypes: true,
 		},
 		CSharp: &tfbridge.CSharpInfo{
+			RootNamespace: "Pulumiverse",
 			PackageReferences: map[string]string{
 				"Pulumi": "3.*",
 			},
