@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package main
 
-// Version is initialized by the Go linker to contain the semver of this build.
-var Version string
+import (
+	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfgen"
+	acme "github.com/pulumiverse/pulumi-acme/provider"
+	"github.com/pulumiverse/pulumi-acme/provider/pkg/version"
+)
+
+func main() {
+	// Modify the path to point to the new provider
+	tfgen.Main("acme", version.Version, acme.Provider())
+}
