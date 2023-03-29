@@ -51,6 +51,7 @@ func NewCertificate(ctx *pulumi.Context,
 	if args.AccountKeyPem == nil {
 		return nil, errors.New("invalid value for required argument 'AccountKeyPem'")
 	}
+	opts = pkgResourceDefaultOpts(opts)
 	var resource Certificate
 	err := ctx.RegisterResource("acme:index/certificate:Certificate", name, args, &resource, opts...)
 	if err != nil {

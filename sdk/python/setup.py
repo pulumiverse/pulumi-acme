@@ -15,7 +15,7 @@ class InstallPluginCommand(install):
     def run(self):
         install.run(self)
         try:
-            check_call(['pulumi', 'plugin', 'install', 'resource', 'acme', PLUGIN_VERSION])
+            check_call(['pulumi', 'plugin', 'install', 'resource', 'acme', PLUGIN_VERSION, '--server', 'github://api.github.com/pulumiverse/pulumi-acme'])
         except OSError as error:
             if error.errno == errno.ENOENT:
                 print(f"""
@@ -39,7 +39,7 @@ def readme():
 
 setup(name='pulumiverse_acme',
       version=VERSION,
-      description="A Pulumi package for creating and managing ACME (Automated Certificate Management Environment) cloud resources.",
+      description="A Pulumi package for creating and managing ACME cloud resources.",
       long_description=readme(),
       long_description_content_type='text/markdown',
       cmdclass={

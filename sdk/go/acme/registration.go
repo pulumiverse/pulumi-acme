@@ -33,6 +33,7 @@ func NewRegistration(ctx *pulumi.Context,
 	if args.EmailAddress == nil {
 		return nil, errors.New("invalid value for required argument 'EmailAddress'")
 	}
+	opts = pkgResourceDefaultOpts(opts)
 	var resource Registration
 	err := ctx.RegisterResource("acme:index/registration:Registration", name, args, &resource, opts...)
 	if err != nil {

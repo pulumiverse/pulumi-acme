@@ -1,3 +1,3 @@
-// A Pulumi package for creating and managing ACME (Automated Certificate Management Environment) cloud resources.
+// A Pulumi package for creating and managing ACME cloud resources.
 
 package acme
