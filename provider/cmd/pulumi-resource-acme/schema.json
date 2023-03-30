@@ -28,7 +28,7 @@
         "go": {
             "generateExtraInputTypes": true,
             "generateResourceContainerTypes": true,
-            "importBasePath": "github.com/pulumi/pulumi-acme/sdk/go/acme"
+            "importBasePath": "github.com/pulumiverse/pulumi-acme/sdk/go/acme"
         },
         "nodejs": {
             "compatibility": "tfbridge20",
