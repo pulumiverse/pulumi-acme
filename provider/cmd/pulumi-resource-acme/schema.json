@@ -1,0 +1,543 @@
+{
+    "name": "acme",
+    "displayName": "ACME",
+    "description": "A Pulumi package for creating and managing ACME cloud resources.",
+    "keywords": [
+        "pulumi",
+        "acme",
+        "category/cloud"
+    ],
+    "homepage": "https://www.pulumi.com",
+    "license": "Apache-2.0",
+    "attribution": "This Pulumi package is based on the [`acme` Terraform Provider](https://github.com/vancluever/terraform-provider-acme).",
+    "repository": "https://github.com/pulumiverse/pulumi-acme",
+    "pluginDownloadURL": "github://api.github.com/pulumiverse/pulumi-acme",
+    "publisher": "Pulumiverse",
+    "meta": {
+        "moduleFormat": "(.*)(?:/[^/]*)"
+    },
+    "language": {
+        "csharp": {
+            "compatibility": "tfbridge20",
+            "namespaces": null,
+            "packageReferences": {
+                "Pulumi": "3.*"
+            },
+            "rootNamespace": "Pulumiverse"
+        },
+        "go": {
+            "generateExtraInputTypes": true,
+            "generateResourceContainerTypes": true,
+            "importBasePath": "github.com/pulumiverse/pulumi-acme/sdk/go/acme"
+        },
+        "nodejs": {
+            "compatibility": "tfbridge20",
+            "dependencies": {
+                "@pulumi/pulumi": "^3.0.0"
+            },
+            "devDependencies": {
+                "@types/mime": "^2.0.0",
+                "@types/node": "^10.0.0"
+            },
+            "disableUnionOutputTypes": true,
+            "packageDescription": "A Pulumi package for creating and managing ACME cloud resources.",
+            "packageName": "@pulumiverse/acme",
+            "readme": "\u003e This provider is a derived work of the [Terraform Provider](https://github.com/vancluever/terraform-provider-acme)\n\u003e distributed under [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/). If you encounter a bug or missing feature,\n\u003e first check the [`pulumi-acme` repo](https://github.com/pulumiverse/pulumi-acme/issues); however, if that doesn't turn up anything,\n\u003e please consult the source [`terraform-provider-acme` repo](https://github.com/vancluever/terraform-provider-acme/issues).",
+            "typescriptVersion": ""
+        },
+        "python": {
+            "compatibility": "tfbridge20",
+            "packageName": "pulumiverse_acme",
+            "readme": "\u003e This provider is a derived work of the [Terraform Provider](https://github.com/vancluever/terraform-provider-acme)\n\u003e distributed under [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/). If you encounter a bug or missing feature,\n\u003e first check the [`pulumi-acme` repo](https://github.com/pulumiverse/pulumi-acme/issues); however, if that doesn't turn up anything,\n\u003e please consult the source [`terraform-provider-acme` repo](https://github.com/vancluever/terraform-provider-acme/issues).",
+            "requires": {
+                "pulumi": "\u003e=3.0.0,\u003c4.0.0"
+            }
+        }
+    },
+    "config": {
+        "variables": {
+            "serverUrl": {
+                "type": "string"
+            }
+        },
+        "defaults": [
+            "serverUrl"
+        ]
+    },
+    "types": {
+        "acme:index/CertificateDnsChallenge:CertificateDnsChallenge": {
+            "properties": {
+                "config": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "pulumi.json#/Any"
+                    },
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    }
+                },
+                "provider": {
+                    "type": "string",
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    }
+                }
+            },
+            "type": "object",
+            "required": [
+                "provider"
+            ]
+        },
+        "acme:index/CertificateHttpChallenge:CertificateHttpChallenge": {
+            "properties": {
+                "port": {
+                    "type": "integer",
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    }
+                },
+                "proxyHeader": {
+                    "type": "string",
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    }
+                }
+            },
+            "type": "object"
+        },
+        "acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge": {
+            "properties": {
+                "hosts": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    }
+                }
+            },
+            "type": "object",
+            "required": [
+                "hosts"
+            ]
+        },
+        "acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge": {
+            "properties": {
+                "directory": {
+                    "type": "string",
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    }
+                }
+            },
+            "type": "object",
+            "required": [
+                "directory"
+            ]
+        },
+        "acme:index/CertificateTlsChallenge:CertificateTlsChallenge": {
+            "properties": {
+                "port": {
+                    "type": "integer",
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    }
+                }
+            },
+            "type": "object"
+        },
+        "acme:index/RegistrationExternalAccountBinding:RegistrationExternalAccountBinding": {
+            "properties": {
+                "hmacBase64": {
+                    "type": "string",
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    },
+                    "willReplaceOnChanges": true
+                },
+                "keyId": {
+                    "type": "string",
+                    "language": {
+                        "python": {
+                            "mapCase": false
+                        }
+                    },
+                    "willReplaceOnChanges": true
+                }
+            },
+            "type": "object",
+            "required": [
+                "hmacBase64",
+                "keyId"
+            ]
+        }
+    },
+    "provider": {
+        "description": "The provider type for the acme package. By default, resources use package-wide configuration\nsettings, however an explicit `Provider` instance may be created and passed during resource\nconstruction to achieve fine-grained programmatic control over provider settings. See the\n[documentation](https://www.pulumi.com/docs/reference/programming-model/#providers) for more information.\n",
+        "properties": {
+            "serverUrl": {
+                "type": "string"
+            }
+        },
+        "required": [
+            "serverUrl"
+        ],
+        "inputProperties": {
+            "serverUrl": {
+                "type": "string"
+            }
+        },
+        "requiredInputs": [
+            "serverUrl"
+        ]
+    },
+    "resources": {
+        "acme:index/certificate:Certificate": {
+            "properties": {
+                "accountKeyPem": {
+                    "type": "string"
+                },
+                "certificateDomain": {
+                    "type": "string"
+                },
+                "certificateNotAfter": {
+                    "type": "string"
+                },
+                "certificateP12": {
+                    "type": "string"
+                },
+                "certificateP12Password": {
+                    "type": "string"
+                },
+                "certificatePem": {
+                    "type": "string"
+                },
+                "certificateRequestPem": {
+                    "type": "string"
+                },
+                "certificateUrl": {
+                    "type": "string"
+                },
+                "commonName": {
+                    "type": "string"
+                },
+                "disableCompletePropagation": {
+                    "type": "boolean"
+                },
+                "dnsChallenges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/types/acme:index/CertificateDnsChallenge:CertificateDnsChallenge"
+                    }
+                },
+                "httpChallenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge"
+                },
+                "httpMemcachedChallenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge"
+                },
+                "httpWebrootChallenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge"
+                },
+                "issuerPem": {
+                    "type": "string"
+                },
+                "keyType": {
+                    "type": "string"
+                },
+                "minDaysRemaining": {
+                    "type": "integer"
+                },
+                "mustStaple": {
+                    "type": "boolean"
+                },
+                "preCheckDelay": {
+                    "type": "integer"
+                },
+                "preferredChain": {
+                    "type": "string"
+                },
+                "privateKeyPem": {
+                    "type": "string"
+                },
+                "recursiveNameservers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "revokeCertificateOnDestroy": {
+                    "type": "boolean"
+                },
+                "subjectAlternativeNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tlsChallenge": {
+                    "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge"
+                }
+            },
+            "required": [
+                "accountKeyPem",
+                "certificateDomain",
+                "certificateNotAfter",
+                "certificateP12",
+                "certificatePem",
+                "certificateUrl",
+                "issuerPem",
+                "privateKeyPem"
+            ],
+            "inputProperties": {
+                "accountKeyPem": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "certificateP12Password": {
+                    "type": "string"
+                },
+                "certificateRequestPem": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "commonName": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "disableCompletePropagation": {
+                    "type": "boolean"
+                },
+                "dnsChallenges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/types/acme:index/CertificateDnsChallenge:CertificateDnsChallenge"
+                    }
+                },
+                "httpChallenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge"
+                },
+                "httpMemcachedChallenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge"
+                },
+                "httpWebrootChallenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge"
+                },
+                "keyType": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "minDaysRemaining": {
+                    "type": "integer"
+                },
+                "mustStaple": {
+                    "type": "boolean",
+                    "willReplaceOnChanges": true
+                },
+                "preCheckDelay": {
+                    "type": "integer"
+                },
+                "preferredChain": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "recursiveNameservers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "revokeCertificateOnDestroy": {
+                    "type": "boolean"
+                },
+                "subjectAlternativeNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "willReplaceOnChanges": true
+                },
+                "tlsChallenge": {
+                    "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge"
+                }
+            },
+            "requiredInputs": [
+                "accountKeyPem"
+            ],
+            "stateInputs": {
+                "description": "Input properties used for looking up and filtering Certificate resources.\n",
+                "properties": {
+                    "accountKeyPem": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "certificateDomain": {
+                        "type": "string"
+                    },
+                    "certificateNotAfter": {
+                        "type": "string"
+                    },
+                    "certificateP12": {
+                        "type": "string"
+                    },
+                    "certificateP12Password": {
+                        "type": "string"
+                    },
+                    "certificatePem": {
+                        "type": "string"
+                    },
+                    "certificateRequestPem": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "certificateUrl": {
+                        "type": "string"
+                    },
+                    "commonName": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "disableCompletePropagation": {
+                        "type": "boolean"
+                    },
+                    "dnsChallenges": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/types/acme:index/CertificateDnsChallenge:CertificateDnsChallenge"
+                        }
+                    },
+                    "httpChallenge": {
+                        "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge"
+                    },
+                    "httpMemcachedChallenge": {
+                        "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge"
+                    },
+                    "httpWebrootChallenge": {
+                        "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge"
+                    },
+                    "issuerPem": {
+                        "type": "string"
+                    },
+                    "keyType": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "minDaysRemaining": {
+                        "type": "integer"
+                    },
+                    "mustStaple": {
+                        "type": "boolean",
+                        "willReplaceOnChanges": true
+                    },
+                    "preCheckDelay": {
+                        "type": "integer"
+                    },
+                    "preferredChain": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "privateKeyPem": {
+                        "type": "string"
+                    },
+                    "recursiveNameservers": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "revokeCertificateOnDestroy": {
+                        "type": "boolean"
+                    },
+                    "subjectAlternativeNames": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "willReplaceOnChanges": true
+                    },
+                    "tlsChallenge": {
+                        "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "acme:index/registration:Registration": {
+            "properties": {
+                "accountKeyPem": {
+                    "type": "string"
+                },
+                "emailAddress": {
+                    "type": "string"
+                },
+                "externalAccountBinding": {
+                    "$ref": "#/types/acme:index/RegistrationExternalAccountBinding:RegistrationExternalAccountBinding"
+                },
+                "registrationUrl": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "accountKeyPem",
+                "emailAddress",
+                "registrationUrl"
+            ],
+            "inputProperties": {
+                "accountKeyPem": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "emailAddress": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "externalAccountBinding": {
+                    "$ref": "#/types/acme:index/RegistrationExternalAccountBinding:RegistrationExternalAccountBinding",
+                    "willReplaceOnChanges": true
+                }
+            },
+            "requiredInputs": [
+                "accountKeyPem",
+                "emailAddress"
+            ],
+            "stateInputs": {
+                "description": "Input properties used for looking up and filtering Registration resources.\n",
+                "properties": {
+                    "accountKeyPem": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "emailAddress": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "externalAccountBinding": {
+                        "$ref": "#/types/acme:index/RegistrationExternalAccountBinding:RegistrationExternalAccountBinding",
+                        "willReplaceOnChanges": true
+                    },
+                    "registrationUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}
