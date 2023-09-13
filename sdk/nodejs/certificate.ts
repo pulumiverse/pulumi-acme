@@ -2,7 +2,8 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
-import { input as inputs, output as outputs } from "./types";
+import * as inputs from "./types/input";
+import * as outputs from "./types/output";
 import * as utilities from "./utilities";
 
 export class Certificate extends pulumi.CustomResource {
@@ -102,8 +103,8 @@ export class Certificate extends pulumi.CustomResource {
             if ((!args || args.accountKeyPem === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'accountKeyPem'");
             }
-            resourceInputs["accountKeyPem"] = args ? args.accountKeyPem : undefined;
-            resourceInputs["certificateP12Password"] = args ? args.certificateP12Password : undefined;
+            resourceInputs["accountKeyPem"] = args?.accountKeyPem ? pulumi.secret(args.accountKeyPem) : undefined;
+            resourceInputs["certificateP12Password"] = args?.certificateP12Password ? pulumi.secret(args.certificateP12Password) : undefined;
             resourceInputs["certificateRequestPem"] = args ? args.certificateRequestPem : undefined;
             resourceInputs["commonName"] = args ? args.commonName : undefined;
             resourceInputs["disableCompletePropagation"] = args ? args.disableCompletePropagation : undefined;
@@ -129,6 +130,8 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["privateKeyPem"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
+        const secretOpts = { additionalSecretOutputs: ["accountKeyPem", "certificateP12", "certificateP12Password", "privateKeyPem"] };
+        opts = pulumi.mergeOptions(opts, secretOpts);
         super(Certificate.__pulumiType, name, resourceInputs, opts);
     }
 }

@@ -6,7 +6,10 @@ package config
 import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+	"github.com/pulumiverse/pulumi-acme/sdk/go/acme/internal"
 )
+
+var _ = internal.GetEnvOrDefault
 
 func GetServerUrl(ctx *pulumi.Context) string {
 	return config.Get(ctx, "acme:serverUrl")

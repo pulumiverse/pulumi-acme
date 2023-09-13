@@ -5,9 +5,21 @@ import * as pulumi from "@pulumi/pulumi";
 import * as utilities from "./utilities";
 
 // Export members:
-export * from "./certificate";
-export * from "./provider";
-export * from "./registration";
+export { CertificateArgs, CertificateState } from "./certificate";
+export type Certificate = import("./certificate").Certificate;
+export const Certificate: typeof import("./certificate").Certificate = null as any;
+utilities.lazyLoad(exports, ["Certificate"], () => require("./certificate"));
+
+export { ProviderArgs } from "./provider";
+export type Provider = import("./provider").Provider;
+export const Provider: typeof import("./provider").Provider = null as any;
+utilities.lazyLoad(exports, ["Provider"], () => require("./provider"));
+
+export { RegistrationArgs, RegistrationState } from "./registration";
+export type Registration = import("./registration").Registration;
+export const Registration: typeof import("./registration").Registration = null as any;
+utilities.lazyLoad(exports, ["Registration"], () => require("./registration"));
+
 
 // Export sub-modules:
 import * as config from "./config";
@@ -17,10 +29,6 @@ export {
     config,
     types,
 };
-
-// Import resources to register:
-import { Certificate } from "./certificate";
-import { Registration } from "./registration";
 
 const _module = {
     version: utilities.getVersion(),
@@ -37,9 +45,6 @@ const _module = {
 };
 pulumi.runtime.registerResourceModule("acme", "index/certificate", _module)
 pulumi.runtime.registerResourceModule("acme", "index/registration", _module)
-
-import { Provider } from "./provider";
-
 pulumi.runtime.registerResourcePackage("acme", {
     version: utilities.getVersion(),
     constructProvider: (name: string, type: string, urn: string): pulumi.ProviderResource => {

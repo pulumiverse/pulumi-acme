@@ -2,7 +2,8 @@
 // *** Do not edit by hand unless you're certain you know what you are doing! ***
 
 import * as pulumi from "@pulumi/pulumi";
-import { input as inputs, output as outputs } from "./types";
+import * as inputs from "./types/input";
+import * as outputs from "./types/output";
 import * as utilities from "./utilities";
 
 export class Registration extends pulumi.CustomResource {
@@ -63,12 +64,14 @@ export class Registration extends pulumi.CustomResource {
             if ((!args || args.emailAddress === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'emailAddress'");
             }
-            resourceInputs["accountKeyPem"] = args ? args.accountKeyPem : undefined;
+            resourceInputs["accountKeyPem"] = args?.accountKeyPem ? pulumi.secret(args.accountKeyPem) : undefined;
             resourceInputs["emailAddress"] = args ? args.emailAddress : undefined;
             resourceInputs["externalAccountBinding"] = args ? args.externalAccountBinding : undefined;
             resourceInputs["registrationUrl"] = undefined /*out*/;
         }
         opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts);
+        const secretOpts = { additionalSecretOutputs: ["accountKeyPem"] };
+        opts = pulumi.mergeOptions(opts, secretOpts);
         super(Registration.__pulumiType, name, resourceInputs, opts);
     }
 }

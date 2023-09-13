@@ -18,7 +18,11 @@ namespace Pulumiverse.Acme.Inputs
         public InputMap<object> Config
         {
             get => _config ?? (_config = new InputMap<object>());
-            set => _config = value;
+            set
+            {
+                var emptySecret = Output.CreateSecret(ImmutableDictionary.Create<string, object>());
+                _config = Output.All(value, emptySecret).Apply(v => v[0]);
+            }
         }
 
         [Input("provider", required: true)]
