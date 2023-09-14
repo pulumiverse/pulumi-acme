@@ -49,6 +49,10 @@ namespace Pulumiverse.Acme
             {
                 Version = Utilities.Version,
                 PluginDownloadURL = "github://api.github.com/pulumiverse/pulumi-acme",
+                AdditionalSecretOutputs =
+                {
+                    "accountKeyPem",
+                },
             };
             var merged = CustomResourceOptions.Merge(defaultOptions, options);
             // Override the ID if one was specified for consistency with other language SDKs.
@@ -73,7 +77,16 @@ namespace Pulumiverse.Acme
     public sealed class RegistrationArgs : global::Pulumi.ResourceArgs
     {
         [Input("accountKeyPem", required: true)]
-        public Input<string> AccountKeyPem { get; set; } = null!;
+        private Input<string>? _accountKeyPem;
+        public Input<string>? AccountKeyPem
+        {
+            get => _accountKeyPem;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _accountKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("emailAddress", required: true)]
         public Input<string> EmailAddress { get; set; } = null!;
@@ -90,7 +103,16 @@ namespace Pulumiverse.Acme
     public sealed class RegistrationState : global::Pulumi.ResourceArgs
     {
         [Input("accountKeyPem")]
-        public Input<string>? AccountKeyPem { get; set; }
+        private Input<string>? _accountKeyPem;
+        public Input<string>? AccountKeyPem
+        {
+            get => _accountKeyPem;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _accountKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("emailAddress")]
         public Input<string>? EmailAddress { get; set; }

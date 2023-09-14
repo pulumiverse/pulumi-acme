@@ -14,10 +14,28 @@ namespace Pulumiverse.Acme.Inputs
     public sealed class RegistrationExternalAccountBindingGetArgs : global::Pulumi.ResourceArgs
     {
         [Input("hmacBase64", required: true)]
-        public Input<string> HmacBase64 { get; set; } = null!;
+        private Input<string>? _hmacBase64;
+        public Input<string>? HmacBase64
+        {
+            get => _hmacBase64;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _hmacBase64 = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("keyId", required: true)]
-        public Input<string> KeyId { get; set; } = null!;
+        private Input<string>? _keyId;
+        public Input<string>? KeyId
+        {
+            get => _keyId;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _keyId = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         public RegistrationExternalAccountBindingGetArgs()
         {

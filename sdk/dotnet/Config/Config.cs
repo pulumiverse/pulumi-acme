@@ -30,7 +30,7 @@ namespace Pulumiverse.Acme
             }
         }
 
-        private static readonly Pulumi.Config __config = new Pulumi.Config("acme");
+        private static readonly global::Pulumi.Config __config = new global::Pulumi.Config("acme");
 
         private static readonly __Value<string?> _serverUrl = new __Value<string?>(() => __config.Get("serverUrl"));
         public static string? ServerUrl

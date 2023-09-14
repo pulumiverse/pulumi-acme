@@ -8,7 +8,11 @@ import (
 	"reflect"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumix"
+	"github.com/pulumiverse/pulumi-acme/sdk/go/acme/internal"
 )
+
+var _ = internal.GetEnvOrDefault
 
 type CertificateDnsChallenge struct {
 	Config   map[string]interface{} `pulumi:"config"`
@@ -43,6 +47,12 @@ func (i CertificateDnsChallengeArgs) ToCertificateDnsChallengeOutputWithContext(
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateDnsChallengeOutput)
 }
 
+func (i CertificateDnsChallengeArgs) ToOutput(ctx context.Context) pulumix.Output[CertificateDnsChallenge] {
+	return pulumix.Output[CertificateDnsChallenge]{
+		OutputState: i.ToCertificateDnsChallengeOutputWithContext(ctx).OutputState,
+	}
+}
+
 // CertificateDnsChallengeArrayInput is an input type that accepts CertificateDnsChallengeArray and CertificateDnsChallengeArrayOutput values.
 // You can construct a concrete instance of `CertificateDnsChallengeArrayInput` via:
 //
@@ -68,6 +78,12 @@ func (i CertificateDnsChallengeArray) ToCertificateDnsChallengeArrayOutputWithCo
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateDnsChallengeArrayOutput)
 }
 
+func (i CertificateDnsChallengeArray) ToOutput(ctx context.Context) pulumix.Output[[]CertificateDnsChallenge] {
+	return pulumix.Output[[]CertificateDnsChallenge]{
+		OutputState: i.ToCertificateDnsChallengeArrayOutputWithContext(ctx).OutputState,
+	}
+}
+
 type CertificateDnsChallengeOutput struct{ *pulumi.OutputState }
 
 func (CertificateDnsChallengeOutput) ElementType() reflect.Type {
@@ -80,6 +96,12 @@ func (o CertificateDnsChallengeOutput) ToCertificateDnsChallengeOutput() Certifi
 
 func (o CertificateDnsChallengeOutput) ToCertificateDnsChallengeOutputWithContext(ctx context.Context) CertificateDnsChallengeOutput {
 	return o
+}
+
+func (o CertificateDnsChallengeOutput) ToOutput(ctx context.Context) pulumix.Output[CertificateDnsChallenge] {
+	return pulumix.Output[CertificateDnsChallenge]{
+		OutputState: o.OutputState,
+	}
 }
 
 func (o CertificateDnsChallengeOutput) Config() pulumi.MapOutput {
@@ -102,6 +124,12 @@ func (o CertificateDnsChallengeArrayOutput) ToCertificateDnsChallengeArrayOutput
 
 func (o CertificateDnsChallengeArrayOutput) ToCertificateDnsChallengeArrayOutputWithContext(ctx context.Context) CertificateDnsChallengeArrayOutput {
 	return o
+}
+
+func (o CertificateDnsChallengeArrayOutput) ToOutput(ctx context.Context) pulumix.Output[[]CertificateDnsChallenge] {
+	return pulumix.Output[[]CertificateDnsChallenge]{
+		OutputState: o.OutputState,
+	}
 }
 
 func (o CertificateDnsChallengeArrayOutput) Index(i pulumi.IntInput) CertificateDnsChallengeOutput {
@@ -141,6 +169,12 @@ func (i CertificateHttpChallengeArgs) ToCertificateHttpChallengeOutput() Certifi
 
 func (i CertificateHttpChallengeArgs) ToCertificateHttpChallengeOutputWithContext(ctx context.Context) CertificateHttpChallengeOutput {
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpChallengeOutput)
+}
+
+func (i CertificateHttpChallengeArgs) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpChallenge] {
+	return pulumix.Output[CertificateHttpChallenge]{
+		OutputState: i.ToCertificateHttpChallengeOutputWithContext(ctx).OutputState,
+	}
 }
 
 func (i CertificateHttpChallengeArgs) ToCertificateHttpChallengePtrOutput() CertificateHttpChallengePtrOutput {
@@ -184,6 +218,12 @@ func (i *certificateHttpChallengePtrType) ToCertificateHttpChallengePtrOutputWit
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpChallengePtrOutput)
 }
 
+func (i *certificateHttpChallengePtrType) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpChallenge] {
+	return pulumix.Output[*CertificateHttpChallenge]{
+		OutputState: i.ToCertificateHttpChallengePtrOutputWithContext(ctx).OutputState,
+	}
+}
+
 type CertificateHttpChallengeOutput struct{ *pulumi.OutputState }
 
 func (CertificateHttpChallengeOutput) ElementType() reflect.Type {
@@ -208,6 +248,12 @@ func (o CertificateHttpChallengeOutput) ToCertificateHttpChallengePtrOutputWithC
 	}).(CertificateHttpChallengePtrOutput)
 }
 
+func (o CertificateHttpChallengeOutput) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpChallenge] {
+	return pulumix.Output[CertificateHttpChallenge]{
+		OutputState: o.OutputState,
+	}
+}
+
 func (o CertificateHttpChallengeOutput) Port() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v CertificateHttpChallenge) *int { return v.Port }).(pulumi.IntPtrOutput)
 }
@@ -228,6 +274,12 @@ func (o CertificateHttpChallengePtrOutput) ToCertificateHttpChallengePtrOutput()
 
 func (o CertificateHttpChallengePtrOutput) ToCertificateHttpChallengePtrOutputWithContext(ctx context.Context) CertificateHttpChallengePtrOutput {
 	return o
+}
+
+func (o CertificateHttpChallengePtrOutput) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpChallenge] {
+	return pulumix.Output[*CertificateHttpChallenge]{
+		OutputState: o.OutputState,
+	}
 }
 
 func (o CertificateHttpChallengePtrOutput) Elem() CertificateHttpChallengeOutput {
@@ -289,6 +341,12 @@ func (i CertificateHttpMemcachedChallengeArgs) ToCertificateHttpMemcachedChallen
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpMemcachedChallengeOutput)
 }
 
+func (i CertificateHttpMemcachedChallengeArgs) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpMemcachedChallenge] {
+	return pulumix.Output[CertificateHttpMemcachedChallenge]{
+		OutputState: i.ToCertificateHttpMemcachedChallengeOutputWithContext(ctx).OutputState,
+	}
+}
+
 func (i CertificateHttpMemcachedChallengeArgs) ToCertificateHttpMemcachedChallengePtrOutput() CertificateHttpMemcachedChallengePtrOutput {
 	return i.ToCertificateHttpMemcachedChallengePtrOutputWithContext(context.Background())
 }
@@ -330,6 +388,12 @@ func (i *certificateHttpMemcachedChallengePtrType) ToCertificateHttpMemcachedCha
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpMemcachedChallengePtrOutput)
 }
 
+func (i *certificateHttpMemcachedChallengePtrType) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpMemcachedChallenge] {
+	return pulumix.Output[*CertificateHttpMemcachedChallenge]{
+		OutputState: i.ToCertificateHttpMemcachedChallengePtrOutputWithContext(ctx).OutputState,
+	}
+}
+
 type CertificateHttpMemcachedChallengeOutput struct{ *pulumi.OutputState }
 
 func (CertificateHttpMemcachedChallengeOutput) ElementType() reflect.Type {
@@ -354,6 +418,12 @@ func (o CertificateHttpMemcachedChallengeOutput) ToCertificateHttpMemcachedChall
 	}).(CertificateHttpMemcachedChallengePtrOutput)
 }
 
+func (o CertificateHttpMemcachedChallengeOutput) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpMemcachedChallenge] {
+	return pulumix.Output[CertificateHttpMemcachedChallenge]{
+		OutputState: o.OutputState,
+	}
+}
+
 func (o CertificateHttpMemcachedChallengeOutput) Hosts() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v CertificateHttpMemcachedChallenge) []string { return v.Hosts }).(pulumi.StringArrayOutput)
 }
@@ -370,6 +440,12 @@ func (o CertificateHttpMemcachedChallengePtrOutput) ToCertificateHttpMemcachedCh
 
 func (o CertificateHttpMemcachedChallengePtrOutput) ToCertificateHttpMemcachedChallengePtrOutputWithContext(ctx context.Context) CertificateHttpMemcachedChallengePtrOutput {
 	return o
+}
+
+func (o CertificateHttpMemcachedChallengePtrOutput) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpMemcachedChallenge] {
+	return pulumix.Output[*CertificateHttpMemcachedChallenge]{
+		OutputState: o.OutputState,
+	}
 }
 
 func (o CertificateHttpMemcachedChallengePtrOutput) Elem() CertificateHttpMemcachedChallengeOutput {
@@ -422,6 +498,12 @@ func (i CertificateHttpWebrootChallengeArgs) ToCertificateHttpWebrootChallengeOu
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpWebrootChallengeOutput)
 }
 
+func (i CertificateHttpWebrootChallengeArgs) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpWebrootChallenge] {
+	return pulumix.Output[CertificateHttpWebrootChallenge]{
+		OutputState: i.ToCertificateHttpWebrootChallengeOutputWithContext(ctx).OutputState,
+	}
+}
+
 func (i CertificateHttpWebrootChallengeArgs) ToCertificateHttpWebrootChallengePtrOutput() CertificateHttpWebrootChallengePtrOutput {
 	return i.ToCertificateHttpWebrootChallengePtrOutputWithContext(context.Background())
 }
@@ -463,6 +545,12 @@ func (i *certificateHttpWebrootChallengePtrType) ToCertificateHttpWebrootChallen
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpWebrootChallengePtrOutput)
 }
 
+func (i *certificateHttpWebrootChallengePtrType) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpWebrootChallenge] {
+	return pulumix.Output[*CertificateHttpWebrootChallenge]{
+		OutputState: i.ToCertificateHttpWebrootChallengePtrOutputWithContext(ctx).OutputState,
+	}
+}
+
 type CertificateHttpWebrootChallengeOutput struct{ *pulumi.OutputState }
 
 func (CertificateHttpWebrootChallengeOutput) ElementType() reflect.Type {
@@ -487,6 +575,12 @@ func (o CertificateHttpWebrootChallengeOutput) ToCertificateHttpWebrootChallenge
 	}).(CertificateHttpWebrootChallengePtrOutput)
 }
 
+func (o CertificateHttpWebrootChallengeOutput) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpWebrootChallenge] {
+	return pulumix.Output[CertificateHttpWebrootChallenge]{
+		OutputState: o.OutputState,
+	}
+}
+
 func (o CertificateHttpWebrootChallengeOutput) Directory() pulumi.StringOutput {
 	return o.ApplyT(func(v CertificateHttpWebrootChallenge) string { return v.Directory }).(pulumi.StringOutput)
 }
@@ -503,6 +597,12 @@ func (o CertificateHttpWebrootChallengePtrOutput) ToCertificateHttpWebrootChalle
 
 func (o CertificateHttpWebrootChallengePtrOutput) ToCertificateHttpWebrootChallengePtrOutputWithContext(ctx context.Context) CertificateHttpWebrootChallengePtrOutput {
 	return o
+}
+
+func (o CertificateHttpWebrootChallengePtrOutput) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpWebrootChallenge] {
+	return pulumix.Output[*CertificateHttpWebrootChallenge]{
+		OutputState: o.OutputState,
+	}
 }
 
 func (o CertificateHttpWebrootChallengePtrOutput) Elem() CertificateHttpWebrootChallengeOutput {
@@ -555,6 +655,12 @@ func (i CertificateTlsChallengeArgs) ToCertificateTlsChallengeOutputWithContext(
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateTlsChallengeOutput)
 }
 
+func (i CertificateTlsChallengeArgs) ToOutput(ctx context.Context) pulumix.Output[CertificateTlsChallenge] {
+	return pulumix.Output[CertificateTlsChallenge]{
+		OutputState: i.ToCertificateTlsChallengeOutputWithContext(ctx).OutputState,
+	}
+}
+
 func (i CertificateTlsChallengeArgs) ToCertificateTlsChallengePtrOutput() CertificateTlsChallengePtrOutput {
 	return i.ToCertificateTlsChallengePtrOutputWithContext(context.Background())
 }
@@ -596,6 +702,12 @@ func (i *certificateTlsChallengePtrType) ToCertificateTlsChallengePtrOutputWithC
 	return pulumi.ToOutputWithContext(ctx, i).(CertificateTlsChallengePtrOutput)
 }
 
+func (i *certificateTlsChallengePtrType) ToOutput(ctx context.Context) pulumix.Output[*CertificateTlsChallenge] {
+	return pulumix.Output[*CertificateTlsChallenge]{
+		OutputState: i.ToCertificateTlsChallengePtrOutputWithContext(ctx).OutputState,
+	}
+}
+
 type CertificateTlsChallengeOutput struct{ *pulumi.OutputState }
 
 func (CertificateTlsChallengeOutput) ElementType() reflect.Type {
@@ -620,6 +732,12 @@ func (o CertificateTlsChallengeOutput) ToCertificateTlsChallengePtrOutputWithCon
 	}).(CertificateTlsChallengePtrOutput)
 }
 
+func (o CertificateTlsChallengeOutput) ToOutput(ctx context.Context) pulumix.Output[CertificateTlsChallenge] {
+	return pulumix.Output[CertificateTlsChallenge]{
+		OutputState: o.OutputState,
+	}
+}
+
 func (o CertificateTlsChallengeOutput) Port() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v CertificateTlsChallenge) *int { return v.Port }).(pulumi.IntPtrOutput)
 }
@@ -636,6 +754,12 @@ func (o CertificateTlsChallengePtrOutput) ToCertificateTlsChallengePtrOutput() C
 
 func (o CertificateTlsChallengePtrOutput) ToCertificateTlsChallengePtrOutputWithContext(ctx context.Context) CertificateTlsChallengePtrOutput {
 	return o
+}
+
+func (o CertificateTlsChallengePtrOutput) ToOutput(ctx context.Context) pulumix.Output[*CertificateTlsChallenge] {
+	return pulumix.Output[*CertificateTlsChallenge]{
+		OutputState: o.OutputState,
+	}
 }
 
 func (o CertificateTlsChallengePtrOutput) Elem() CertificateTlsChallengeOutput {
@@ -690,6 +814,12 @@ func (i RegistrationExternalAccountBindingArgs) ToRegistrationExternalAccountBin
 	return pulumi.ToOutputWithContext(ctx, i).(RegistrationExternalAccountBindingOutput)
 }
 
+func (i RegistrationExternalAccountBindingArgs) ToOutput(ctx context.Context) pulumix.Output[RegistrationExternalAccountBinding] {
+	return pulumix.Output[RegistrationExternalAccountBinding]{
+		OutputState: i.ToRegistrationExternalAccountBindingOutputWithContext(ctx).OutputState,
+	}
+}
+
 func (i RegistrationExternalAccountBindingArgs) ToRegistrationExternalAccountBindingPtrOutput() RegistrationExternalAccountBindingPtrOutput {
 	return i.ToRegistrationExternalAccountBindingPtrOutputWithContext(context.Background())
 }
@@ -731,6 +861,12 @@ func (i *registrationExternalAccountBindingPtrType) ToRegistrationExternalAccoun
 	return pulumi.ToOutputWithContext(ctx, i).(RegistrationExternalAccountBindingPtrOutput)
 }
 
+func (i *registrationExternalAccountBindingPtrType) ToOutput(ctx context.Context) pulumix.Output[*RegistrationExternalAccountBinding] {
+	return pulumix.Output[*RegistrationExternalAccountBinding]{
+		OutputState: i.ToRegistrationExternalAccountBindingPtrOutputWithContext(ctx).OutputState,
+	}
+}
+
 type RegistrationExternalAccountBindingOutput struct{ *pulumi.OutputState }
 
 func (RegistrationExternalAccountBindingOutput) ElementType() reflect.Type {
@@ -755,6 +891,12 @@ func (o RegistrationExternalAccountBindingOutput) ToRegistrationExternalAccountB
 	}).(RegistrationExternalAccountBindingPtrOutput)
 }
 
+func (o RegistrationExternalAccountBindingOutput) ToOutput(ctx context.Context) pulumix.Output[RegistrationExternalAccountBinding] {
+	return pulumix.Output[RegistrationExternalAccountBinding]{
+		OutputState: o.OutputState,
+	}
+}
+
 func (o RegistrationExternalAccountBindingOutput) HmacBase64() pulumi.StringOutput {
 	return o.ApplyT(func(v RegistrationExternalAccountBinding) string { return v.HmacBase64 }).(pulumi.StringOutput)
 }
@@ -775,6 +917,12 @@ func (o RegistrationExternalAccountBindingPtrOutput) ToRegistrationExternalAccou
 
 func (o RegistrationExternalAccountBindingPtrOutput) ToRegistrationExternalAccountBindingPtrOutputWithContext(ctx context.Context) RegistrationExternalAccountBindingPtrOutput {
 	return o
+}
+
+func (o RegistrationExternalAccountBindingPtrOutput) ToOutput(ctx context.Context) pulumix.Output[*RegistrationExternalAccountBinding] {
+	return pulumix.Output[*RegistrationExternalAccountBinding]{
+		OutputState: o.OutputState,
+	}
 }
 
 func (o RegistrationExternalAccountBindingPtrOutput) Elem() RegistrationExternalAccountBindingOutput {

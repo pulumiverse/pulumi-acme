@@ -625,8 +625,8 @@ class Certificate(pulumi.CustomResource):
 
             if account_key_pem is None and not opts.urn:
                 raise TypeError("Missing required property 'account_key_pem'")
-            __props__.__dict__["account_key_pem"] = account_key_pem
-            __props__.__dict__["certificate_p12_password"] = certificate_p12_password
+            __props__.__dict__["account_key_pem"] = None if account_key_pem is None else pulumi.Output.secret(account_key_pem)
+            __props__.__dict__["certificate_p12_password"] = None if certificate_p12_password is None else pulumi.Output.secret(certificate_p12_password)
             __props__.__dict__["certificate_request_pem"] = certificate_request_pem
             __props__.__dict__["common_name"] = common_name
             __props__.__dict__["disable_complete_propagation"] = disable_complete_propagation
@@ -650,6 +650,8 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["certificate_url"] = None
             __props__.__dict__["issuer_pem"] = None
             __props__.__dict__["private_key_pem"] = None
+        secret_opts = pulumi.ResourceOptions(additional_secret_outputs=["accountKeyPem", "certificateP12", "certificateP12Password", "privateKeyPem"])
+        opts = pulumi.ResourceOptions.merge(opts, secret_opts)
         super(Certificate, __self__).__init__(
             'acme:index/certificate:Certificate',
             resource_name,

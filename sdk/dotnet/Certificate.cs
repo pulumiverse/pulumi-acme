@@ -112,6 +112,13 @@ namespace Pulumiverse.Acme
             {
                 Version = Utilities.Version,
                 PluginDownloadURL = "github://api.github.com/pulumiverse/pulumi-acme",
+                AdditionalSecretOutputs =
+                {
+                    "accountKeyPem",
+                    "certificateP12",
+                    "certificateP12Password",
+                    "privateKeyPem",
+                },
             };
             var merged = CustomResourceOptions.Merge(defaultOptions, options);
             // Override the ID if one was specified for consistency with other language SDKs.
@@ -136,10 +143,28 @@ namespace Pulumiverse.Acme
     public sealed class CertificateArgs : global::Pulumi.ResourceArgs
     {
         [Input("accountKeyPem", required: true)]
-        public Input<string> AccountKeyPem { get; set; } = null!;
+        private Input<string>? _accountKeyPem;
+        public Input<string>? AccountKeyPem
+        {
+            get => _accountKeyPem;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _accountKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("certificateP12Password")]
-        public Input<string>? CertificateP12Password { get; set; }
+        private Input<string>? _certificateP12Password;
+        public Input<string>? CertificateP12Password
+        {
+            get => _certificateP12Password;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _certificateP12Password = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("certificateRequestPem")]
         public Input<string>? CertificateRequestPem { get; set; }
@@ -213,7 +238,16 @@ namespace Pulumiverse.Acme
     public sealed class CertificateState : global::Pulumi.ResourceArgs
     {
         [Input("accountKeyPem")]
-        public Input<string>? AccountKeyPem { get; set; }
+        private Input<string>? _accountKeyPem;
+        public Input<string>? AccountKeyPem
+        {
+            get => _accountKeyPem;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _accountKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("certificateDomain")]
         public Input<string>? CertificateDomain { get; set; }
@@ -222,10 +256,28 @@ namespace Pulumiverse.Acme
         public Input<string>? CertificateNotAfter { get; set; }
 
         [Input("certificateP12")]
-        public Input<string>? CertificateP12 { get; set; }
+        private Input<string>? _certificateP12;
+        public Input<string>? CertificateP12
+        {
+            get => _certificateP12;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _certificateP12 = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("certificateP12Password")]
-        public Input<string>? CertificateP12Password { get; set; }
+        private Input<string>? _certificateP12Password;
+        public Input<string>? CertificateP12Password
+        {
+            get => _certificateP12Password;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _certificateP12Password = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("certificatePem")]
         public Input<string>? CertificatePem { get; set; }
@@ -278,7 +330,16 @@ namespace Pulumiverse.Acme
         public Input<string>? PreferredChain { get; set; }
 
         [Input("privateKeyPem")]
-        public Input<string>? PrivateKeyPem { get; set; }
+        private Input<string>? _privateKeyPem;
+        public Input<string>? PrivateKeyPem
+        {
+            get => _privateKeyPem;
+            set
+            {
+                var emptySecret = Output.CreateSecret(0);
+                _privateKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
+            }
+        }
 
         [Input("recursiveNameservers")]
         private InputList<string>? _recursiveNameservers;

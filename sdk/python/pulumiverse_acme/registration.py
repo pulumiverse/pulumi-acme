@@ -162,12 +162,14 @@ class Registration(pulumi.CustomResource):
 
             if account_key_pem is None and not opts.urn:
                 raise TypeError("Missing required property 'account_key_pem'")
-            __props__.__dict__["account_key_pem"] = account_key_pem
+            __props__.__dict__["account_key_pem"] = None if account_key_pem is None else pulumi.Output.secret(account_key_pem)
             if email_address is None and not opts.urn:
                 raise TypeError("Missing required property 'email_address'")
             __props__.__dict__["email_address"] = email_address
             __props__.__dict__["external_account_binding"] = external_account_binding
             __props__.__dict__["registration_url"] = None
+        secret_opts = pulumi.ResourceOptions(additional_secret_outputs=["accountKeyPem"])
+        opts = pulumi.ResourceOptions.merge(opts, secret_opts)
         super(Registration, __self__).__init__(
             'acme:index/registration:Registration',
             resource_name,
