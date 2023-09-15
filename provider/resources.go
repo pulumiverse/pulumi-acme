@@ -17,11 +17,12 @@ package acme
 import (
 	"fmt"
 	"path/filepath"
+	// Enable embedding of package metadata
+	_ "embed"
 
 	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfbridge"
-	shim "github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfshim"
+	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfbridge/tokens"
 	shimv2 "github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfshim/sdk-v2"
-	"github.com/pulumi/pulumi/sdk/v3/go/common/resource"
 	"github.com/pulumiverse/pulumi-acme/provider/pkg/version"
 	"github.com/vancluever/terraform-provider-acme/v2/acme"
 )
@@ -35,13 +36,8 @@ const (
 	mainMod = "index" // the acme module
 )
 
-// preConfigureCallback is called before the providerConfigure function of the underlying provider.
-// It should validate that the provider can be configured, and provide actionable errors in the case
-// it cannot be. Configuration variables can be read from `vars` using the `stringValue` function -
-// for example `stringValue(vars, "accessKey")`.
-func preConfigureCallback(vars resource.PropertyMap, c shim.ResourceConfig) error {
-	return nil
-}
+//go:embed cmd/pulumi-resource-acme/bridge-metadata.json
+var metadata []byte
 
 // Provider returns additional overlaid schema and metadata associated with the provider..
 func Provider() tfbridge.ProviderInfo {
@@ -60,12 +56,6 @@ func Provider() tfbridge.ProviderInfo {
 		// would like to be shown in the Pulumi Registry if this package is published
 		// there.
 		Publisher: "Pulumiverse",
-		// LogoURL is optional but useful to help identify your package in the Pulumi Registry
-		// if this package is published there.
-		//
-		// You may host a logo on a domain you control or add an SVG logo for your package
-		// in your repository and use the raw content URL for that file as your logo URL.
-		LogoURL: "",
 		// PluginDownloadURL is an optional URL used to download the Provider
 		// for use in Pulumi programs
 		// e.g https://github.com/org/pulumi-provider-name/releases/
@@ -81,43 +71,12 @@ func Provider() tfbridge.ProviderInfo {
 
 		// The GitHub Org for the provider - defaults to `terraform-providers`. Note that this
 		// should match the TF provider module's require directive, not any replace directives.
-		GitHubOrg:               "vancluever",
-		TFProviderModuleVersion: "v2",
+		GitHubOrg: "vancluever",
 
-		Config: map[string]*tfbridge.SchemaInfo{
-			// Add any required configuration here, or remove the example below if
-			// no additional points are required.
-			// "region": {
-			// 	Type: tfbridge.MakeType("region", "Region"),
-			// 	Default: &tfbridge.DefaultInfo{
-			// 		EnvVars: []string{"AWS_REGION", "AWS_DEFAULT_REGION"},
-			// 	},
-			// },
-		},
-		PreConfigureCallback: preConfigureCallback,
-		Resources: map[string]*tfbridge.ResourceInfo{
-			// Map each resource in the Terraform provider to a Pulumi type. Two examples
-			// are below - the single line form is the common case. The multi-line form is
-			// needed only if you wish to override types or other default options.
-			//
-			// "aws_iam_role": {Tok: tfbridge.MakeResource(mainPkg, mainMod, "IamRole")}
-			//
-			// "aws_acm_certificate": {
-			// 	Tok: tfbridge.MakeResource(mainPkg, mainMod, "Certificate"),
-			// 	Fields: map[string]*tfbridge.SchemaInfo{
-			// 		"tags": {Type: tfbridge.MakeType(mainPkg, "Tags")},
-			// 	},
-			// },
-			"acme_certificate":  {Tok: tfbridge.MakeResource(mainPkg, mainMod, "Certificate")},
-			"acme_registration": {Tok: tfbridge.MakeResource(mainPkg, mainMod, "Registration")},
-		},
-		DataSources: map[string]*tfbridge.DataSourceInfo{
-			// Map each resource in the Terraform provider to a Pulumi function. An example
-			// is below.
-			// "aws_ami": {Tok: tfbridge.MakeDataSource(mainPkg, mainMod, "getAmi")},
-			"acme_certificate":  {Tok: tfbridge.MakeDataSource(mainPkg, mainMod, "getCertificate")},
-			"acme_registration": {Tok: tfbridge.MakeDataSource(mainPkg, mainMod, "getRegistration")},
-		},
+		ResourcePrefix: "acme",
+		Version:        version.Version,
+		MetadataInfo:   tfbridge.NewProviderMetadata(metadata),
+
 		JavaScript: &tfbridge.JavaScriptInfo{
 			PackageName: "@pulumiverse/acme",
 			// List any npm dependencies and their versions
@@ -157,7 +116,10 @@ func Provider() tfbridge.ProviderInfo {
 		},
 	}
 
+	prov.MustComputeTokens(
+		tokens.SingleModule(prov.ResourcePrefix, mainMod, tokens.MakeStandard(mainPkg)))
 	prov.SetAutonaming(255, "-")
+	prov.MustApplyAutoAliases()
 
 	return prov
 }
