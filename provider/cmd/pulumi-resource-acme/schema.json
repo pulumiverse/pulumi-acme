@@ -85,10 +85,12 @@
         "acme:index/CertificateHttpChallenge:CertificateHttpChallenge": {
             "properties": {
                 "port": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "The port that the challenge server listens on. Default: `80`.\n"
                 },
                 "proxyHeader": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The proxy header to match against. Default:\n`Host`.\n\nThe `proxy_header` option behaves differently depending on its definition:\n\n* When set to `Host`, standard host header validation is used.\n* When set to `Forwarded`, the server looks in the `Forwarded` header for a\nsection matching `host=DOMAIN` where `DOMAIN` is the domain currently being\nresolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)\nfor more details.\n* When set to an arbitrary header (example: `X-Forwarded-Host`), that header is\nchecked for the host entry in the same way the host header would normally be\nchecked.\n"
                 }
             },
             "type": "object"
@@ -99,7 +101,8 @@
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "description": "The hosts to publish the record to.\n"
                 }
             },
             "type": "object",
@@ -110,7 +113,8 @@
         "acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge": {
             "properties": {
                 "directory": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The directory to publish the record to.\n"
                 }
             },
             "type": "object",
@@ -121,7 +125,8 @@
         "acme:index/CertificateTlsChallenge:CertificateTlsChallenge": {
             "properties": {
                 "port": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "The port that the challenge server listens on. Default: `443`.\n"
                 }
             },
             "type": "object"
@@ -170,91 +175,116 @@
             "properties": {
                 "accountKeyPem": {
                     "type": "string",
+                    "description": "The private key of the account that is\nrequesting the certificate. Forces a new resource when changed.\n",
                     "secret": true
                 },
                 "certificateDomain": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The common name of the certificate.\n"
                 },
                 "certificateNotAfter": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The expiry date of the certificate, laid out in\nRFC3339 format (`2006-01-02T15:04:05Z07:00`).\n"
                 },
                 "certificateP12": {
                     "type": "string",
+                    "description": "The certificate, any intermediates, and the private key\narchived as a PFX file (PKCS12 format, generally used by Microsoft products).\nThe data is base64 encoded (including padding), and its password is\nconfigurable via the `certificate_p12_password`\nargument. This field is empty if creating a certificate from a CSR.\n",
                     "secret": true
                 },
                 "certificateP12Password": {
                     "type": "string",
+                    "description": "Password to be used when generating\nthe PFX file stored in `certificate_p12`. Defaults to an\nempty string.\n",
                     "secret": true
                 },
                 "certificatePem": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The certificate in PEM format. This does not include the\n`issuer_pem`. This certificate can be concatenated with `issuer_pem` to form\na full chain, e.g. `\"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}\"`\n"
                 },
                 "certificateRequestPem": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n"
                 },
                 "certificateUrl": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The full URL of the certificate within the ACME CA.\n"
                 },
                 "commonName": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Required when not specifying a CSR. Forces\na new resource when changed.\n"
                 },
                 "disableCompletePropagation": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Disable the requirement for full\npropagation of the TXT challenge records before proceeding with validation.\nDefaults to `false`.\n\n\u003e See About DNS propagation checks for details\non the `recursive_nameservers` and `disable_complete_propagation` settings.\n"
                 },
                 "dnsChallenges": {
                     "type": "array",
                     "items": {
                         "$ref": "#/types/acme:index/CertificateDnsChallenge:CertificateDnsChallenge"
-                    }
+                    },
+                    "description": "The DNS challenges to\nuse in fulfilling the request.\n"
                 },
                 "httpChallenge": {
-                    "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge"
+                    "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge",
+                    "description": "Defines an HTTP challenge to use in fulfilling\nthe request.\n"
                 },
                 "httpMemcachedChallenge": {
-                    "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge"
+                    "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge",
+                    "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[Memcached](https://memcached.org/) cluster.\n"
                 },
                 "httpWebrootChallenge": {
-                    "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge"
+                    "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge",
+                    "description": "Defines an alternate type of HTTP\nchallenge that can be used to place a file at a location that can be served by\nan out-of-band webserver.\n"
                 },
                 "issuerPem": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The intermediate certificates of the issuer. Multiple\ncertificates are concatenated in this field when there is more than one\nintermediate certificate in the chain.\n"
                 },
                 "keyType": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The key type for the certificate's private key. Can be one of:\n`P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and\n`8192` (for RSA keys of respective length). Required when not specifying a\nCSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when\nchanged.\n"
                 },
                 "minDaysRemaining": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "The minimum amount of days remaining on the\nexpiration of a certificate before a renewal is attempted. The default is\n`30`. A value of less than `0` means that the certificate will never be\nrenewed.\n"
                 },
                 "mustStaple": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Enables the [OCSP Stapling Required][ocsp-stapling]\nTLS Security Policy extension. Certificates with this extension must include a\nvalid OCSP Staple in the TLS handshake for the connection to succeed.\nDefaults to `false`. Note that this option has no effect when using an\nexternal CSR - it must be enabled in the CSR itself. Forces a new resource\nwhen changed.\n\n[ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling\n\n\u003e OCSP stapling requires specific webserver configuration to support the\ndownloading of the staple from the CA's OCSP endpoints, and should be configured\nto tolerate prolonged outages of the OCSP service. Consider this when using\n`must_staple`, and only enable it if you are sure your webserver or service\nprovider can be configured correctly.\n"
                 },
                 "preCheckDelay": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "Insert a delay after _every_ DNS challenge\nrecord to allow for extra time for DNS propagation before the certificate is\nrequested. Use this option if you observe issues with requesting certificates\neven when DNS challenge records get added successfully. Units are in seconds.\nDefaults to 0 (no delay).\n\n\u003e Be careful with `pre_check_delay` since the delay is executed _per-domain_.\nTake your expected delay and divide it by the number of domains you have\nconfigured (`common_name` + `subject_alternative_names`).\n"
                 },
                 "preferredChain": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The common name of the root of a preferred\nalternate certificate chain offered by the CA. The certificates in\n`issuer_pem` will reflect the chain requested, if available, otherwise the\ndefault chain will be provided. Forces a new resource when changed.\n\n\u003e `preferred_chain` can be used to request alternate chains on Let's Encrypt\nduring the transition away from their old cross-signed intermediates. See [this\narticle for more\ndetails](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).\nIn their example titled **\"What about the alternate chain?\"**, the root you\nwould put in to the `preferred_chain` field would be `ISRG Root X1`. The\nequivalent in the [staging\nenvironment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)\nPretend Pear X1`.\n"
                 },
                 "privateKeyPem": {
                     "type": "string",
+                    "description": "The certificate's private key, in PEM format, if the\ncertificate was generated from scratch and not with\n`certificate_request_pem`.  If\n`certificate_request_pem` was used, this will be blank.\n",
                     "secret": true
                 },
                 "recursiveNameservers": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records. Defaults to your\nsystem-configured DNS resolvers.\n"
                 },
                 "revokeCertificateOnDestroy": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
                 },
                 "subjectAlternativeNames": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "description": "The certificate's subject alternative names,\ndomains that this certificate will also be recognized for. Only valid when not\nspecifying a CSR. Forces a new resource when changed.\n"
                 },
                 "tlsChallenge": {
-                    "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge"
+                    "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
+                    "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, and\n`http_memcached_challenge` can be defined at once. See the section on Using\nHTTP and TLS challenges for more details on\nusing these and `tls_challenge`.\n"
                 }
             },
             "required": [
@@ -270,75 +300,93 @@
             "inputProperties": {
                 "accountKeyPem": {
                     "type": "string",
+                    "description": "The private key of the account that is\nrequesting the certificate. Forces a new resource when changed.\n",
                     "secret": true,
                     "willReplaceOnChanges": true
                 },
                 "certificateP12Password": {
                     "type": "string",
+                    "description": "Password to be used when generating\nthe PFX file stored in `certificate_p12`. Defaults to an\nempty string.\n",
                     "secret": true
                 },
                 "certificateRequestPem": {
                     "type": "string",
+                    "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n",
                     "willReplaceOnChanges": true
                 },
                 "commonName": {
                     "type": "string",
+                    "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Required when not specifying a CSR. Forces\na new resource when changed.\n",
                     "willReplaceOnChanges": true
                 },
                 "disableCompletePropagation": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Disable the requirement for full\npropagation of the TXT challenge records before proceeding with validation.\nDefaults to `false`.\n\n\u003e See About DNS propagation checks for details\non the `recursive_nameservers` and `disable_complete_propagation` settings.\n"
                 },
                 "dnsChallenges": {
                     "type": "array",
                     "items": {
                         "$ref": "#/types/acme:index/CertificateDnsChallenge:CertificateDnsChallenge"
-                    }
+                    },
+                    "description": "The DNS challenges to\nuse in fulfilling the request.\n"
                 },
                 "httpChallenge": {
-                    "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge"
+                    "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge",
+                    "description": "Defines an HTTP challenge to use in fulfilling\nthe request.\n"
                 },
                 "httpMemcachedChallenge": {
-                    "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge"
+                    "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge",
+                    "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[Memcached](https://memcached.org/) cluster.\n"
                 },
                 "httpWebrootChallenge": {
-                    "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge"
+                    "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge",
+                    "description": "Defines an alternate type of HTTP\nchallenge that can be used to place a file at a location that can be served by\nan out-of-band webserver.\n"
                 },
                 "keyType": {
                     "type": "string",
+                    "description": "The key type for the certificate's private key. Can be one of:\n`P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and\n`8192` (for RSA keys of respective length). Required when not specifying a\nCSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when\nchanged.\n",
                     "willReplaceOnChanges": true
                 },
                 "minDaysRemaining": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "The minimum amount of days remaining on the\nexpiration of a certificate before a renewal is attempted. The default is\n`30`. A value of less than `0` means that the certificate will never be\nrenewed.\n"
                 },
                 "mustStaple": {
                     "type": "boolean",
+                    "description": "Enables the [OCSP Stapling Required][ocsp-stapling]\nTLS Security Policy extension. Certificates with this extension must include a\nvalid OCSP Staple in the TLS handshake for the connection to succeed.\nDefaults to `false`. Note that this option has no effect when using an\nexternal CSR - it must be enabled in the CSR itself. Forces a new resource\nwhen changed.\n\n[ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling\n\n\u003e OCSP stapling requires specific webserver configuration to support the\ndownloading of the staple from the CA's OCSP endpoints, and should be configured\nto tolerate prolonged outages of the OCSP service. Consider this when using\n`must_staple`, and only enable it if you are sure your webserver or service\nprovider can be configured correctly.\n",
                     "willReplaceOnChanges": true
                 },
                 "preCheckDelay": {
-                    "type": "integer"
+                    "type": "integer",
+                    "description": "Insert a delay after _every_ DNS challenge\nrecord to allow for extra time for DNS propagation before the certificate is\nrequested. Use this option if you observe issues with requesting certificates\neven when DNS challenge records get added successfully. Units are in seconds.\nDefaults to 0 (no delay).\n\n\u003e Be careful with `pre_check_delay` since the delay is executed _per-domain_.\nTake your expected delay and divide it by the number of domains you have\nconfigured (`common_name` + `subject_alternative_names`).\n"
                 },
                 "preferredChain": {
                     "type": "string",
+                    "description": "The common name of the root of a preferred\nalternate certificate chain offered by the CA. The certificates in\n`issuer_pem` will reflect the chain requested, if available, otherwise the\ndefault chain will be provided. Forces a new resource when changed.\n\n\u003e `preferred_chain` can be used to request alternate chains on Let's Encrypt\nduring the transition away from their old cross-signed intermediates. See [this\narticle for more\ndetails](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).\nIn their example titled **\"What about the alternate chain?\"**, the root you\nwould put in to the `preferred_chain` field would be `ISRG Root X1`. The\nequivalent in the [staging\nenvironment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)\nPretend Pear X1`.\n",
                     "willReplaceOnChanges": true
                 },
                 "recursiveNameservers": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    }
+                    },
+                    "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records. Defaults to your\nsystem-configured DNS resolvers.\n"
                 },
                 "revokeCertificateOnDestroy": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
                 },
                 "subjectAlternativeNames": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     },
+                    "description": "The certificate's subject alternative names,\ndomains that this certificate will also be recognized for. Only valid when not\nspecifying a CSR. Forces a new resource when changed.\n",
                     "willReplaceOnChanges": true
                 },
                 "tlsChallenge": {
-                    "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge"
+                    "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
+                    "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, and\n`http_memcached_challenge` can be defined at once. See the section on Using\nHTTP and TLS challenges for more details on\nusing these and `tls_challenge`.\n"
                 }
             },
             "requiredInputs": [
@@ -349,98 +397,123 @@
                 "properties": {
                     "accountKeyPem": {
                         "type": "string",
+                        "description": "The private key of the account that is\nrequesting the certificate. Forces a new resource when changed.\n",
                         "secret": true,
                         "willReplaceOnChanges": true
                     },
                     "certificateDomain": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "The common name of the certificate.\n"
                     },
                     "certificateNotAfter": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "The expiry date of the certificate, laid out in\nRFC3339 format (`2006-01-02T15:04:05Z07:00`).\n"
                     },
                     "certificateP12": {
                         "type": "string",
+                        "description": "The certificate, any intermediates, and the private key\narchived as a PFX file (PKCS12 format, generally used by Microsoft products).\nThe data is base64 encoded (including padding), and its password is\nconfigurable via the `certificate_p12_password`\nargument. This field is empty if creating a certificate from a CSR.\n",
                         "secret": true
                     },
                     "certificateP12Password": {
                         "type": "string",
+                        "description": "Password to be used when generating\nthe PFX file stored in `certificate_p12`. Defaults to an\nempty string.\n",
                         "secret": true
                     },
                     "certificatePem": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "The certificate in PEM format. This does not include the\n`issuer_pem`. This certificate can be concatenated with `issuer_pem` to form\na full chain, e.g. `\"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}\"`\n"
                     },
                     "certificateRequestPem": {
                         "type": "string",
+                        "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n",
                         "willReplaceOnChanges": true
                     },
                     "certificateUrl": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "The full URL of the certificate within the ACME CA.\n"
                     },
                     "commonName": {
                         "type": "string",
+                        "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Required when not specifying a CSR. Forces\na new resource when changed.\n",
                         "willReplaceOnChanges": true
                     },
                     "disableCompletePropagation": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Disable the requirement for full\npropagation of the TXT challenge records before proceeding with validation.\nDefaults to `false`.\n\n\u003e See About DNS propagation checks for details\non the `recursive_nameservers` and `disable_complete_propagation` settings.\n"
                     },
                     "dnsChallenges": {
                         "type": "array",
                         "items": {
                             "$ref": "#/types/acme:index/CertificateDnsChallenge:CertificateDnsChallenge"
-                        }
+                        },
+                        "description": "The DNS challenges to\nuse in fulfilling the request.\n"
                     },
                     "httpChallenge": {
-                        "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge"
+                        "$ref": "#/types/acme:index/CertificateHttpChallenge:CertificateHttpChallenge",
+                        "description": "Defines an HTTP challenge to use in fulfilling\nthe request.\n"
                     },
                     "httpMemcachedChallenge": {
-                        "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge"
+                        "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge",
+                        "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[Memcached](https://memcached.org/) cluster.\n"
                     },
                     "httpWebrootChallenge": {
-                        "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge"
+                        "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge",
+                        "description": "Defines an alternate type of HTTP\nchallenge that can be used to place a file at a location that can be served by\nan out-of-band webserver.\n"
                     },
                     "issuerPem": {
-                        "type": "string"
+                        "type": "string",
+                        "description": "The intermediate certificates of the issuer. Multiple\ncertificates are concatenated in this field when there is more than one\nintermediate certificate in the chain.\n"
                     },
                     "keyType": {
                         "type": "string",
+                        "description": "The key type for the certificate's private key. Can be one of:\n`P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and\n`8192` (for RSA keys of respective length). Required when not specifying a\nCSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when\nchanged.\n",
                         "willReplaceOnChanges": true
                     },
                     "minDaysRemaining": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "The minimum amount of days remaining on the\nexpiration of a certificate before a renewal is attempted. The default is\n`30`. A value of less than `0` means that the certificate will never be\nrenewed.\n"
                     },
                     "mustStaple": {
                         "type": "boolean",
+                        "description": "Enables the [OCSP Stapling Required][ocsp-stapling]\nTLS Security Policy extension. Certificates with this extension must include a\nvalid OCSP Staple in the TLS handshake for the connection to succeed.\nDefaults to `false`. Note that this option has no effect when using an\nexternal CSR - it must be enabled in the CSR itself. Forces a new resource\nwhen changed.\n\n[ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling\n\n\u003e OCSP stapling requires specific webserver configuration to support the\ndownloading of the staple from the CA's OCSP endpoints, and should be configured\nto tolerate prolonged outages of the OCSP service. Consider this when using\n`must_staple`, and only enable it if you are sure your webserver or service\nprovider can be configured correctly.\n",
                         "willReplaceOnChanges": true
                     },
                     "preCheckDelay": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Insert a delay after _every_ DNS challenge\nrecord to allow for extra time for DNS propagation before the certificate is\nrequested. Use this option if you observe issues with requesting certificates\neven when DNS challenge records get added successfully. Units are in seconds.\nDefaults to 0 (no delay).\n\n\u003e Be careful with `pre_check_delay` since the delay is executed _per-domain_.\nTake your expected delay and divide it by the number of domains you have\nconfigured (`common_name` + `subject_alternative_names`).\n"
                     },
                     "preferredChain": {
                         "type": "string",
+                        "description": "The common name of the root of a preferred\nalternate certificate chain offered by the CA. The certificates in\n`issuer_pem` will reflect the chain requested, if available, otherwise the\ndefault chain will be provided. Forces a new resource when changed.\n\n\u003e `preferred_chain` can be used to request alternate chains on Let's Encrypt\nduring the transition away from their old cross-signed intermediates. See [this\narticle for more\ndetails](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).\nIn their example titled **\"What about the alternate chain?\"**, the root you\nwould put in to the `preferred_chain` field would be `ISRG Root X1`. The\nequivalent in the [staging\nenvironment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)\nPretend Pear X1`.\n",
                         "willReplaceOnChanges": true
                     },
                     "privateKeyPem": {
                         "type": "string",
+                        "description": "The certificate's private key, in PEM format, if the\ncertificate was generated from scratch and not with\n`certificate_request_pem`.  If\n`certificate_request_pem` was used, this will be blank.\n",
                         "secret": true
                     },
                     "recursiveNameservers": {
                         "type": "array",
                         "items": {
                             "type": "string"
-                        }
+                        },
+                        "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records. Defaults to your\nsystem-configured DNS resolvers.\n"
                     },
                     "revokeCertificateOnDestroy": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
                     },
                     "subjectAlternativeNames": {
                         "type": "array",
                         "items": {
                             "type": "string"
                         },
+                        "description": "The certificate's subject alternative names,\ndomains that this certificate will also be recognized for. Only valid when not\nspecifying a CSR. Forces a new resource when changed.\n",
                         "willReplaceOnChanges": true
                     },
                     "tlsChallenge": {
-                        "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge"
+                        "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
+                        "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, and\n`http_memcached_challenge` can be defined at once. See the section on Using\nHTTP and TLS challenges for more details on\nusing these and `tls_challenge`.\n"
                     }
                 },
                 "type": "object"
