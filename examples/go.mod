@@ -1,6 +1,6 @@
 module github.com/pulumiverse/pulumi-acme/examples
 
-go 1.18
+go 1.20
 
 require github.com/pulumi/pulumi/pkg/v3 v3.82.1
 
