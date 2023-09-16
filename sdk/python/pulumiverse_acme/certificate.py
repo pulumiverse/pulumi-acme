@@ -36,6 +36,96 @@ class CertificateArgs:
                  tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None):
         """
         The set of arguments for constructing a Certificate resource.
+        :param pulumi.Input[str] account_key_pem: The private key of the account that is
+               requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_p12_password: Password to be used when generating
+               the PFX file stored in `certificate_p12`. Defaults to an
+               empty string.
+        :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
+               from [`tls_cert_request`][tls-cert-request], or one from an external source,
+               in PEM format.  Either this, or the in-resource request options
+               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+               to be specified. Forces a new resource when changed.
+        :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
+               certificate will be recognized for. Required when not specifying a CSR. Forces
+               a new resource when changed.
+        :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
+               propagation of the TXT challenge records before proceeding with validation.
+               Defaults to `false`.
+               
+               > See About DNS propagation checks for details
+               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        :param pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]] dns_challenges: The DNS challenges to
+               use in fulfilling the request.
+        :param pulumi.Input['CertificateHttpChallengeArgs'] http_challenge: Defines an HTTP challenge to use in fulfilling
+               the request.
+        :param pulumi.Input['CertificateHttpMemcachedChallengeArgs'] http_memcached_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input['CertificateHttpWebrootChallengeArgs'] http_webroot_challenge: Defines an alternate type of HTTP
+               challenge that can be used to place a file at a location that can be served by
+               an out-of-band webserver.
+        :param pulumi.Input[str] key_type: The key type for the certificate's private key. Can be one of:
+               `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+               `8192` (for RSA keys of respective length). Required when not specifying a
+               CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+               changed.
+        :param pulumi.Input[int] min_days_remaining: The minimum amount of days remaining on the
+               expiration of a certificate before a renewal is attempted. The default is
+               `30`. A value of less than `0` means that the certificate will never be
+               renewed.
+        :param pulumi.Input[bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
+               TLS Security Policy extension. Certificates with this extension must include a
+               valid OCSP Staple in the TLS handshake for the connection to succeed.
+               Defaults to `false`. Note that this option has no effect when using an
+               external CSR - it must be enabled in the CSR itself. Forces a new resource
+               when changed.
+               
+               [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+               
+               > OCSP stapling requires specific webserver configuration to support the
+               downloading of the staple from the CA's OCSP endpoints, and should be configured
+               to tolerate prolonged outages of the OCSP service. Consider this when using
+               `must_staple`, and only enable it if you are sure your webserver or service
+               provider can be configured correctly.
+        :param pulumi.Input[int] pre_check_delay: Insert a delay after _every_ DNS challenge
+               record to allow for extra time for DNS propagation before the certificate is
+               requested. Use this option if you observe issues with requesting certificates
+               even when DNS challenge records get added successfully. Units are in seconds.
+               Defaults to 0 (no delay).
+               
+               > Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+               Take your expected delay and divide it by the number of domains you have
+               configured (`common_name` + `subject_alternative_names`).
+        :param pulumi.Input[str] preferred_chain: The common name of the root of a preferred
+               alternate certificate chain offered by the CA. The certificates in
+               `issuer_pem` will reflect the chain requested, if available, otherwise the
+               default chain will be provided. Forces a new resource when changed.
+               
+               > `preferred_chain` can be used to request alternate chains on Let's Encrypt
+               during the transition away from their old cross-signed intermediates. See [this
+               article for more
+               details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+               In their example titled **"What about the alternate chain?"**, the root you
+               would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+               equivalent in the [staging
+               environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+               Pretend Pear X1`.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
+               used to check for propagation of DNS challenge records. Defaults to your
+               system-configured DNS resolvers.
+        :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
+               which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
+               domains that this certificate will also be recognized for. Only valid when not
+               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input['CertificateTlsChallengeArgs'] tls_challenge: Defines a TLS challenge to use in fulfilling the
+               request.
+               
+               > Only one of `http_challenge`, `http_webroot_challenge`, and
+               `http_memcached_challenge` can be defined at once. See the section on Using
+               HTTP and TLS challenges for more details on
+               using these and `tls_challenge`.
         """
         pulumi.set(__self__, "account_key_pem", account_key_pem)
         if certificate_p12_password is not None:
@@ -76,6 +166,10 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="accountKeyPem")
     def account_key_pem(self) -> pulumi.Input[str]:
+        """
+        The private key of the account that is
+        requesting the certificate. Forces a new resource when changed.
+        """
         return pulumi.get(self, "account_key_pem")
 
     @account_key_pem.setter
@@ -85,6 +179,11 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="certificateP12Password")
     def certificate_p12_password(self) -> Optional[pulumi.Input[str]]:
+        """
+        Password to be used when generating
+        the PFX file stored in `certificate_p12`. Defaults to an
+        empty string.
+        """
         return pulumi.get(self, "certificate_p12_password")
 
     @certificate_p12_password.setter
@@ -94,6 +193,13 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="certificateRequestPem")
     def certificate_request_pem(self) -> Optional[pulumi.Input[str]]:
+        """
+        A pre-created certificate request, such as one
+        from [`tls_cert_request`][tls-cert-request], or one from an external source,
+        in PEM format.  Either this, or the in-resource request options
+        (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+        to be specified. Forces a new resource when changed.
+        """
         return pulumi.get(self, "certificate_request_pem")
 
     @certificate_request_pem.setter
@@ -103,6 +209,11 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="commonName")
     def common_name(self) -> Optional[pulumi.Input[str]]:
+        """
+        The certificate's common name, the primary domain that the
+        certificate will be recognized for. Required when not specifying a CSR. Forces
+        a new resource when changed.
+        """
         return pulumi.get(self, "common_name")
 
     @common_name.setter
@@ -112,6 +223,14 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="disableCompletePropagation")
     def disable_complete_propagation(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Disable the requirement for full
+        propagation of the TXT challenge records before proceeding with validation.
+        Defaults to `false`.
+
+        > See About DNS propagation checks for details
+        on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        """
         return pulumi.get(self, "disable_complete_propagation")
 
     @disable_complete_propagation.setter
@@ -121,6 +240,10 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="dnsChallenges")
     def dns_challenges(self) -> Optional[pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]]]:
+        """
+        The DNS challenges to
+        use in fulfilling the request.
+        """
         return pulumi.get(self, "dns_challenges")
 
     @dns_challenges.setter
@@ -130,6 +253,10 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="httpChallenge")
     def http_challenge(self) -> Optional[pulumi.Input['CertificateHttpChallengeArgs']]:
+        """
+        Defines an HTTP challenge to use in fulfilling
+        the request.
+        """
         return pulumi.get(self, "http_challenge")
 
     @http_challenge.setter
@@ -139,6 +266,11 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="httpMemcachedChallenge")
     def http_memcached_challenge(self) -> Optional[pulumi.Input['CertificateHttpMemcachedChallengeArgs']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to serve up challenges to a
+        [Memcached](https://memcached.org/) cluster.
+        """
         return pulumi.get(self, "http_memcached_challenge")
 
     @http_memcached_challenge.setter
@@ -148,6 +280,11 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="httpWebrootChallenge")
     def http_webroot_challenge(self) -> Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to place a file at a location that can be served by
+        an out-of-band webserver.
+        """
         return pulumi.get(self, "http_webroot_challenge")
 
     @http_webroot_challenge.setter
@@ -157,6 +294,13 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="keyType")
     def key_type(self) -> Optional[pulumi.Input[str]]:
+        """
+        The key type for the certificate's private key. Can be one of:
+        `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+        `8192` (for RSA keys of respective length). Required when not specifying a
+        CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+        changed.
+        """
         return pulumi.get(self, "key_type")
 
     @key_type.setter
@@ -166,6 +310,12 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="minDaysRemaining")
     def min_days_remaining(self) -> Optional[pulumi.Input[int]]:
+        """
+        The minimum amount of days remaining on the
+        expiration of a certificate before a renewal is attempted. The default is
+        `30`. A value of less than `0` means that the certificate will never be
+        renewed.
+        """
         return pulumi.get(self, "min_days_remaining")
 
     @min_days_remaining.setter
@@ -175,6 +325,22 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="mustStaple")
     def must_staple(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Enables the [OCSP Stapling Required][ocsp-stapling]
+        TLS Security Policy extension. Certificates with this extension must include a
+        valid OCSP Staple in the TLS handshake for the connection to succeed.
+        Defaults to `false`. Note that this option has no effect when using an
+        external CSR - it must be enabled in the CSR itself. Forces a new resource
+        when changed.
+
+        [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+
+        > OCSP stapling requires specific webserver configuration to support the
+        downloading of the staple from the CA's OCSP endpoints, and should be configured
+        to tolerate prolonged outages of the OCSP service. Consider this when using
+        `must_staple`, and only enable it if you are sure your webserver or service
+        provider can be configured correctly.
+        """
         return pulumi.get(self, "must_staple")
 
     @must_staple.setter
@@ -184,6 +350,17 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="preCheckDelay")
     def pre_check_delay(self) -> Optional[pulumi.Input[int]]:
+        """
+        Insert a delay after _every_ DNS challenge
+        record to allow for extra time for DNS propagation before the certificate is
+        requested. Use this option if you observe issues with requesting certificates
+        even when DNS challenge records get added successfully. Units are in seconds.
+        Defaults to 0 (no delay).
+
+        > Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+        Take your expected delay and divide it by the number of domains you have
+        configured (`common_name` + `subject_alternative_names`).
+        """
         return pulumi.get(self, "pre_check_delay")
 
     @pre_check_delay.setter
@@ -193,6 +370,22 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="preferredChain")
     def preferred_chain(self) -> Optional[pulumi.Input[str]]:
+        """
+        The common name of the root of a preferred
+        alternate certificate chain offered by the CA. The certificates in
+        `issuer_pem` will reflect the chain requested, if available, otherwise the
+        default chain will be provided. Forces a new resource when changed.
+
+        > `preferred_chain` can be used to request alternate chains on Let's Encrypt
+        during the transition away from their old cross-signed intermediates. See [this
+        article for more
+        details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+        In their example titled **"What about the alternate chain?"**, the root you
+        would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+        equivalent in the [staging
+        environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+        Pretend Pear X1`.
+        """
         return pulumi.get(self, "preferred_chain")
 
     @preferred_chain.setter
@@ -202,6 +395,11 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="recursiveNameservers")
     def recursive_nameservers(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
+        """
+        The recursive nameservers that will be
+        used to check for propagation of DNS challenge records. Defaults to your
+        system-configured DNS resolvers.
+        """
         return pulumi.get(self, "recursive_nameservers")
 
     @recursive_nameservers.setter
@@ -211,6 +409,10 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="revokeCertificateOnDestroy")
     def revoke_certificate_on_destroy(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Enables revocation of a certificate upon destroy,
+        which includes when a resource is re-created. Default is `true`.
+        """
         return pulumi.get(self, "revoke_certificate_on_destroy")
 
     @revoke_certificate_on_destroy.setter
@@ -220,6 +422,11 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
+        """
+        The certificate's subject alternative names,
+        domains that this certificate will also be recognized for. Only valid when not
+        specifying a CSR. Forces a new resource when changed.
+        """
         return pulumi.get(self, "subject_alternative_names")
 
     @subject_alternative_names.setter
@@ -229,6 +436,15 @@ class CertificateArgs:
     @property
     @pulumi.getter(name="tlsChallenge")
     def tls_challenge(self) -> Optional[pulumi.Input['CertificateTlsChallengeArgs']]:
+        """
+        Defines a TLS challenge to use in fulfilling the
+        request.
+
+        > Only one of `http_challenge`, `http_webroot_challenge`, and
+        `http_memcached_challenge` can be defined at once. See the section on Using
+        HTTP and TLS challenges for more details on
+        using these and `tls_challenge`.
+        """
         return pulumi.get(self, "tls_challenge")
 
     @tls_challenge.setter
@@ -266,6 +482,115 @@ class _CertificateState:
                  tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None):
         """
         Input properties used for looking up and filtering Certificate resources.
+        :param pulumi.Input[str] account_key_pem: The private key of the account that is
+               requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_domain: The common name of the certificate.
+        :param pulumi.Input[str] certificate_not_after: The expiry date of the certificate, laid out in
+               RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+        :param pulumi.Input[str] certificate_p12: The certificate, any intermediates, and the private key
+               archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+               The data is base64 encoded (including padding), and its password is
+               configurable via the `certificate_p12_password`
+               argument. This field is empty if creating a certificate from a CSR.
+        :param pulumi.Input[str] certificate_p12_password: Password to be used when generating
+               the PFX file stored in `certificate_p12`. Defaults to an
+               empty string.
+        :param pulumi.Input[str] certificate_pem: The certificate in PEM format. This does not include the
+               `issuer_pem`. This certificate can be concatenated with `issuer_pem` to form
+               a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+        :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
+               from [`tls_cert_request`][tls-cert-request], or one from an external source,
+               in PEM format.  Either this, or the in-resource request options
+               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+               to be specified. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_url: The full URL of the certificate within the ACME CA.
+        :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
+               certificate will be recognized for. Required when not specifying a CSR. Forces
+               a new resource when changed.
+        :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
+               propagation of the TXT challenge records before proceeding with validation.
+               Defaults to `false`.
+               
+               > See About DNS propagation checks for details
+               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        :param pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]] dns_challenges: The DNS challenges to
+               use in fulfilling the request.
+        :param pulumi.Input['CertificateHttpChallengeArgs'] http_challenge: Defines an HTTP challenge to use in fulfilling
+               the request.
+        :param pulumi.Input['CertificateHttpMemcachedChallengeArgs'] http_memcached_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input['CertificateHttpWebrootChallengeArgs'] http_webroot_challenge: Defines an alternate type of HTTP
+               challenge that can be used to place a file at a location that can be served by
+               an out-of-band webserver.
+        :param pulumi.Input[str] issuer_pem: The intermediate certificates of the issuer. Multiple
+               certificates are concatenated in this field when there is more than one
+               intermediate certificate in the chain.
+        :param pulumi.Input[str] key_type: The key type for the certificate's private key. Can be one of:
+               `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+               `8192` (for RSA keys of respective length). Required when not specifying a
+               CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+               changed.
+        :param pulumi.Input[int] min_days_remaining: The minimum amount of days remaining on the
+               expiration of a certificate before a renewal is attempted. The default is
+               `30`. A value of less than `0` means that the certificate will never be
+               renewed.
+        :param pulumi.Input[bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
+               TLS Security Policy extension. Certificates with this extension must include a
+               valid OCSP Staple in the TLS handshake for the connection to succeed.
+               Defaults to `false`. Note that this option has no effect when using an
+               external CSR - it must be enabled in the CSR itself. Forces a new resource
+               when changed.
+               
+               [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+               
+               > OCSP stapling requires specific webserver configuration to support the
+               downloading of the staple from the CA's OCSP endpoints, and should be configured
+               to tolerate prolonged outages of the OCSP service. Consider this when using
+               `must_staple`, and only enable it if you are sure your webserver or service
+               provider can be configured correctly.
+        :param pulumi.Input[int] pre_check_delay: Insert a delay after _every_ DNS challenge
+               record to allow for extra time for DNS propagation before the certificate is
+               requested. Use this option if you observe issues with requesting certificates
+               even when DNS challenge records get added successfully. Units are in seconds.
+               Defaults to 0 (no delay).
+               
+               > Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+               Take your expected delay and divide it by the number of domains you have
+               configured (`common_name` + `subject_alternative_names`).
+        :param pulumi.Input[str] preferred_chain: The common name of the root of a preferred
+               alternate certificate chain offered by the CA. The certificates in
+               `issuer_pem` will reflect the chain requested, if available, otherwise the
+               default chain will be provided. Forces a new resource when changed.
+               
+               > `preferred_chain` can be used to request alternate chains on Let's Encrypt
+               during the transition away from their old cross-signed intermediates. See [this
+               article for more
+               details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+               In their example titled **"What about the alternate chain?"**, the root you
+               would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+               equivalent in the [staging
+               environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+               Pretend Pear X1`.
+        :param pulumi.Input[str] private_key_pem: The certificate's private key, in PEM format, if the
+               certificate was generated from scratch and not with
+               `certificate_request_pem`.  If
+               `certificate_request_pem` was used, this will be blank.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
+               used to check for propagation of DNS challenge records. Defaults to your
+               system-configured DNS resolvers.
+        :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
+               which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
+               domains that this certificate will also be recognized for. Only valid when not
+               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input['CertificateTlsChallengeArgs'] tls_challenge: Defines a TLS challenge to use in fulfilling the
+               request.
+               
+               > Only one of `http_challenge`, `http_webroot_challenge`, and
+               `http_memcached_challenge` can be defined at once. See the section on Using
+               HTTP and TLS challenges for more details on
+               using these and `tls_challenge`.
         """
         if account_key_pem is not None:
             pulumi.set(__self__, "account_key_pem", account_key_pem)
@@ -321,6 +646,10 @@ class _CertificateState:
     @property
     @pulumi.getter(name="accountKeyPem")
     def account_key_pem(self) -> Optional[pulumi.Input[str]]:
+        """
+        The private key of the account that is
+        requesting the certificate. Forces a new resource when changed.
+        """
         return pulumi.get(self, "account_key_pem")
 
     @account_key_pem.setter
@@ -330,6 +659,9 @@ class _CertificateState:
     @property
     @pulumi.getter(name="certificateDomain")
     def certificate_domain(self) -> Optional[pulumi.Input[str]]:
+        """
+        The common name of the certificate.
+        """
         return pulumi.get(self, "certificate_domain")
 
     @certificate_domain.setter
@@ -339,6 +671,10 @@ class _CertificateState:
     @property
     @pulumi.getter(name="certificateNotAfter")
     def certificate_not_after(self) -> Optional[pulumi.Input[str]]:
+        """
+        The expiry date of the certificate, laid out in
+        RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+        """
         return pulumi.get(self, "certificate_not_after")
 
     @certificate_not_after.setter
@@ -348,6 +684,13 @@ class _CertificateState:
     @property
     @pulumi.getter(name="certificateP12")
     def certificate_p12(self) -> Optional[pulumi.Input[str]]:
+        """
+        The certificate, any intermediates, and the private key
+        archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+        The data is base64 encoded (including padding), and its password is
+        configurable via the `certificate_p12_password`
+        argument. This field is empty if creating a certificate from a CSR.
+        """
         return pulumi.get(self, "certificate_p12")
 
     @certificate_p12.setter
@@ -357,6 +700,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="certificateP12Password")
     def certificate_p12_password(self) -> Optional[pulumi.Input[str]]:
+        """
+        Password to be used when generating
+        the PFX file stored in `certificate_p12`. Defaults to an
+        empty string.
+        """
         return pulumi.get(self, "certificate_p12_password")
 
     @certificate_p12_password.setter
@@ -366,6 +714,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="certificatePem")
     def certificate_pem(self) -> Optional[pulumi.Input[str]]:
+        """
+        The certificate in PEM format. This does not include the
+        `issuer_pem`. This certificate can be concatenated with `issuer_pem` to form
+        a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+        """
         return pulumi.get(self, "certificate_pem")
 
     @certificate_pem.setter
@@ -375,6 +728,13 @@ class _CertificateState:
     @property
     @pulumi.getter(name="certificateRequestPem")
     def certificate_request_pem(self) -> Optional[pulumi.Input[str]]:
+        """
+        A pre-created certificate request, such as one
+        from [`tls_cert_request`][tls-cert-request], or one from an external source,
+        in PEM format.  Either this, or the in-resource request options
+        (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+        to be specified. Forces a new resource when changed.
+        """
         return pulumi.get(self, "certificate_request_pem")
 
     @certificate_request_pem.setter
@@ -384,6 +744,9 @@ class _CertificateState:
     @property
     @pulumi.getter(name="certificateUrl")
     def certificate_url(self) -> Optional[pulumi.Input[str]]:
+        """
+        The full URL of the certificate within the ACME CA.
+        """
         return pulumi.get(self, "certificate_url")
 
     @certificate_url.setter
@@ -393,6 +756,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="commonName")
     def common_name(self) -> Optional[pulumi.Input[str]]:
+        """
+        The certificate's common name, the primary domain that the
+        certificate will be recognized for. Required when not specifying a CSR. Forces
+        a new resource when changed.
+        """
         return pulumi.get(self, "common_name")
 
     @common_name.setter
@@ -402,6 +770,14 @@ class _CertificateState:
     @property
     @pulumi.getter(name="disableCompletePropagation")
     def disable_complete_propagation(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Disable the requirement for full
+        propagation of the TXT challenge records before proceeding with validation.
+        Defaults to `false`.
+
+        > See About DNS propagation checks for details
+        on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        """
         return pulumi.get(self, "disable_complete_propagation")
 
     @disable_complete_propagation.setter
@@ -411,6 +787,10 @@ class _CertificateState:
     @property
     @pulumi.getter(name="dnsChallenges")
     def dns_challenges(self) -> Optional[pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]]]:
+        """
+        The DNS challenges to
+        use in fulfilling the request.
+        """
         return pulumi.get(self, "dns_challenges")
 
     @dns_challenges.setter
@@ -420,6 +800,10 @@ class _CertificateState:
     @property
     @pulumi.getter(name="httpChallenge")
     def http_challenge(self) -> Optional[pulumi.Input['CertificateHttpChallengeArgs']]:
+        """
+        Defines an HTTP challenge to use in fulfilling
+        the request.
+        """
         return pulumi.get(self, "http_challenge")
 
     @http_challenge.setter
@@ -429,6 +813,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="httpMemcachedChallenge")
     def http_memcached_challenge(self) -> Optional[pulumi.Input['CertificateHttpMemcachedChallengeArgs']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to serve up challenges to a
+        [Memcached](https://memcached.org/) cluster.
+        """
         return pulumi.get(self, "http_memcached_challenge")
 
     @http_memcached_challenge.setter
@@ -438,6 +827,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="httpWebrootChallenge")
     def http_webroot_challenge(self) -> Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to place a file at a location that can be served by
+        an out-of-band webserver.
+        """
         return pulumi.get(self, "http_webroot_challenge")
 
     @http_webroot_challenge.setter
@@ -447,6 +841,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="issuerPem")
     def issuer_pem(self) -> Optional[pulumi.Input[str]]:
+        """
+        The intermediate certificates of the issuer. Multiple
+        certificates are concatenated in this field when there is more than one
+        intermediate certificate in the chain.
+        """
         return pulumi.get(self, "issuer_pem")
 
     @issuer_pem.setter
@@ -456,6 +855,13 @@ class _CertificateState:
     @property
     @pulumi.getter(name="keyType")
     def key_type(self) -> Optional[pulumi.Input[str]]:
+        """
+        The key type for the certificate's private key. Can be one of:
+        `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+        `8192` (for RSA keys of respective length). Required when not specifying a
+        CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+        changed.
+        """
         return pulumi.get(self, "key_type")
 
     @key_type.setter
@@ -465,6 +871,12 @@ class _CertificateState:
     @property
     @pulumi.getter(name="minDaysRemaining")
     def min_days_remaining(self) -> Optional[pulumi.Input[int]]:
+        """
+        The minimum amount of days remaining on the
+        expiration of a certificate before a renewal is attempted. The default is
+        `30`. A value of less than `0` means that the certificate will never be
+        renewed.
+        """
         return pulumi.get(self, "min_days_remaining")
 
     @min_days_remaining.setter
@@ -474,6 +886,22 @@ class _CertificateState:
     @property
     @pulumi.getter(name="mustStaple")
     def must_staple(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Enables the [OCSP Stapling Required][ocsp-stapling]
+        TLS Security Policy extension. Certificates with this extension must include a
+        valid OCSP Staple in the TLS handshake for the connection to succeed.
+        Defaults to `false`. Note that this option has no effect when using an
+        external CSR - it must be enabled in the CSR itself. Forces a new resource
+        when changed.
+
+        [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+
+        > OCSP stapling requires specific webserver configuration to support the
+        downloading of the staple from the CA's OCSP endpoints, and should be configured
+        to tolerate prolonged outages of the OCSP service. Consider this when using
+        `must_staple`, and only enable it if you are sure your webserver or service
+        provider can be configured correctly.
+        """
         return pulumi.get(self, "must_staple")
 
     @must_staple.setter
@@ -483,6 +911,17 @@ class _CertificateState:
     @property
     @pulumi.getter(name="preCheckDelay")
     def pre_check_delay(self) -> Optional[pulumi.Input[int]]:
+        """
+        Insert a delay after _every_ DNS challenge
+        record to allow for extra time for DNS propagation before the certificate is
+        requested. Use this option if you observe issues with requesting certificates
+        even when DNS challenge records get added successfully. Units are in seconds.
+        Defaults to 0 (no delay).
+
+        > Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+        Take your expected delay and divide it by the number of domains you have
+        configured (`common_name` + `subject_alternative_names`).
+        """
         return pulumi.get(self, "pre_check_delay")
 
     @pre_check_delay.setter
@@ -492,6 +931,22 @@ class _CertificateState:
     @property
     @pulumi.getter(name="preferredChain")
     def preferred_chain(self) -> Optional[pulumi.Input[str]]:
+        """
+        The common name of the root of a preferred
+        alternate certificate chain offered by the CA. The certificates in
+        `issuer_pem` will reflect the chain requested, if available, otherwise the
+        default chain will be provided. Forces a new resource when changed.
+
+        > `preferred_chain` can be used to request alternate chains on Let's Encrypt
+        during the transition away from their old cross-signed intermediates. See [this
+        article for more
+        details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+        In their example titled **"What about the alternate chain?"**, the root you
+        would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+        equivalent in the [staging
+        environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+        Pretend Pear X1`.
+        """
         return pulumi.get(self, "preferred_chain")
 
     @preferred_chain.setter
@@ -501,6 +956,12 @@ class _CertificateState:
     @property
     @pulumi.getter(name="privateKeyPem")
     def private_key_pem(self) -> Optional[pulumi.Input[str]]:
+        """
+        The certificate's private key, in PEM format, if the
+        certificate was generated from scratch and not with
+        `certificate_request_pem`.  If
+        `certificate_request_pem` was used, this will be blank.
+        """
         return pulumi.get(self, "private_key_pem")
 
     @private_key_pem.setter
@@ -510,6 +971,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="recursiveNameservers")
     def recursive_nameservers(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
+        """
+        The recursive nameservers that will be
+        used to check for propagation of DNS challenge records. Defaults to your
+        system-configured DNS resolvers.
+        """
         return pulumi.get(self, "recursive_nameservers")
 
     @recursive_nameservers.setter
@@ -519,6 +985,10 @@ class _CertificateState:
     @property
     @pulumi.getter(name="revokeCertificateOnDestroy")
     def revoke_certificate_on_destroy(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Enables revocation of a certificate upon destroy,
+        which includes when a resource is re-created. Default is `true`.
+        """
         return pulumi.get(self, "revoke_certificate_on_destroy")
 
     @revoke_certificate_on_destroy.setter
@@ -528,6 +998,11 @@ class _CertificateState:
     @property
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
+        """
+        The certificate's subject alternative names,
+        domains that this certificate will also be recognized for. Only valid when not
+        specifying a CSR. Forces a new resource when changed.
+        """
         return pulumi.get(self, "subject_alternative_names")
 
     @subject_alternative_names.setter
@@ -537,6 +1012,15 @@ class _CertificateState:
     @property
     @pulumi.getter(name="tlsChallenge")
     def tls_challenge(self) -> Optional[pulumi.Input['CertificateTlsChallengeArgs']]:
+        """
+        Defines a TLS challenge to use in fulfilling the
+        request.
+
+        > Only one of `http_challenge`, `http_webroot_challenge`, and
+        `http_memcached_challenge` can be defined at once. See the section on Using
+        HTTP and TLS challenges for more details on
+        using these and `tls_challenge`.
+        """
         return pulumi.get(self, "tls_challenge")
 
     @tls_challenge.setter
@@ -572,6 +1056,96 @@ class Certificate(pulumi.CustomResource):
         Create a Certificate resource with the given unique name, props, and options.
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
+        :param pulumi.Input[str] account_key_pem: The private key of the account that is
+               requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_p12_password: Password to be used when generating
+               the PFX file stored in `certificate_p12`. Defaults to an
+               empty string.
+        :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
+               from [`tls_cert_request`][tls-cert-request], or one from an external source,
+               in PEM format.  Either this, or the in-resource request options
+               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+               to be specified. Forces a new resource when changed.
+        :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
+               certificate will be recognized for. Required when not specifying a CSR. Forces
+               a new resource when changed.
+        :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
+               propagation of the TXT challenge records before proceeding with validation.
+               Defaults to `false`.
+               
+               > See About DNS propagation checks for details
+               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        :param pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]] dns_challenges: The DNS challenges to
+               use in fulfilling the request.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']] http_challenge: Defines an HTTP challenge to use in fulfilling
+               the request.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']] http_memcached_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']] http_webroot_challenge: Defines an alternate type of HTTP
+               challenge that can be used to place a file at a location that can be served by
+               an out-of-band webserver.
+        :param pulumi.Input[str] key_type: The key type for the certificate's private key. Can be one of:
+               `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+               `8192` (for RSA keys of respective length). Required when not specifying a
+               CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+               changed.
+        :param pulumi.Input[int] min_days_remaining: The minimum amount of days remaining on the
+               expiration of a certificate before a renewal is attempted. The default is
+               `30`. A value of less than `0` means that the certificate will never be
+               renewed.
+        :param pulumi.Input[bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
+               TLS Security Policy extension. Certificates with this extension must include a
+               valid OCSP Staple in the TLS handshake for the connection to succeed.
+               Defaults to `false`. Note that this option has no effect when using an
+               external CSR - it must be enabled in the CSR itself. Forces a new resource
+               when changed.
+               
+               [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+               
+               > OCSP stapling requires specific webserver configuration to support the
+               downloading of the staple from the CA's OCSP endpoints, and should be configured
+               to tolerate prolonged outages of the OCSP service. Consider this when using
+               `must_staple`, and only enable it if you are sure your webserver or service
+               provider can be configured correctly.
+        :param pulumi.Input[int] pre_check_delay: Insert a delay after _every_ DNS challenge
+               record to allow for extra time for DNS propagation before the certificate is
+               requested. Use this option if you observe issues with requesting certificates
+               even when DNS challenge records get added successfully. Units are in seconds.
+               Defaults to 0 (no delay).
+               
+               > Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+               Take your expected delay and divide it by the number of domains you have
+               configured (`common_name` + `subject_alternative_names`).
+        :param pulumi.Input[str] preferred_chain: The common name of the root of a preferred
+               alternate certificate chain offered by the CA. The certificates in
+               `issuer_pem` will reflect the chain requested, if available, otherwise the
+               default chain will be provided. Forces a new resource when changed.
+               
+               > `preferred_chain` can be used to request alternate chains on Let's Encrypt
+               during the transition away from their old cross-signed intermediates. See [this
+               article for more
+               details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+               In their example titled **"What about the alternate chain?"**, the root you
+               would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+               equivalent in the [staging
+               environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+               Pretend Pear X1`.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
+               used to check for propagation of DNS challenge records. Defaults to your
+               system-configured DNS resolvers.
+        :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
+               which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
+               domains that this certificate will also be recognized for. Only valid when not
+               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']] tls_challenge: Defines a TLS challenge to use in fulfilling the
+               request.
+               
+               > Only one of `http_challenge`, `http_webroot_challenge`, and
+               `http_memcached_challenge` can be defined at once. See the section on Using
+               HTTP and TLS challenges for more details on
+               using these and `tls_challenge`.
         """
         ...
     @overload
@@ -694,6 +1268,115 @@ class Certificate(pulumi.CustomResource):
         :param str resource_name: The unique name of the resulting resource.
         :param pulumi.Input[str] id: The unique provider ID of the resource to lookup.
         :param pulumi.ResourceOptions opts: Options for the resource.
+        :param pulumi.Input[str] account_key_pem: The private key of the account that is
+               requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_domain: The common name of the certificate.
+        :param pulumi.Input[str] certificate_not_after: The expiry date of the certificate, laid out in
+               RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+        :param pulumi.Input[str] certificate_p12: The certificate, any intermediates, and the private key
+               archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+               The data is base64 encoded (including padding), and its password is
+               configurable via the `certificate_p12_password`
+               argument. This field is empty if creating a certificate from a CSR.
+        :param pulumi.Input[str] certificate_p12_password: Password to be used when generating
+               the PFX file stored in `certificate_p12`. Defaults to an
+               empty string.
+        :param pulumi.Input[str] certificate_pem: The certificate in PEM format. This does not include the
+               `issuer_pem`. This certificate can be concatenated with `issuer_pem` to form
+               a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+        :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
+               from [`tls_cert_request`][tls-cert-request], or one from an external source,
+               in PEM format.  Either this, or the in-resource request options
+               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+               to be specified. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_url: The full URL of the certificate within the ACME CA.
+        :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
+               certificate will be recognized for. Required when not specifying a CSR. Forces
+               a new resource when changed.
+        :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
+               propagation of the TXT challenge records before proceeding with validation.
+               Defaults to `false`.
+               
+               > See About DNS propagation checks for details
+               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        :param pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]] dns_challenges: The DNS challenges to
+               use in fulfilling the request.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']] http_challenge: Defines an HTTP challenge to use in fulfilling
+               the request.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']] http_memcached_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']] http_webroot_challenge: Defines an alternate type of HTTP
+               challenge that can be used to place a file at a location that can be served by
+               an out-of-band webserver.
+        :param pulumi.Input[str] issuer_pem: The intermediate certificates of the issuer. Multiple
+               certificates are concatenated in this field when there is more than one
+               intermediate certificate in the chain.
+        :param pulumi.Input[str] key_type: The key type for the certificate's private key. Can be one of:
+               `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+               `8192` (for RSA keys of respective length). Required when not specifying a
+               CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+               changed.
+        :param pulumi.Input[int] min_days_remaining: The minimum amount of days remaining on the
+               expiration of a certificate before a renewal is attempted. The default is
+               `30`. A value of less than `0` means that the certificate will never be
+               renewed.
+        :param pulumi.Input[bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
+               TLS Security Policy extension. Certificates with this extension must include a
+               valid OCSP Staple in the TLS handshake for the connection to succeed.
+               Defaults to `false`. Note that this option has no effect when using an
+               external CSR - it must be enabled in the CSR itself. Forces a new resource
+               when changed.
+               
+               [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+               
+               > OCSP stapling requires specific webserver configuration to support the
+               downloading of the staple from the CA's OCSP endpoints, and should be configured
+               to tolerate prolonged outages of the OCSP service. Consider this when using
+               `must_staple`, and only enable it if you are sure your webserver or service
+               provider can be configured correctly.
+        :param pulumi.Input[int] pre_check_delay: Insert a delay after _every_ DNS challenge
+               record to allow for extra time for DNS propagation before the certificate is
+               requested. Use this option if you observe issues with requesting certificates
+               even when DNS challenge records get added successfully. Units are in seconds.
+               Defaults to 0 (no delay).
+               
+               > Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+               Take your expected delay and divide it by the number of domains you have
+               configured (`common_name` + `subject_alternative_names`).
+        :param pulumi.Input[str] preferred_chain: The common name of the root of a preferred
+               alternate certificate chain offered by the CA. The certificates in
+               `issuer_pem` will reflect the chain requested, if available, otherwise the
+               default chain will be provided. Forces a new resource when changed.
+               
+               > `preferred_chain` can be used to request alternate chains on Let's Encrypt
+               during the transition away from their old cross-signed intermediates. See [this
+               article for more
+               details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+               In their example titled **"What about the alternate chain?"**, the root you
+               would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+               equivalent in the [staging
+               environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+               Pretend Pear X1`.
+        :param pulumi.Input[str] private_key_pem: The certificate's private key, in PEM format, if the
+               certificate was generated from scratch and not with
+               `certificate_request_pem`.  If
+               `certificate_request_pem` was used, this will be blank.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
+               used to check for propagation of DNS challenge records. Defaults to your
+               system-configured DNS resolvers.
+        :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
+               which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
+               domains that this certificate will also be recognized for. Only valid when not
+               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']] tls_challenge: Defines a TLS challenge to use in fulfilling the
+               request.
+               
+               > Only one of `http_challenge`, `http_webroot_challenge`, and
+               `http_memcached_challenge` can be defined at once. See the section on Using
+               HTTP and TLS challenges for more details on
+               using these and `tls_challenge`.
         """
         opts = pulumi.ResourceOptions.merge(opts, pulumi.ResourceOptions(id=id))
 
@@ -729,125 +1412,284 @@ class Certificate(pulumi.CustomResource):
     @property
     @pulumi.getter(name="accountKeyPem")
     def account_key_pem(self) -> pulumi.Output[str]:
+        """
+        The private key of the account that is
+        requesting the certificate. Forces a new resource when changed.
+        """
         return pulumi.get(self, "account_key_pem")
 
     @property
     @pulumi.getter(name="certificateDomain")
     def certificate_domain(self) -> pulumi.Output[str]:
+        """
+        The common name of the certificate.
+        """
         return pulumi.get(self, "certificate_domain")
 
     @property
     @pulumi.getter(name="certificateNotAfter")
     def certificate_not_after(self) -> pulumi.Output[str]:
+        """
+        The expiry date of the certificate, laid out in
+        RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+        """
         return pulumi.get(self, "certificate_not_after")
 
     @property
     @pulumi.getter(name="certificateP12")
     def certificate_p12(self) -> pulumi.Output[str]:
+        """
+        The certificate, any intermediates, and the private key
+        archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+        The data is base64 encoded (including padding), and its password is
+        configurable via the `certificate_p12_password`
+        argument. This field is empty if creating a certificate from a CSR.
+        """
         return pulumi.get(self, "certificate_p12")
 
     @property
     @pulumi.getter(name="certificateP12Password")
     def certificate_p12_password(self) -> pulumi.Output[Optional[str]]:
+        """
+        Password to be used when generating
+        the PFX file stored in `certificate_p12`. Defaults to an
+        empty string.
+        """
         return pulumi.get(self, "certificate_p12_password")
 
     @property
     @pulumi.getter(name="certificatePem")
     def certificate_pem(self) -> pulumi.Output[str]:
+        """
+        The certificate in PEM format. This does not include the
+        `issuer_pem`. This certificate can be concatenated with `issuer_pem` to form
+        a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+        """
         return pulumi.get(self, "certificate_pem")
 
     @property
     @pulumi.getter(name="certificateRequestPem")
     def certificate_request_pem(self) -> pulumi.Output[Optional[str]]:
+        """
+        A pre-created certificate request, such as one
+        from [`tls_cert_request`][tls-cert-request], or one from an external source,
+        in PEM format.  Either this, or the in-resource request options
+        (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+        to be specified. Forces a new resource when changed.
+        """
         return pulumi.get(self, "certificate_request_pem")
 
     @property
     @pulumi.getter(name="certificateUrl")
     def certificate_url(self) -> pulumi.Output[str]:
+        """
+        The full URL of the certificate within the ACME CA.
+        """
         return pulumi.get(self, "certificate_url")
 
     @property
     @pulumi.getter(name="commonName")
     def common_name(self) -> pulumi.Output[Optional[str]]:
+        """
+        The certificate's common name, the primary domain that the
+        certificate will be recognized for. Required when not specifying a CSR. Forces
+        a new resource when changed.
+        """
         return pulumi.get(self, "common_name")
 
     @property
     @pulumi.getter(name="disableCompletePropagation")
     def disable_complete_propagation(self) -> pulumi.Output[Optional[bool]]:
+        """
+        Disable the requirement for full
+        propagation of the TXT challenge records before proceeding with validation.
+        Defaults to `false`.
+
+        > See About DNS propagation checks for details
+        on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        """
         return pulumi.get(self, "disable_complete_propagation")
 
     @property
     @pulumi.getter(name="dnsChallenges")
     def dns_challenges(self) -> pulumi.Output[Optional[Sequence['outputs.CertificateDnsChallenge']]]:
+        """
+        The DNS challenges to
+        use in fulfilling the request.
+        """
         return pulumi.get(self, "dns_challenges")
 
     @property
     @pulumi.getter(name="httpChallenge")
     def http_challenge(self) -> pulumi.Output[Optional['outputs.CertificateHttpChallenge']]:
+        """
+        Defines an HTTP challenge to use in fulfilling
+        the request.
+        """
         return pulumi.get(self, "http_challenge")
 
     @property
     @pulumi.getter(name="httpMemcachedChallenge")
     def http_memcached_challenge(self) -> pulumi.Output[Optional['outputs.CertificateHttpMemcachedChallenge']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to serve up challenges to a
+        [Memcached](https://memcached.org/) cluster.
+        """
         return pulumi.get(self, "http_memcached_challenge")
 
     @property
     @pulumi.getter(name="httpWebrootChallenge")
     def http_webroot_challenge(self) -> pulumi.Output[Optional['outputs.CertificateHttpWebrootChallenge']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to place a file at a location that can be served by
+        an out-of-band webserver.
+        """
         return pulumi.get(self, "http_webroot_challenge")
 
     @property
     @pulumi.getter(name="issuerPem")
     def issuer_pem(self) -> pulumi.Output[str]:
+        """
+        The intermediate certificates of the issuer. Multiple
+        certificates are concatenated in this field when there is more than one
+        intermediate certificate in the chain.
+        """
         return pulumi.get(self, "issuer_pem")
 
     @property
     @pulumi.getter(name="keyType")
     def key_type(self) -> pulumi.Output[Optional[str]]:
+        """
+        The key type for the certificate's private key. Can be one of:
+        `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+        `8192` (for RSA keys of respective length). Required when not specifying a
+        CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+        changed.
+        """
         return pulumi.get(self, "key_type")
 
     @property
     @pulumi.getter(name="minDaysRemaining")
     def min_days_remaining(self) -> pulumi.Output[Optional[int]]:
+        """
+        The minimum amount of days remaining on the
+        expiration of a certificate before a renewal is attempted. The default is
+        `30`. A value of less than `0` means that the certificate will never be
+        renewed.
+        """
         return pulumi.get(self, "min_days_remaining")
 
     @property
     @pulumi.getter(name="mustStaple")
     def must_staple(self) -> pulumi.Output[Optional[bool]]:
+        """
+        Enables the [OCSP Stapling Required][ocsp-stapling]
+        TLS Security Policy extension. Certificates with this extension must include a
+        valid OCSP Staple in the TLS handshake for the connection to succeed.
+        Defaults to `false`. Note that this option has no effect when using an
+        external CSR - it must be enabled in the CSR itself. Forces a new resource
+        when changed.
+
+        [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+
+        > OCSP stapling requires specific webserver configuration to support the
+        downloading of the staple from the CA's OCSP endpoints, and should be configured
+        to tolerate prolonged outages of the OCSP service. Consider this when using
+        `must_staple`, and only enable it if you are sure your webserver or service
+        provider can be configured correctly.
+        """
         return pulumi.get(self, "must_staple")
 
     @property
     @pulumi.getter(name="preCheckDelay")
     def pre_check_delay(self) -> pulumi.Output[Optional[int]]:
+        """
+        Insert a delay after _every_ DNS challenge
+        record to allow for extra time for DNS propagation before the certificate is
+        requested. Use this option if you observe issues with requesting certificates
+        even when DNS challenge records get added successfully. Units are in seconds.
+        Defaults to 0 (no delay).
+
+        > Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+        Take your expected delay and divide it by the number of domains you have
+        configured (`common_name` + `subject_alternative_names`).
+        """
         return pulumi.get(self, "pre_check_delay")
 
     @property
     @pulumi.getter(name="preferredChain")
     def preferred_chain(self) -> pulumi.Output[Optional[str]]:
+        """
+        The common name of the root of a preferred
+        alternate certificate chain offered by the CA. The certificates in
+        `issuer_pem` will reflect the chain requested, if available, otherwise the
+        default chain will be provided. Forces a new resource when changed.
+
+        > `preferred_chain` can be used to request alternate chains on Let's Encrypt
+        during the transition away from their old cross-signed intermediates. See [this
+        article for more
+        details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+        In their example titled **"What about the alternate chain?"**, the root you
+        would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+        equivalent in the [staging
+        environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+        Pretend Pear X1`.
+        """
         return pulumi.get(self, "preferred_chain")
 
     @property
     @pulumi.getter(name="privateKeyPem")
     def private_key_pem(self) -> pulumi.Output[str]:
+        """
+        The certificate's private key, in PEM format, if the
+        certificate was generated from scratch and not with
+        `certificate_request_pem`.  If
+        `certificate_request_pem` was used, this will be blank.
+        """
         return pulumi.get(self, "private_key_pem")
 
     @property
     @pulumi.getter(name="recursiveNameservers")
     def recursive_nameservers(self) -> pulumi.Output[Optional[Sequence[str]]]:
+        """
+        The recursive nameservers that will be
+        used to check for propagation of DNS challenge records. Defaults to your
+        system-configured DNS resolvers.
+        """
         return pulumi.get(self, "recursive_nameservers")
 
     @property
     @pulumi.getter(name="revokeCertificateOnDestroy")
     def revoke_certificate_on_destroy(self) -> pulumi.Output[Optional[bool]]:
+        """
+        Enables revocation of a certificate upon destroy,
+        which includes when a resource is re-created. Default is `true`.
+        """
         return pulumi.get(self, "revoke_certificate_on_destroy")
 
     @property
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> pulumi.Output[Optional[Sequence[str]]]:
+        """
+        The certificate's subject alternative names,
+        domains that this certificate will also be recognized for. Only valid when not
+        specifying a CSR. Forces a new resource when changed.
+        """
         return pulumi.get(self, "subject_alternative_names")
 
     @property
     @pulumi.getter(name="tlsChallenge")
     def tls_challenge(self) -> pulumi.Output[Optional['outputs.CertificateTlsChallenge']]:
+        """
+        Defines a TLS challenge to use in fulfilling the
+        request.
+
+        > Only one of `http_challenge`, `http_webroot_challenge`, and
+        `http_memcached_challenge` can be defined at once. See the section on Using
+        HTTP and TLS challenges for more details on
+        using these and `tls_challenge`.
+        """
         return pulumi.get(self, "tls_challenge")
 

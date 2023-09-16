@@ -11,19 +11,46 @@ export interface CertificateDnsChallenge {
 }
 
 export interface CertificateHttpChallenge {
+    /**
+     * The port that the challenge server listens on. Default: `80`.
+     */
     port?: pulumi.Input<number>;
+    /**
+     * The proxy header to match against. Default:
+     * `Host`.
+     *
+     * The `proxyHeader` option behaves differently depending on its definition:
+     *
+     * * When set to `Host`, standard host header validation is used.
+     * * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+     * section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+     * resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+     * for more details.
+     * * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+     * checked for the host entry in the same way the host header would normally be
+     * checked.
+     */
     proxyHeader?: pulumi.Input<string>;
 }
 
 export interface CertificateHttpMemcachedChallenge {
+    /**
+     * The hosts to publish the record to.
+     */
     hosts: pulumi.Input<pulumi.Input<string>[]>;
 }
 
 export interface CertificateHttpWebrootChallenge {
+    /**
+     * The directory to publish the record to.
+     */
     directory: pulumi.Input<string>;
 }
 
 export interface CertificateTlsChallenge {
+    /**
+     * The port that the challenge server listens on. Default: `443`.
+     */
     port?: pulumi.Input<number>;
 }
 

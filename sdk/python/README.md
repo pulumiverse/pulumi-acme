@@ -11,13 +11,13 @@ This package is available for several languages/platforms:
 To use from JavaScript or TypeScript in Node.js, install using either `npm`:
 
 ```bash
-npm install @pulumi/acme
+npm install @pulumiverse/acme
 ```
 
 or `yarn`:
 
 ```bash
-yarn add @pulumi/acme
+yarn add @pulumiverse/acme
 ```
 
 ### Python
@@ -25,7 +25,7 @@ yarn add @pulumi/acme
 To use from Python, install using `pip`:
 
 ```bash
-pip install pulumi_acme
+pip install pulumiverse_acme
 ```
 
 ### Go
@@ -33,7 +33,7 @@ pip install pulumi_acme
 To use from Go, use `go get` to grab the latest version of the library:
 
 ```bash
-go get github.com/pulumi/pulumi-acme/sdk/go/...
+go get github.com/pulumiverse/pulumi-acme/sdk/go/...
 ```
 
 ### .NET
@@ -41,15 +41,8 @@ go get github.com/pulumi/pulumi-acme/sdk/go/...
 To use from .NET, install using `dotnet add package`:
 
 ```bash
-dotnet add package Pulumi.ACME
+dotnet add package Pulumiverse.Acme
 ```
-
-## Configuration
-
-The following configuration points are available for the `acme` provider:
-
-- `acme:apiKey` (environment: `ACME_API_KEY`) - the API key for `acme`
-- `acme:region` (environment: `ACME_REGION`) - the region in which to deploy resources
 
 ## Reference
 

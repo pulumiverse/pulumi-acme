@@ -34,30 +34,189 @@ export class Certificate extends pulumi.CustomResource {
         return obj['__pulumiType'] === Certificate.__pulumiType;
     }
 
+    /**
+     * The private key of the account that is
+     * requesting the certificate. Forces a new resource when changed.
+     */
     public readonly accountKeyPem!: pulumi.Output<string>;
+    /**
+     * The common name of the certificate.
+     */
     public /*out*/ readonly certificateDomain!: pulumi.Output<string>;
+    /**
+     * The expiry date of the certificate, laid out in
+     * RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+     */
     public /*out*/ readonly certificateNotAfter!: pulumi.Output<string>;
+    /**
+     * The certificate, any intermediates, and the private key
+     * archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+     * The data is base64 encoded (including padding), and its password is
+     * configurable via the `certificateP12Password`
+     * argument. This field is empty if creating a certificate from a CSR.
+     */
     public /*out*/ readonly certificateP12!: pulumi.Output<string>;
+    /**
+     * Password to be used when generating
+     * the PFX file stored in `certificateP12`. Defaults to an
+     * empty string.
+     */
     public readonly certificateP12Password!: pulumi.Output<string | undefined>;
+    /**
+     * The certificate in PEM format. This does not include the
+     * `issuerPem`. This certificate can be concatenated with `issuerPem` to form
+     * a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+     */
     public /*out*/ readonly certificatePem!: pulumi.Output<string>;
+    /**
+     * A pre-created certificate request, such as one
+     * from [`tlsCertRequest`][tls-cert-request], or one from an external source,
+     * in PEM format.  Either this, or the in-resource request options
+     * (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
+     * to be specified. Forces a new resource when changed.
+     */
     public readonly certificateRequestPem!: pulumi.Output<string | undefined>;
+    /**
+     * The full URL of the certificate within the ACME CA.
+     */
     public /*out*/ readonly certificateUrl!: pulumi.Output<string>;
+    /**
+     * The certificate's common name, the primary domain that the
+     * certificate will be recognized for. Required when not specifying a CSR. Forces
+     * a new resource when changed.
+     */
     public readonly commonName!: pulumi.Output<string | undefined>;
+    /**
+     * Disable the requirement for full
+     * propagation of the TXT challenge records before proceeding with validation.
+     * Defaults to `false`.
+     *
+     * > See About DNS propagation checks for details
+     * on the `recursiveNameservers` and `disableCompletePropagation` settings.
+     */
     public readonly disableCompletePropagation!: pulumi.Output<boolean | undefined>;
+    /**
+     * The DNS challenges to
+     * use in fulfilling the request.
+     */
     public readonly dnsChallenges!: pulumi.Output<outputs.CertificateDnsChallenge[] | undefined>;
+    /**
+     * Defines an HTTP challenge to use in fulfilling
+     * the request.
+     */
     public readonly httpChallenge!: pulumi.Output<outputs.CertificateHttpChallenge | undefined>;
+    /**
+     * Defines an alternate type of HTTP
+     * challenge that can be used to serve up challenges to a
+     * [Memcached](https://memcached.org/) cluster.
+     */
     public readonly httpMemcachedChallenge!: pulumi.Output<outputs.CertificateHttpMemcachedChallenge | undefined>;
+    /**
+     * Defines an alternate type of HTTP
+     * challenge that can be used to place a file at a location that can be served by
+     * an out-of-band webserver.
+     */
     public readonly httpWebrootChallenge!: pulumi.Output<outputs.CertificateHttpWebrootChallenge | undefined>;
+    /**
+     * The intermediate certificates of the issuer. Multiple
+     * certificates are concatenated in this field when there is more than one
+     * intermediate certificate in the chain.
+     */
     public /*out*/ readonly issuerPem!: pulumi.Output<string>;
+    /**
+     * The key type for the certificate's private key. Can be one of:
+     * `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+     * `8192` (for RSA keys of respective length). Required when not specifying a
+     * CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+     * changed.
+     */
     public readonly keyType!: pulumi.Output<string | undefined>;
+    /**
+     * The minimum amount of days remaining on the
+     * expiration of a certificate before a renewal is attempted. The default is
+     * `30`. A value of less than `0` means that the certificate will never be
+     * renewed.
+     */
     public readonly minDaysRemaining!: pulumi.Output<number | undefined>;
+    /**
+     * Enables the [OCSP Stapling Required][ocsp-stapling]
+     * TLS Security Policy extension. Certificates with this extension must include a
+     * valid OCSP Staple in the TLS handshake for the connection to succeed.
+     * Defaults to `false`. Note that this option has no effect when using an
+     * external CSR - it must be enabled in the CSR itself. Forces a new resource
+     * when changed.
+     *
+     * [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+     *
+     * > OCSP stapling requires specific webserver configuration to support the
+     * downloading of the staple from the CA's OCSP endpoints, and should be configured
+     * to tolerate prolonged outages of the OCSP service. Consider this when using
+     * `mustStaple`, and only enable it if you are sure your webserver or service
+     * provider can be configured correctly.
+     */
     public readonly mustStaple!: pulumi.Output<boolean | undefined>;
+    /**
+     * Insert a delay after _every_ DNS challenge
+     * record to allow for extra time for DNS propagation before the certificate is
+     * requested. Use this option if you observe issues with requesting certificates
+     * even when DNS challenge records get added successfully. Units are in seconds.
+     * Defaults to 0 (no delay).
+     *
+     * > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
+     * Take your expected delay and divide it by the number of domains you have
+     * configured (`commonName` + `subjectAlternativeNames`).
+     */
     public readonly preCheckDelay!: pulumi.Output<number | undefined>;
+    /**
+     * The common name of the root of a preferred
+     * alternate certificate chain offered by the CA. The certificates in
+     * `issuerPem` will reflect the chain requested, if available, otherwise the
+     * default chain will be provided. Forces a new resource when changed.
+     *
+     * > `preferredChain` can be used to request alternate chains on Let's Encrypt
+     * during the transition away from their old cross-signed intermediates. See [this
+     * article for more
+     * details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+     * In their example titled **"What about the alternate chain?"**, the root you
+     * would put in to the `preferredChain` field would be `ISRG Root X1`. The
+     * equivalent in the [staging
+     * environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+     * Pretend Pear X1`.
+     */
     public readonly preferredChain!: pulumi.Output<string | undefined>;
+    /**
+     * The certificate's private key, in PEM format, if the
+     * certificate was generated from scratch and not with
+     * `certificateRequestPem`.  If
+     * `certificateRequestPem` was used, this will be blank.
+     */
     public /*out*/ readonly privateKeyPem!: pulumi.Output<string>;
+    /**
+     * The recursive nameservers that will be
+     * used to check for propagation of DNS challenge records. Defaults to your
+     * system-configured DNS resolvers.
+     */
     public readonly recursiveNameservers!: pulumi.Output<string[] | undefined>;
+    /**
+     * Enables revocation of a certificate upon destroy,
+     * which includes when a resource is re-created. Default is `true`.
+     */
     public readonly revokeCertificateOnDestroy!: pulumi.Output<boolean | undefined>;
+    /**
+     * The certificate's subject alternative names,
+     * domains that this certificate will also be recognized for. Only valid when not
+     * specifying a CSR. Forces a new resource when changed.
+     */
     public readonly subjectAlternativeNames!: pulumi.Output<string[] | undefined>;
+    /**
+     * Defines a TLS challenge to use in fulfilling the
+     * request.
+     *
+     * > Only one of `httpChallenge`, `httpWebrootChallenge`, and
+     * `httpMemcachedChallenge` can be defined at once. See the section on Using
+     * HTTP and TLS challenges for more details on
+     * using these and `tlsChallenge`.
+     */
     public readonly tlsChallenge!: pulumi.Output<outputs.CertificateTlsChallenge | undefined>;
 
     /**
@@ -140,30 +299,189 @@ export class Certificate extends pulumi.CustomResource {
  * Input properties used for looking up and filtering Certificate resources.
  */
 export interface CertificateState {
+    /**
+     * The private key of the account that is
+     * requesting the certificate. Forces a new resource when changed.
+     */
     accountKeyPem?: pulumi.Input<string>;
+    /**
+     * The common name of the certificate.
+     */
     certificateDomain?: pulumi.Input<string>;
+    /**
+     * The expiry date of the certificate, laid out in
+     * RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+     */
     certificateNotAfter?: pulumi.Input<string>;
+    /**
+     * The certificate, any intermediates, and the private key
+     * archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+     * The data is base64 encoded (including padding), and its password is
+     * configurable via the `certificateP12Password`
+     * argument. This field is empty if creating a certificate from a CSR.
+     */
     certificateP12?: pulumi.Input<string>;
+    /**
+     * Password to be used when generating
+     * the PFX file stored in `certificateP12`. Defaults to an
+     * empty string.
+     */
     certificateP12Password?: pulumi.Input<string>;
+    /**
+     * The certificate in PEM format. This does not include the
+     * `issuerPem`. This certificate can be concatenated with `issuerPem` to form
+     * a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+     */
     certificatePem?: pulumi.Input<string>;
+    /**
+     * A pre-created certificate request, such as one
+     * from [`tlsCertRequest`][tls-cert-request], or one from an external source,
+     * in PEM format.  Either this, or the in-resource request options
+     * (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
+     * to be specified. Forces a new resource when changed.
+     */
     certificateRequestPem?: pulumi.Input<string>;
+    /**
+     * The full URL of the certificate within the ACME CA.
+     */
     certificateUrl?: pulumi.Input<string>;
+    /**
+     * The certificate's common name, the primary domain that the
+     * certificate will be recognized for. Required when not specifying a CSR. Forces
+     * a new resource when changed.
+     */
     commonName?: pulumi.Input<string>;
+    /**
+     * Disable the requirement for full
+     * propagation of the TXT challenge records before proceeding with validation.
+     * Defaults to `false`.
+     *
+     * > See About DNS propagation checks for details
+     * on the `recursiveNameservers` and `disableCompletePropagation` settings.
+     */
     disableCompletePropagation?: pulumi.Input<boolean>;
+    /**
+     * The DNS challenges to
+     * use in fulfilling the request.
+     */
     dnsChallenges?: pulumi.Input<pulumi.Input<inputs.CertificateDnsChallenge>[]>;
+    /**
+     * Defines an HTTP challenge to use in fulfilling
+     * the request.
+     */
     httpChallenge?: pulumi.Input<inputs.CertificateHttpChallenge>;
+    /**
+     * Defines an alternate type of HTTP
+     * challenge that can be used to serve up challenges to a
+     * [Memcached](https://memcached.org/) cluster.
+     */
     httpMemcachedChallenge?: pulumi.Input<inputs.CertificateHttpMemcachedChallenge>;
+    /**
+     * Defines an alternate type of HTTP
+     * challenge that can be used to place a file at a location that can be served by
+     * an out-of-band webserver.
+     */
     httpWebrootChallenge?: pulumi.Input<inputs.CertificateHttpWebrootChallenge>;
+    /**
+     * The intermediate certificates of the issuer. Multiple
+     * certificates are concatenated in this field when there is more than one
+     * intermediate certificate in the chain.
+     */
     issuerPem?: pulumi.Input<string>;
+    /**
+     * The key type for the certificate's private key. Can be one of:
+     * `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+     * `8192` (for RSA keys of respective length). Required when not specifying a
+     * CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+     * changed.
+     */
     keyType?: pulumi.Input<string>;
+    /**
+     * The minimum amount of days remaining on the
+     * expiration of a certificate before a renewal is attempted. The default is
+     * `30`. A value of less than `0` means that the certificate will never be
+     * renewed.
+     */
     minDaysRemaining?: pulumi.Input<number>;
+    /**
+     * Enables the [OCSP Stapling Required][ocsp-stapling]
+     * TLS Security Policy extension. Certificates with this extension must include a
+     * valid OCSP Staple in the TLS handshake for the connection to succeed.
+     * Defaults to `false`. Note that this option has no effect when using an
+     * external CSR - it must be enabled in the CSR itself. Forces a new resource
+     * when changed.
+     *
+     * [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+     *
+     * > OCSP stapling requires specific webserver configuration to support the
+     * downloading of the staple from the CA's OCSP endpoints, and should be configured
+     * to tolerate prolonged outages of the OCSP service. Consider this when using
+     * `mustStaple`, and only enable it if you are sure your webserver or service
+     * provider can be configured correctly.
+     */
     mustStaple?: pulumi.Input<boolean>;
+    /**
+     * Insert a delay after _every_ DNS challenge
+     * record to allow for extra time for DNS propagation before the certificate is
+     * requested. Use this option if you observe issues with requesting certificates
+     * even when DNS challenge records get added successfully. Units are in seconds.
+     * Defaults to 0 (no delay).
+     *
+     * > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
+     * Take your expected delay and divide it by the number of domains you have
+     * configured (`commonName` + `subjectAlternativeNames`).
+     */
     preCheckDelay?: pulumi.Input<number>;
+    /**
+     * The common name of the root of a preferred
+     * alternate certificate chain offered by the CA. The certificates in
+     * `issuerPem` will reflect the chain requested, if available, otherwise the
+     * default chain will be provided. Forces a new resource when changed.
+     *
+     * > `preferredChain` can be used to request alternate chains on Let's Encrypt
+     * during the transition away from their old cross-signed intermediates. See [this
+     * article for more
+     * details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+     * In their example titled **"What about the alternate chain?"**, the root you
+     * would put in to the `preferredChain` field would be `ISRG Root X1`. The
+     * equivalent in the [staging
+     * environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+     * Pretend Pear X1`.
+     */
     preferredChain?: pulumi.Input<string>;
+    /**
+     * The certificate's private key, in PEM format, if the
+     * certificate was generated from scratch and not with
+     * `certificateRequestPem`.  If
+     * `certificateRequestPem` was used, this will be blank.
+     */
     privateKeyPem?: pulumi.Input<string>;
+    /**
+     * The recursive nameservers that will be
+     * used to check for propagation of DNS challenge records. Defaults to your
+     * system-configured DNS resolvers.
+     */
     recursiveNameservers?: pulumi.Input<pulumi.Input<string>[]>;
+    /**
+     * Enables revocation of a certificate upon destroy,
+     * which includes when a resource is re-created. Default is `true`.
+     */
     revokeCertificateOnDestroy?: pulumi.Input<boolean>;
+    /**
+     * The certificate's subject alternative names,
+     * domains that this certificate will also be recognized for. Only valid when not
+     * specifying a CSR. Forces a new resource when changed.
+     */
     subjectAlternativeNames?: pulumi.Input<pulumi.Input<string>[]>;
+    /**
+     * Defines a TLS challenge to use in fulfilling the
+     * request.
+     *
+     * > Only one of `httpChallenge`, `httpWebrootChallenge`, and
+     * `httpMemcachedChallenge` can be defined at once. See the section on Using
+     * HTTP and TLS challenges for more details on
+     * using these and `tlsChallenge`.
+     */
     tlsChallenge?: pulumi.Input<inputs.CertificateTlsChallenge>;
 }
 
@@ -171,22 +489,148 @@ export interface CertificateState {
  * The set of arguments for constructing a Certificate resource.
  */
 export interface CertificateArgs {
+    /**
+     * The private key of the account that is
+     * requesting the certificate. Forces a new resource when changed.
+     */
     accountKeyPem: pulumi.Input<string>;
+    /**
+     * Password to be used when generating
+     * the PFX file stored in `certificateP12`. Defaults to an
+     * empty string.
+     */
     certificateP12Password?: pulumi.Input<string>;
+    /**
+     * A pre-created certificate request, such as one
+     * from [`tlsCertRequest`][tls-cert-request], or one from an external source,
+     * in PEM format.  Either this, or the in-resource request options
+     * (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
+     * to be specified. Forces a new resource when changed.
+     */
     certificateRequestPem?: pulumi.Input<string>;
+    /**
+     * The certificate's common name, the primary domain that the
+     * certificate will be recognized for. Required when not specifying a CSR. Forces
+     * a new resource when changed.
+     */
     commonName?: pulumi.Input<string>;
+    /**
+     * Disable the requirement for full
+     * propagation of the TXT challenge records before proceeding with validation.
+     * Defaults to `false`.
+     *
+     * > See About DNS propagation checks for details
+     * on the `recursiveNameservers` and `disableCompletePropagation` settings.
+     */
     disableCompletePropagation?: pulumi.Input<boolean>;
+    /**
+     * The DNS challenges to
+     * use in fulfilling the request.
+     */
     dnsChallenges?: pulumi.Input<pulumi.Input<inputs.CertificateDnsChallenge>[]>;
+    /**
+     * Defines an HTTP challenge to use in fulfilling
+     * the request.
+     */
     httpChallenge?: pulumi.Input<inputs.CertificateHttpChallenge>;
+    /**
+     * Defines an alternate type of HTTP
+     * challenge that can be used to serve up challenges to a
+     * [Memcached](https://memcached.org/) cluster.
+     */
     httpMemcachedChallenge?: pulumi.Input<inputs.CertificateHttpMemcachedChallenge>;
+    /**
+     * Defines an alternate type of HTTP
+     * challenge that can be used to place a file at a location that can be served by
+     * an out-of-band webserver.
+     */
     httpWebrootChallenge?: pulumi.Input<inputs.CertificateHttpWebrootChallenge>;
+    /**
+     * The key type for the certificate's private key. Can be one of:
+     * `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+     * `8192` (for RSA keys of respective length). Required when not specifying a
+     * CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+     * changed.
+     */
     keyType?: pulumi.Input<string>;
+    /**
+     * The minimum amount of days remaining on the
+     * expiration of a certificate before a renewal is attempted. The default is
+     * `30`. A value of less than `0` means that the certificate will never be
+     * renewed.
+     */
     minDaysRemaining?: pulumi.Input<number>;
+    /**
+     * Enables the [OCSP Stapling Required][ocsp-stapling]
+     * TLS Security Policy extension. Certificates with this extension must include a
+     * valid OCSP Staple in the TLS handshake for the connection to succeed.
+     * Defaults to `false`. Note that this option has no effect when using an
+     * external CSR - it must be enabled in the CSR itself. Forces a new resource
+     * when changed.
+     *
+     * [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+     *
+     * > OCSP stapling requires specific webserver configuration to support the
+     * downloading of the staple from the CA's OCSP endpoints, and should be configured
+     * to tolerate prolonged outages of the OCSP service. Consider this when using
+     * `mustStaple`, and only enable it if you are sure your webserver or service
+     * provider can be configured correctly.
+     */
     mustStaple?: pulumi.Input<boolean>;
+    /**
+     * Insert a delay after _every_ DNS challenge
+     * record to allow for extra time for DNS propagation before the certificate is
+     * requested. Use this option if you observe issues with requesting certificates
+     * even when DNS challenge records get added successfully. Units are in seconds.
+     * Defaults to 0 (no delay).
+     *
+     * > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
+     * Take your expected delay and divide it by the number of domains you have
+     * configured (`commonName` + `subjectAlternativeNames`).
+     */
     preCheckDelay?: pulumi.Input<number>;
+    /**
+     * The common name of the root of a preferred
+     * alternate certificate chain offered by the CA. The certificates in
+     * `issuerPem` will reflect the chain requested, if available, otherwise the
+     * default chain will be provided. Forces a new resource when changed.
+     *
+     * > `preferredChain` can be used to request alternate chains on Let's Encrypt
+     * during the transition away from their old cross-signed intermediates. See [this
+     * article for more
+     * details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+     * In their example titled **"What about the alternate chain?"**, the root you
+     * would put in to the `preferredChain` field would be `ISRG Root X1`. The
+     * equivalent in the [staging
+     * environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+     * Pretend Pear X1`.
+     */
     preferredChain?: pulumi.Input<string>;
+    /**
+     * The recursive nameservers that will be
+     * used to check for propagation of DNS challenge records. Defaults to your
+     * system-configured DNS resolvers.
+     */
     recursiveNameservers?: pulumi.Input<pulumi.Input<string>[]>;
+    /**
+     * Enables revocation of a certificate upon destroy,
+     * which includes when a resource is re-created. Default is `true`.
+     */
     revokeCertificateOnDestroy?: pulumi.Input<boolean>;
+    /**
+     * The certificate's subject alternative names,
+     * domains that this certificate will also be recognized for. Only valid when not
+     * specifying a CSR. Forces a new resource when changed.
+     */
     subjectAlternativeNames?: pulumi.Input<pulumi.Input<string>[]>;
+    /**
+     * Defines a TLS challenge to use in fulfilling the
+     * request.
+     *
+     * > Only one of `httpChallenge`, `httpWebrootChallenge`, and
+     * `httpMemcachedChallenge` can be defined at once. See the section on Using
+     * HTTP and TLS challenges for more details on
+     * using these and `tlsChallenge`.
+     */
     tlsChallenge?: pulumi.Input<inputs.CertificateTlsChallenge>;
 }

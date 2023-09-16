@@ -15,6 +15,10 @@ namespace Pulumiverse.Acme.Inputs
     {
         [Input("hosts", required: true)]
         private InputList<string>? _hosts;
+
+        /// <summary>
+        /// The hosts to publish the record to.
+        /// </summary>
         public InputList<string> Hosts
         {
             get => _hosts ?? (_hosts = new InputList<string>());

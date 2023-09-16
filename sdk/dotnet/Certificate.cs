@@ -13,78 +13,237 @@ namespace Pulumiverse.Acme
     [AcmeResourceType("acme:index/certificate:Certificate")]
     public partial class Certificate : global::Pulumi.CustomResource
     {
+        /// <summary>
+        /// The private key of the account that is
+        /// requesting the certificate. Forces a new resource when changed.
+        /// </summary>
         [Output("accountKeyPem")]
         public Output<string> AccountKeyPem { get; private set; } = null!;
 
+        /// <summary>
+        /// The common name of the certificate.
+        /// </summary>
         [Output("certificateDomain")]
         public Output<string> CertificateDomain { get; private set; } = null!;
 
+        /// <summary>
+        /// The expiry date of the certificate, laid out in
+        /// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+        /// </summary>
         [Output("certificateNotAfter")]
         public Output<string> CertificateNotAfter { get; private set; } = null!;
 
+        /// <summary>
+        /// The certificate, any intermediates, and the private key
+        /// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+        /// The data is base64 encoded (including padding), and its password is
+        /// configurable via the `certificate_p12_password`
+        /// argument. This field is empty if creating a certificate from a CSR.
+        /// </summary>
         [Output("certificateP12")]
         public Output<string> CertificateP12 { get; private set; } = null!;
 
+        /// <summary>
+        /// Password to be used when generating
+        /// the PFX file stored in `certificate_p12`. Defaults to an
+        /// empty string.
+        /// </summary>
         [Output("certificateP12Password")]
         public Output<string?> CertificateP12Password { get; private set; } = null!;
 
+        /// <summary>
+        /// The certificate in PEM format. This does not include the
+        /// `issuer_pem`. This certificate can be concatenated with `issuer_pem` to form
+        /// a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+        /// </summary>
         [Output("certificatePem")]
         public Output<string> CertificatePem { get; private set; } = null!;
 
+        /// <summary>
+        /// A pre-created certificate request, such as one
+        /// from [`tls_cert_request`][tls-cert-request], or one from an external source,
+        /// in PEM format.  Either this, or the in-resource request options
+        /// (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+        /// to be specified. Forces a new resource when changed.
+        /// </summary>
         [Output("certificateRequestPem")]
         public Output<string?> CertificateRequestPem { get; private set; } = null!;
 
+        /// <summary>
+        /// The full URL of the certificate within the ACME CA.
+        /// </summary>
         [Output("certificateUrl")]
         public Output<string> CertificateUrl { get; private set; } = null!;
 
+        /// <summary>
+        /// The certificate's common name, the primary domain that the
+        /// certificate will be recognized for. Required when not specifying a CSR. Forces
+        /// a new resource when changed.
+        /// </summary>
         [Output("commonName")]
         public Output<string?> CommonName { get; private set; } = null!;
 
+        /// <summary>
+        /// Disable the requirement for full
+        /// propagation of the TXT challenge records before proceeding with validation.
+        /// Defaults to `false`.
+        /// 
+        /// &gt; See About DNS propagation checks for details
+        /// on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        /// </summary>
         [Output("disableCompletePropagation")]
         public Output<bool?> DisableCompletePropagation { get; private set; } = null!;
 
+        /// <summary>
+        /// The DNS challenges to
+        /// use in fulfilling the request.
+        /// </summary>
         [Output("dnsChallenges")]
         public Output<ImmutableArray<Outputs.CertificateDnsChallenge>> DnsChallenges { get; private set; } = null!;
 
+        /// <summary>
+        /// Defines an HTTP challenge to use in fulfilling
+        /// the request.
+        /// </summary>
         [Output("httpChallenge")]
         public Output<Outputs.CertificateHttpChallenge?> HttpChallenge { get; private set; } = null!;
 
+        /// <summary>
+        /// Defines an alternate type of HTTP
+        /// challenge that can be used to serve up challenges to a
+        /// [Memcached](https://memcached.org/) cluster.
+        /// </summary>
         [Output("httpMemcachedChallenge")]
         public Output<Outputs.CertificateHttpMemcachedChallenge?> HttpMemcachedChallenge { get; private set; } = null!;
 
+        /// <summary>
+        /// Defines an alternate type of HTTP
+        /// challenge that can be used to place a file at a location that can be served by
+        /// an out-of-band webserver.
+        /// </summary>
         [Output("httpWebrootChallenge")]
         public Output<Outputs.CertificateHttpWebrootChallenge?> HttpWebrootChallenge { get; private set; } = null!;
 
+        /// <summary>
+        /// The intermediate certificates of the issuer. Multiple
+        /// certificates are concatenated in this field when there is more than one
+        /// intermediate certificate in the chain.
+        /// </summary>
         [Output("issuerPem")]
         public Output<string> IssuerPem { get; private set; } = null!;
 
+        /// <summary>
+        /// The key type for the certificate's private key. Can be one of:
+        /// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+        /// `8192` (for RSA keys of respective length). Required when not specifying a
+        /// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+        /// changed.
+        /// </summary>
         [Output("keyType")]
         public Output<string?> KeyType { get; private set; } = null!;
 
+        /// <summary>
+        /// The minimum amount of days remaining on the
+        /// expiration of a certificate before a renewal is attempted. The default is
+        /// `30`. A value of less than `0` means that the certificate will never be
+        /// renewed.
+        /// </summary>
         [Output("minDaysRemaining")]
         public Output<int?> MinDaysRemaining { get; private set; } = null!;
 
+        /// <summary>
+        /// Enables the [OCSP Stapling Required][ocsp-stapling]
+        /// TLS Security Policy extension. Certificates with this extension must include a
+        /// valid OCSP Staple in the TLS handshake for the connection to succeed.
+        /// Defaults to `false`. Note that this option has no effect when using an
+        /// external CSR - it must be enabled in the CSR itself. Forces a new resource
+        /// when changed.
+        /// 
+        /// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+        /// 
+        /// &gt; OCSP stapling requires specific webserver configuration to support the
+        /// downloading of the staple from the CA's OCSP endpoints, and should be configured
+        /// to tolerate prolonged outages of the OCSP service. Consider this when using
+        /// `must_staple`, and only enable it if you are sure your webserver or service
+        /// provider can be configured correctly.
+        /// </summary>
         [Output("mustStaple")]
         public Output<bool?> MustStaple { get; private set; } = null!;
 
+        /// <summary>
+        /// Insert a delay after _every_ DNS challenge
+        /// record to allow for extra time for DNS propagation before the certificate is
+        /// requested. Use this option if you observe issues with requesting certificates
+        /// even when DNS challenge records get added successfully. Units are in seconds.
+        /// Defaults to 0 (no delay).
+        /// 
+        /// &gt; Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+        /// Take your expected delay and divide it by the number of domains you have
+        /// configured (`common_name` + `subject_alternative_names`).
+        /// </summary>
         [Output("preCheckDelay")]
         public Output<int?> PreCheckDelay { get; private set; } = null!;
 
+        /// <summary>
+        /// The common name of the root of a preferred
+        /// alternate certificate chain offered by the CA. The certificates in
+        /// `issuer_pem` will reflect the chain requested, if available, otherwise the
+        /// default chain will be provided. Forces a new resource when changed.
+        /// 
+        /// &gt; `preferred_chain` can be used to request alternate chains on Let's Encrypt
+        /// during the transition away from their old cross-signed intermediates. See [this
+        /// article for more
+        /// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+        /// In their example titled **"What about the alternate chain?"**, the root you
+        /// would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+        /// equivalent in the [staging
+        /// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+        /// Pretend Pear X1`.
+        /// </summary>
         [Output("preferredChain")]
         public Output<string?> PreferredChain { get; private set; } = null!;
 
+        /// <summary>
+        /// The certificate's private key, in PEM format, if the
+        /// certificate was generated from scratch and not with
+        /// `certificate_request_pem`.  If
+        /// `certificate_request_pem` was used, this will be blank.
+        /// </summary>
         [Output("privateKeyPem")]
         public Output<string> PrivateKeyPem { get; private set; } = null!;
 
+        /// <summary>
+        /// The recursive nameservers that will be
+        /// used to check for propagation of DNS challenge records. Defaults to your
+        /// system-configured DNS resolvers.
+        /// </summary>
         [Output("recursiveNameservers")]
         public Output<ImmutableArray<string>> RecursiveNameservers { get; private set; } = null!;
 
+        /// <summary>
+        /// Enables revocation of a certificate upon destroy,
+        /// which includes when a resource is re-created. Default is `true`.
+        /// </summary>
         [Output("revokeCertificateOnDestroy")]
         public Output<bool?> RevokeCertificateOnDestroy { get; private set; } = null!;
 
+        /// <summary>
+        /// The certificate's subject alternative names,
+        /// domains that this certificate will also be recognized for. Only valid when not
+        /// specifying a CSR. Forces a new resource when changed.
+        /// </summary>
         [Output("subjectAlternativeNames")]
         public Output<ImmutableArray<string>> SubjectAlternativeNames { get; private set; } = null!;
 
+        /// <summary>
+        /// Defines a TLS challenge to use in fulfilling the
+        /// request.
+        /// 
+        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, and
+        /// `http_memcached_challenge` can be defined at once. See the section on Using
+        /// HTTP and TLS challenges for more details on
+        /// using these and `tls_challenge`.
+        /// </summary>
         [Output("tlsChallenge")]
         public Output<Outputs.CertificateTlsChallenge?> TlsChallenge { get; private set; } = null!;
 
@@ -144,6 +303,11 @@ namespace Pulumiverse.Acme
     {
         [Input("accountKeyPem", required: true)]
         private Input<string>? _accountKeyPem;
+
+        /// <summary>
+        /// The private key of the account that is
+        /// requesting the certificate. Forces a new resource when changed.
+        /// </summary>
         public Input<string>? AccountKeyPem
         {
             get => _accountKeyPem;
@@ -156,6 +320,12 @@ namespace Pulumiverse.Acme
 
         [Input("certificateP12Password")]
         private Input<string>? _certificateP12Password;
+
+        /// <summary>
+        /// Password to be used when generating
+        /// the PFX file stored in `certificate_p12`. Defaults to an
+        /// empty string.
+        /// </summary>
         public Input<string>? CertificateP12Password
         {
             get => _certificateP12Password;
@@ -166,66 +336,186 @@ namespace Pulumiverse.Acme
             }
         }
 
+        /// <summary>
+        /// A pre-created certificate request, such as one
+        /// from [`tls_cert_request`][tls-cert-request], or one from an external source,
+        /// in PEM format.  Either this, or the in-resource request options
+        /// (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+        /// to be specified. Forces a new resource when changed.
+        /// </summary>
         [Input("certificateRequestPem")]
         public Input<string>? CertificateRequestPem { get; set; }
 
+        /// <summary>
+        /// The certificate's common name, the primary domain that the
+        /// certificate will be recognized for. Required when not specifying a CSR. Forces
+        /// a new resource when changed.
+        /// </summary>
         [Input("commonName")]
         public Input<string>? CommonName { get; set; }
 
+        /// <summary>
+        /// Disable the requirement for full
+        /// propagation of the TXT challenge records before proceeding with validation.
+        /// Defaults to `false`.
+        /// 
+        /// &gt; See About DNS propagation checks for details
+        /// on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        /// </summary>
         [Input("disableCompletePropagation")]
         public Input<bool>? DisableCompletePropagation { get; set; }
 
         [Input("dnsChallenges")]
         private InputList<Inputs.CertificateDnsChallengeArgs>? _dnsChallenges;
+
+        /// <summary>
+        /// The DNS challenges to
+        /// use in fulfilling the request.
+        /// </summary>
         public InputList<Inputs.CertificateDnsChallengeArgs> DnsChallenges
         {
             get => _dnsChallenges ?? (_dnsChallenges = new InputList<Inputs.CertificateDnsChallengeArgs>());
             set => _dnsChallenges = value;
         }
 
+        /// <summary>
+        /// Defines an HTTP challenge to use in fulfilling
+        /// the request.
+        /// </summary>
         [Input("httpChallenge")]
         public Input<Inputs.CertificateHttpChallengeArgs>? HttpChallenge { get; set; }
 
+        /// <summary>
+        /// Defines an alternate type of HTTP
+        /// challenge that can be used to serve up challenges to a
+        /// [Memcached](https://memcached.org/) cluster.
+        /// </summary>
         [Input("httpMemcachedChallenge")]
         public Input<Inputs.CertificateHttpMemcachedChallengeArgs>? HttpMemcachedChallenge { get; set; }
 
+        /// <summary>
+        /// Defines an alternate type of HTTP
+        /// challenge that can be used to place a file at a location that can be served by
+        /// an out-of-band webserver.
+        /// </summary>
         [Input("httpWebrootChallenge")]
         public Input<Inputs.CertificateHttpWebrootChallengeArgs>? HttpWebrootChallenge { get; set; }
 
+        /// <summary>
+        /// The key type for the certificate's private key. Can be one of:
+        /// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+        /// `8192` (for RSA keys of respective length). Required when not specifying a
+        /// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+        /// changed.
+        /// </summary>
         [Input("keyType")]
         public Input<string>? KeyType { get; set; }
 
+        /// <summary>
+        /// The minimum amount of days remaining on the
+        /// expiration of a certificate before a renewal is attempted. The default is
+        /// `30`. A value of less than `0` means that the certificate will never be
+        /// renewed.
+        /// </summary>
         [Input("minDaysRemaining")]
         public Input<int>? MinDaysRemaining { get; set; }
 
+        /// <summary>
+        /// Enables the [OCSP Stapling Required][ocsp-stapling]
+        /// TLS Security Policy extension. Certificates with this extension must include a
+        /// valid OCSP Staple in the TLS handshake for the connection to succeed.
+        /// Defaults to `false`. Note that this option has no effect when using an
+        /// external CSR - it must be enabled in the CSR itself. Forces a new resource
+        /// when changed.
+        /// 
+        /// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+        /// 
+        /// &gt; OCSP stapling requires specific webserver configuration to support the
+        /// downloading of the staple from the CA's OCSP endpoints, and should be configured
+        /// to tolerate prolonged outages of the OCSP service. Consider this when using
+        /// `must_staple`, and only enable it if you are sure your webserver or service
+        /// provider can be configured correctly.
+        /// </summary>
         [Input("mustStaple")]
         public Input<bool>? MustStaple { get; set; }
 
+        /// <summary>
+        /// Insert a delay after _every_ DNS challenge
+        /// record to allow for extra time for DNS propagation before the certificate is
+        /// requested. Use this option if you observe issues with requesting certificates
+        /// even when DNS challenge records get added successfully. Units are in seconds.
+        /// Defaults to 0 (no delay).
+        /// 
+        /// &gt; Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+        /// Take your expected delay and divide it by the number of domains you have
+        /// configured (`common_name` + `subject_alternative_names`).
+        /// </summary>
         [Input("preCheckDelay")]
         public Input<int>? PreCheckDelay { get; set; }
 
+        /// <summary>
+        /// The common name of the root of a preferred
+        /// alternate certificate chain offered by the CA. The certificates in
+        /// `issuer_pem` will reflect the chain requested, if available, otherwise the
+        /// default chain will be provided. Forces a new resource when changed.
+        /// 
+        /// &gt; `preferred_chain` can be used to request alternate chains on Let's Encrypt
+        /// during the transition away from their old cross-signed intermediates. See [this
+        /// article for more
+        /// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+        /// In their example titled **"What about the alternate chain?"**, the root you
+        /// would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+        /// equivalent in the [staging
+        /// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+        /// Pretend Pear X1`.
+        /// </summary>
         [Input("preferredChain")]
         public Input<string>? PreferredChain { get; set; }
 
         [Input("recursiveNameservers")]
         private InputList<string>? _recursiveNameservers;
+
+        /// <summary>
+        /// The recursive nameservers that will be
+        /// used to check for propagation of DNS challenge records. Defaults to your
+        /// system-configured DNS resolvers.
+        /// </summary>
         public InputList<string> RecursiveNameservers
         {
             get => _recursiveNameservers ?? (_recursiveNameservers = new InputList<string>());
             set => _recursiveNameservers = value;
         }
 
+        /// <summary>
+        /// Enables revocation of a certificate upon destroy,
+        /// which includes when a resource is re-created. Default is `true`.
+        /// </summary>
         [Input("revokeCertificateOnDestroy")]
         public Input<bool>? RevokeCertificateOnDestroy { get; set; }
 
         [Input("subjectAlternativeNames")]
         private InputList<string>? _subjectAlternativeNames;
+
+        /// <summary>
+        /// The certificate's subject alternative names,
+        /// domains that this certificate will also be recognized for. Only valid when not
+        /// specifying a CSR. Forces a new resource when changed.
+        /// </summary>
         public InputList<string> SubjectAlternativeNames
         {
             get => _subjectAlternativeNames ?? (_subjectAlternativeNames = new InputList<string>());
             set => _subjectAlternativeNames = value;
         }
 
+        /// <summary>
+        /// Defines a TLS challenge to use in fulfilling the
+        /// request.
+        /// 
+        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, and
+        /// `http_memcached_challenge` can be defined at once. See the section on Using
+        /// HTTP and TLS challenges for more details on
+        /// using these and `tls_challenge`.
+        /// </summary>
         [Input("tlsChallenge")]
         public Input<Inputs.CertificateTlsChallengeArgs>? TlsChallenge { get; set; }
 
@@ -239,6 +529,11 @@ namespace Pulumiverse.Acme
     {
         [Input("accountKeyPem")]
         private Input<string>? _accountKeyPem;
+
+        /// <summary>
+        /// The private key of the account that is
+        /// requesting the certificate. Forces a new resource when changed.
+        /// </summary>
         public Input<string>? AccountKeyPem
         {
             get => _accountKeyPem;
@@ -249,14 +544,29 @@ namespace Pulumiverse.Acme
             }
         }
 
+        /// <summary>
+        /// The common name of the certificate.
+        /// </summary>
         [Input("certificateDomain")]
         public Input<string>? CertificateDomain { get; set; }
 
+        /// <summary>
+        /// The expiry date of the certificate, laid out in
+        /// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
+        /// </summary>
         [Input("certificateNotAfter")]
         public Input<string>? CertificateNotAfter { get; set; }
 
         [Input("certificateP12")]
         private Input<string>? _certificateP12;
+
+        /// <summary>
+        /// The certificate, any intermediates, and the private key
+        /// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
+        /// The data is base64 encoded (including padding), and its password is
+        /// configurable via the `certificate_p12_password`
+        /// argument. This field is empty if creating a certificate from a CSR.
+        /// </summary>
         public Input<string>? CertificateP12
         {
             get => _certificateP12;
@@ -269,6 +579,12 @@ namespace Pulumiverse.Acme
 
         [Input("certificateP12Password")]
         private Input<string>? _certificateP12Password;
+
+        /// <summary>
+        /// Password to be used when generating
+        /// the PFX file stored in `certificate_p12`. Defaults to an
+        /// empty string.
+        /// </summary>
         public Input<string>? CertificateP12Password
         {
             get => _certificateP12Password;
@@ -279,58 +595,173 @@ namespace Pulumiverse.Acme
             }
         }
 
+        /// <summary>
+        /// The certificate in PEM format. This does not include the
+        /// `issuer_pem`. This certificate can be concatenated with `issuer_pem` to form
+        /// a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
+        /// </summary>
         [Input("certificatePem")]
         public Input<string>? CertificatePem { get; set; }
 
+        /// <summary>
+        /// A pre-created certificate request, such as one
+        /// from [`tls_cert_request`][tls-cert-request], or one from an external source,
+        /// in PEM format.  Either this, or the in-resource request options
+        /// (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
+        /// to be specified. Forces a new resource when changed.
+        /// </summary>
         [Input("certificateRequestPem")]
         public Input<string>? CertificateRequestPem { get; set; }
 
+        /// <summary>
+        /// The full URL of the certificate within the ACME CA.
+        /// </summary>
         [Input("certificateUrl")]
         public Input<string>? CertificateUrl { get; set; }
 
+        /// <summary>
+        /// The certificate's common name, the primary domain that the
+        /// certificate will be recognized for. Required when not specifying a CSR. Forces
+        /// a new resource when changed.
+        /// </summary>
         [Input("commonName")]
         public Input<string>? CommonName { get; set; }
 
+        /// <summary>
+        /// Disable the requirement for full
+        /// propagation of the TXT challenge records before proceeding with validation.
+        /// Defaults to `false`.
+        /// 
+        /// &gt; See About DNS propagation checks for details
+        /// on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        /// </summary>
         [Input("disableCompletePropagation")]
         public Input<bool>? DisableCompletePropagation { get; set; }
 
         [Input("dnsChallenges")]
         private InputList<Inputs.CertificateDnsChallengeGetArgs>? _dnsChallenges;
+
+        /// <summary>
+        /// The DNS challenges to
+        /// use in fulfilling the request.
+        /// </summary>
         public InputList<Inputs.CertificateDnsChallengeGetArgs> DnsChallenges
         {
             get => _dnsChallenges ?? (_dnsChallenges = new InputList<Inputs.CertificateDnsChallengeGetArgs>());
             set => _dnsChallenges = value;
         }
 
+        /// <summary>
+        /// Defines an HTTP challenge to use in fulfilling
+        /// the request.
+        /// </summary>
         [Input("httpChallenge")]
         public Input<Inputs.CertificateHttpChallengeGetArgs>? HttpChallenge { get; set; }
 
+        /// <summary>
+        /// Defines an alternate type of HTTP
+        /// challenge that can be used to serve up challenges to a
+        /// [Memcached](https://memcached.org/) cluster.
+        /// </summary>
         [Input("httpMemcachedChallenge")]
         public Input<Inputs.CertificateHttpMemcachedChallengeGetArgs>? HttpMemcachedChallenge { get; set; }
 
+        /// <summary>
+        /// Defines an alternate type of HTTP
+        /// challenge that can be used to place a file at a location that can be served by
+        /// an out-of-band webserver.
+        /// </summary>
         [Input("httpWebrootChallenge")]
         public Input<Inputs.CertificateHttpWebrootChallengeGetArgs>? HttpWebrootChallenge { get; set; }
 
+        /// <summary>
+        /// The intermediate certificates of the issuer. Multiple
+        /// certificates are concatenated in this field when there is more than one
+        /// intermediate certificate in the chain.
+        /// </summary>
         [Input("issuerPem")]
         public Input<string>? IssuerPem { get; set; }
 
+        /// <summary>
+        /// The key type for the certificate's private key. Can be one of:
+        /// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
+        /// `8192` (for RSA keys of respective length). Required when not specifying a
+        /// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
+        /// changed.
+        /// </summary>
         [Input("keyType")]
         public Input<string>? KeyType { get; set; }
 
+        /// <summary>
+        /// The minimum amount of days remaining on the
+        /// expiration of a certificate before a renewal is attempted. The default is
+        /// `30`. A value of less than `0` means that the certificate will never be
+        /// renewed.
+        /// </summary>
         [Input("minDaysRemaining")]
         public Input<int>? MinDaysRemaining { get; set; }
 
+        /// <summary>
+        /// Enables the [OCSP Stapling Required][ocsp-stapling]
+        /// TLS Security Policy extension. Certificates with this extension must include a
+        /// valid OCSP Staple in the TLS handshake for the connection to succeed.
+        /// Defaults to `false`. Note that this option has no effect when using an
+        /// external CSR - it must be enabled in the CSR itself. Forces a new resource
+        /// when changed.
+        /// 
+        /// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
+        /// 
+        /// &gt; OCSP stapling requires specific webserver configuration to support the
+        /// downloading of the staple from the CA's OCSP endpoints, and should be configured
+        /// to tolerate prolonged outages of the OCSP service. Consider this when using
+        /// `must_staple`, and only enable it if you are sure your webserver or service
+        /// provider can be configured correctly.
+        /// </summary>
         [Input("mustStaple")]
         public Input<bool>? MustStaple { get; set; }
 
+        /// <summary>
+        /// Insert a delay after _every_ DNS challenge
+        /// record to allow for extra time for DNS propagation before the certificate is
+        /// requested. Use this option if you observe issues with requesting certificates
+        /// even when DNS challenge records get added successfully. Units are in seconds.
+        /// Defaults to 0 (no delay).
+        /// 
+        /// &gt; Be careful with `pre_check_delay` since the delay is executed _per-domain_.
+        /// Take your expected delay and divide it by the number of domains you have
+        /// configured (`common_name` + `subject_alternative_names`).
+        /// </summary>
         [Input("preCheckDelay")]
         public Input<int>? PreCheckDelay { get; set; }
 
+        /// <summary>
+        /// The common name of the root of a preferred
+        /// alternate certificate chain offered by the CA. The certificates in
+        /// `issuer_pem` will reflect the chain requested, if available, otherwise the
+        /// default chain will be provided. Forces a new resource when changed.
+        /// 
+        /// &gt; `preferred_chain` can be used to request alternate chains on Let's Encrypt
+        /// during the transition away from their old cross-signed intermediates. See [this
+        /// article for more
+        /// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
+        /// In their example titled **"What about the alternate chain?"**, the root you
+        /// would put in to the `preferred_chain` field would be `ISRG Root X1`. The
+        /// equivalent in the [staging
+        /// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
+        /// Pretend Pear X1`.
+        /// </summary>
         [Input("preferredChain")]
         public Input<string>? PreferredChain { get; set; }
 
         [Input("privateKeyPem")]
         private Input<string>? _privateKeyPem;
+
+        /// <summary>
+        /// The certificate's private key, in PEM format, if the
+        /// certificate was generated from scratch and not with
+        /// `certificate_request_pem`.  If
+        /// `certificate_request_pem` was used, this will be blank.
+        /// </summary>
         public Input<string>? PrivateKeyPem
         {
             get => _privateKeyPem;
@@ -343,23 +774,48 @@ namespace Pulumiverse.Acme
 
         [Input("recursiveNameservers")]
         private InputList<string>? _recursiveNameservers;
+
+        /// <summary>
+        /// The recursive nameservers that will be
+        /// used to check for propagation of DNS challenge records. Defaults to your
+        /// system-configured DNS resolvers.
+        /// </summary>
         public InputList<string> RecursiveNameservers
         {
             get => _recursiveNameservers ?? (_recursiveNameservers = new InputList<string>());
             set => _recursiveNameservers = value;
         }
 
+        /// <summary>
+        /// Enables revocation of a certificate upon destroy,
+        /// which includes when a resource is re-created. Default is `true`.
+        /// </summary>
         [Input("revokeCertificateOnDestroy")]
         public Input<bool>? RevokeCertificateOnDestroy { get; set; }
 
         [Input("subjectAlternativeNames")]
         private InputList<string>? _subjectAlternativeNames;
+
+        /// <summary>
+        /// The certificate's subject alternative names,
+        /// domains that this certificate will also be recognized for. Only valid when not
+        /// specifying a CSR. Forces a new resource when changed.
+        /// </summary>
         public InputList<string> SubjectAlternativeNames
         {
             get => _subjectAlternativeNames ?? (_subjectAlternativeNames = new InputList<string>());
             set => _subjectAlternativeNames = value;
         }
 
+        /// <summary>
+        /// Defines a TLS challenge to use in fulfilling the
+        /// request.
+        /// 
+        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, and
+        /// `http_memcached_challenge` can be defined at once. See the section on Using
+        /// HTTP and TLS challenges for more details on
+        /// using these and `tls_challenge`.
+        /// </summary>
         [Input("tlsChallenge")]
         public Input<Inputs.CertificateTlsChallengeGetArgs>? TlsChallenge { get; set; }
 

@@ -60,6 +60,22 @@ class CertificateHttpChallenge(dict):
     def __init__(__self__, *,
                  port: Optional[int] = None,
                  proxy_header: Optional[str] = None):
+        """
+        :param int port: The port that the challenge server listens on. Default: `80`.
+        :param str proxy_header: The proxy header to match against. Default:
+               `Host`.
+               
+               The `proxy_header` option behaves differently depending on its definition:
+               
+               * When set to `Host`, standard host header validation is used.
+               * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+               section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+               resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+               for more details.
+               * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+               checked for the host entry in the same way the host header would normally be
+               checked.
+        """
         if port is not None:
             pulumi.set(__self__, "port", port)
         if proxy_header is not None:
@@ -68,11 +84,29 @@ class CertificateHttpChallenge(dict):
     @property
     @pulumi.getter
     def port(self) -> Optional[int]:
+        """
+        The port that the challenge server listens on. Default: `80`.
+        """
         return pulumi.get(self, "port")
 
     @property
     @pulumi.getter(name="proxyHeader")
     def proxy_header(self) -> Optional[str]:
+        """
+        The proxy header to match against. Default:
+        `Host`.
+
+        The `proxy_header` option behaves differently depending on its definition:
+
+        * When set to `Host`, standard host header validation is used.
+        * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+        section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+        resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+        for more details.
+        * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+        checked for the host entry in the same way the host header would normally be
+        checked.
+        """
         return pulumi.get(self, "proxy_header")
 
 
@@ -80,11 +114,17 @@ class CertificateHttpChallenge(dict):
 class CertificateHttpMemcachedChallenge(dict):
     def __init__(__self__, *,
                  hosts: Sequence[str]):
+        """
+        :param Sequence[str] hosts: The hosts to publish the record to.
+        """
         pulumi.set(__self__, "hosts", hosts)
 
     @property
     @pulumi.getter
     def hosts(self) -> Sequence[str]:
+        """
+        The hosts to publish the record to.
+        """
         return pulumi.get(self, "hosts")
 
 
@@ -92,11 +132,17 @@ class CertificateHttpMemcachedChallenge(dict):
 class CertificateHttpWebrootChallenge(dict):
     def __init__(__self__, *,
                  directory: str):
+        """
+        :param str directory: The directory to publish the record to.
+        """
         pulumi.set(__self__, "directory", directory)
 
     @property
     @pulumi.getter
     def directory(self) -> str:
+        """
+        The directory to publish the record to.
+        """
         return pulumi.get(self, "directory")
 
 
@@ -104,12 +150,18 @@ class CertificateHttpWebrootChallenge(dict):
 class CertificateTlsChallenge(dict):
     def __init__(__self__, *,
                  port: Optional[int] = None):
+        """
+        :param int port: The port that the challenge server listens on. Default: `443`.
+        """
         if port is not None:
             pulumi.set(__self__, "port", port)
 
     @property
     @pulumi.getter
     def port(self) -> Optional[int]:
+        """
+        The port that the challenge server listens on. Default: `443`.
+        """
         return pulumi.get(self, "port")
 
 
