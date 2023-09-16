@@ -51,6 +51,22 @@ class CertificateHttpChallengeArgs:
     def __init__(__self__, *,
                  port: Optional[pulumi.Input[int]] = None,
                  proxy_header: Optional[pulumi.Input[str]] = None):
+        """
+        :param pulumi.Input[int] port: The port that the challenge server listens on. Default: `80`.
+        :param pulumi.Input[str] proxy_header: The proxy header to match against. Default:
+               `Host`.
+               
+               The `proxy_header` option behaves differently depending on its definition:
+               
+               * When set to `Host`, standard host header validation is used.
+               * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+               section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+               resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+               for more details.
+               * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+               checked for the host entry in the same way the host header would normally be
+               checked.
+        """
         if port is not None:
             pulumi.set(__self__, "port", port)
         if proxy_header is not None:
@@ -59,6 +75,9 @@ class CertificateHttpChallengeArgs:
     @property
     @pulumi.getter
     def port(self) -> Optional[pulumi.Input[int]]:
+        """
+        The port that the challenge server listens on. Default: `80`.
+        """
         return pulumi.get(self, "port")
 
     @port.setter
@@ -68,6 +87,21 @@ class CertificateHttpChallengeArgs:
     @property
     @pulumi.getter(name="proxyHeader")
     def proxy_header(self) -> Optional[pulumi.Input[str]]:
+        """
+        The proxy header to match against. Default:
+        `Host`.
+
+        The `proxy_header` option behaves differently depending on its definition:
+
+        * When set to `Host`, standard host header validation is used.
+        * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+        section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+        resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+        for more details.
+        * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+        checked for the host entry in the same way the host header would normally be
+        checked.
+        """
         return pulumi.get(self, "proxy_header")
 
     @proxy_header.setter
@@ -79,11 +113,17 @@ class CertificateHttpChallengeArgs:
 class CertificateHttpMemcachedChallengeArgs:
     def __init__(__self__, *,
                  hosts: pulumi.Input[Sequence[pulumi.Input[str]]]):
+        """
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] hosts: The hosts to publish the record to.
+        """
         pulumi.set(__self__, "hosts", hosts)
 
     @property
     @pulumi.getter
     def hosts(self) -> pulumi.Input[Sequence[pulumi.Input[str]]]:
+        """
+        The hosts to publish the record to.
+        """
         return pulumi.get(self, "hosts")
 
     @hosts.setter
@@ -95,11 +135,17 @@ class CertificateHttpMemcachedChallengeArgs:
 class CertificateHttpWebrootChallengeArgs:
     def __init__(__self__, *,
                  directory: pulumi.Input[str]):
+        """
+        :param pulumi.Input[str] directory: The directory to publish the record to.
+        """
         pulumi.set(__self__, "directory", directory)
 
     @property
     @pulumi.getter
     def directory(self) -> pulumi.Input[str]:
+        """
+        The directory to publish the record to.
+        """
         return pulumi.get(self, "directory")
 
     @directory.setter
@@ -111,12 +157,18 @@ class CertificateHttpWebrootChallengeArgs:
 class CertificateTlsChallengeArgs:
     def __init__(__self__, *,
                  port: Optional[pulumi.Input[int]] = None):
+        """
+        :param pulumi.Input[int] port: The port that the challenge server listens on. Default: `443`.
+        """
         if port is not None:
             pulumi.set(__self__, "port", port)
 
     @property
     @pulumi.getter
     def port(self) -> Optional[pulumi.Input[int]]:
+        """
+        The port that the challenge server listens on. Default: `443`.
+        """
         return pulumi.get(self, "port")
 
     @port.setter

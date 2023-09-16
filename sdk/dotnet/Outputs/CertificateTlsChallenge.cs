@@ -14,6 +14,9 @@ namespace Pulumiverse.Acme.Outputs
     [OutputType]
     public sealed class CertificateTlsChallenge
     {
+        /// <summary>
+        /// The port that the challenge server listens on. Default: `443`.
+        /// </summary>
         public readonly int? Port;
 
         [OutputConstructor]

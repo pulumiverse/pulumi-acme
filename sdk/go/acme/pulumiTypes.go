@@ -139,7 +139,21 @@ func (o CertificateDnsChallengeArrayOutput) Index(i pulumi.IntInput) Certificate
 }
 
 type CertificateHttpChallenge struct {
-	Port        *int    `pulumi:"port"`
+	// The port that the challenge server listens on. Default: `80`.
+	Port *int `pulumi:"port"`
+	// The proxy header to match against. Default:
+	// `Host`.
+	//
+	// The `proxyHeader` option behaves differently depending on its definition:
+	//
+	// * When set to `Host`, standard host header validation is used.
+	// * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+	//   section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+	//   resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+	//   for more details.
+	// * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+	//   checked for the host entry in the same way the host header would normally be
+	//   checked.
 	ProxyHeader *string `pulumi:"proxyHeader"`
 }
 
@@ -155,7 +169,21 @@ type CertificateHttpChallengeInput interface {
 }
 
 type CertificateHttpChallengeArgs struct {
-	Port        pulumi.IntPtrInput    `pulumi:"port"`
+	// The port that the challenge server listens on. Default: `80`.
+	Port pulumi.IntPtrInput `pulumi:"port"`
+	// The proxy header to match against. Default:
+	// `Host`.
+	//
+	// The `proxyHeader` option behaves differently depending on its definition:
+	//
+	// * When set to `Host`, standard host header validation is used.
+	// * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+	//   section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+	//   resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+	//   for more details.
+	// * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+	//   checked for the host entry in the same way the host header would normally be
+	//   checked.
 	ProxyHeader pulumi.StringPtrInput `pulumi:"proxyHeader"`
 }
 
@@ -254,10 +282,24 @@ func (o CertificateHttpChallengeOutput) ToOutput(ctx context.Context) pulumix.Ou
 	}
 }
 
+// The port that the challenge server listens on. Default: `80`.
 func (o CertificateHttpChallengeOutput) Port() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v CertificateHttpChallenge) *int { return v.Port }).(pulumi.IntPtrOutput)
 }
 
+// The proxy header to match against. Default:
+// `Host`.
+//
+// The `proxyHeader` option behaves differently depending on its definition:
+//
+//   - When set to `Host`, standard host header validation is used.
+//   - When set to `Forwarded`, the server looks in the `Forwarded` header for a
+//     section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+//     resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+//     for more details.
+//   - When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+//     checked for the host entry in the same way the host header would normally be
+//     checked.
 func (o CertificateHttpChallengeOutput) ProxyHeader() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v CertificateHttpChallenge) *string { return v.ProxyHeader }).(pulumi.StringPtrOutput)
 }
@@ -292,6 +334,7 @@ func (o CertificateHttpChallengePtrOutput) Elem() CertificateHttpChallengeOutput
 	}).(CertificateHttpChallengeOutput)
 }
 
+// The port that the challenge server listens on. Default: `80`.
 func (o CertificateHttpChallengePtrOutput) Port() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *CertificateHttpChallenge) *int {
 		if v == nil {
@@ -301,6 +344,19 @@ func (o CertificateHttpChallengePtrOutput) Port() pulumi.IntPtrOutput {
 	}).(pulumi.IntPtrOutput)
 }
 
+// The proxy header to match against. Default:
+// `Host`.
+//
+// The `proxyHeader` option behaves differently depending on its definition:
+//
+//   - When set to `Host`, standard host header validation is used.
+//   - When set to `Forwarded`, the server looks in the `Forwarded` header for a
+//     section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+//     resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+//     for more details.
+//   - When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+//     checked for the host entry in the same way the host header would normally be
+//     checked.
 func (o CertificateHttpChallengePtrOutput) ProxyHeader() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *CertificateHttpChallenge) *string {
 		if v == nil {
@@ -311,6 +367,7 @@ func (o CertificateHttpChallengePtrOutput) ProxyHeader() pulumi.StringPtrOutput 
 }
 
 type CertificateHttpMemcachedChallenge struct {
+	// The hosts to publish the record to.
 	Hosts []string `pulumi:"hosts"`
 }
 
@@ -326,6 +383,7 @@ type CertificateHttpMemcachedChallengeInput interface {
 }
 
 type CertificateHttpMemcachedChallengeArgs struct {
+	// The hosts to publish the record to.
 	Hosts pulumi.StringArrayInput `pulumi:"hosts"`
 }
 
@@ -424,6 +482,7 @@ func (o CertificateHttpMemcachedChallengeOutput) ToOutput(ctx context.Context) p
 	}
 }
 
+// The hosts to publish the record to.
 func (o CertificateHttpMemcachedChallengeOutput) Hosts() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v CertificateHttpMemcachedChallenge) []string { return v.Hosts }).(pulumi.StringArrayOutput)
 }
@@ -458,6 +517,7 @@ func (o CertificateHttpMemcachedChallengePtrOutput) Elem() CertificateHttpMemcac
 	}).(CertificateHttpMemcachedChallengeOutput)
 }
 
+// The hosts to publish the record to.
 func (o CertificateHttpMemcachedChallengePtrOutput) Hosts() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v *CertificateHttpMemcachedChallenge) []string {
 		if v == nil {
@@ -468,6 +528,7 @@ func (o CertificateHttpMemcachedChallengePtrOutput) Hosts() pulumi.StringArrayOu
 }
 
 type CertificateHttpWebrootChallenge struct {
+	// The directory to publish the record to.
 	Directory string `pulumi:"directory"`
 }
 
@@ -483,6 +544,7 @@ type CertificateHttpWebrootChallengeInput interface {
 }
 
 type CertificateHttpWebrootChallengeArgs struct {
+	// The directory to publish the record to.
 	Directory pulumi.StringInput `pulumi:"directory"`
 }
 
@@ -581,6 +643,7 @@ func (o CertificateHttpWebrootChallengeOutput) ToOutput(ctx context.Context) pul
 	}
 }
 
+// The directory to publish the record to.
 func (o CertificateHttpWebrootChallengeOutput) Directory() pulumi.StringOutput {
 	return o.ApplyT(func(v CertificateHttpWebrootChallenge) string { return v.Directory }).(pulumi.StringOutput)
 }
@@ -615,6 +678,7 @@ func (o CertificateHttpWebrootChallengePtrOutput) Elem() CertificateHttpWebrootC
 	}).(CertificateHttpWebrootChallengeOutput)
 }
 
+// The directory to publish the record to.
 func (o CertificateHttpWebrootChallengePtrOutput) Directory() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *CertificateHttpWebrootChallenge) *string {
 		if v == nil {
@@ -625,6 +689,7 @@ func (o CertificateHttpWebrootChallengePtrOutput) Directory() pulumi.StringPtrOu
 }
 
 type CertificateTlsChallenge struct {
+	// The port that the challenge server listens on. Default: `443`.
 	Port *int `pulumi:"port"`
 }
 
@@ -640,6 +705,7 @@ type CertificateTlsChallengeInput interface {
 }
 
 type CertificateTlsChallengeArgs struct {
+	// The port that the challenge server listens on. Default: `443`.
 	Port pulumi.IntPtrInput `pulumi:"port"`
 }
 
@@ -738,6 +804,7 @@ func (o CertificateTlsChallengeOutput) ToOutput(ctx context.Context) pulumix.Out
 	}
 }
 
+// The port that the challenge server listens on. Default: `443`.
 func (o CertificateTlsChallengeOutput) Port() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v CertificateTlsChallenge) *int { return v.Port }).(pulumi.IntPtrOutput)
 }
@@ -772,6 +839,7 @@ func (o CertificateTlsChallengePtrOutput) Elem() CertificateTlsChallengeOutput {
 	}).(CertificateTlsChallengeOutput)
 }
 
+// The port that the challenge server listens on. Default: `443`.
 func (o CertificateTlsChallengePtrOutput) Port() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *CertificateTlsChallenge) *int {
 		if v == nil {

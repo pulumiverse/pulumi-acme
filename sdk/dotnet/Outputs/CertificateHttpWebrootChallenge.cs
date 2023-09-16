@@ -14,6 +14,9 @@ namespace Pulumiverse.Acme.Outputs
     [OutputType]
     public sealed class CertificateHttpWebrootChallenge
     {
+        /// <summary>
+        /// The directory to publish the record to.
+        /// </summary>
         public readonly string Directory;
 
         [OutputConstructor]

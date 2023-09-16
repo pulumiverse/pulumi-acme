@@ -13,6 +13,9 @@ namespace Pulumiverse.Acme.Inputs
 
     public sealed class CertificateTlsChallengeArgs : global::Pulumi.ResourceArgs
     {
+        /// <summary>
+        /// The port that the challenge server listens on. Default: `443`.
+        /// </summary>
         [Input("port")]
         public Input<int>? Port { get; set; }
 
