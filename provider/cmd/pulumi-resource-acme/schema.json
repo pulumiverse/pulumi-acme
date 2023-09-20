@@ -110,6 +110,17 @@
                 "hosts"
             ]
         },
+        "acme:index/CertificateHttpS3Challenge:CertificateHttpS3Challenge": {
+            "properties": {
+                "s3Bucket": {
+                    "type": "string"
+                }
+            },
+            "type": "object",
+            "required": [
+                "s3Bucket"
+            ]
+        },
         "acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge": {
             "properties": {
                 "directory": {
@@ -231,6 +242,10 @@
                     "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge",
                     "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[Memcached](https://memcached.org/) cluster.\n"
                 },
+                "httpS3Challenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpS3Challenge:CertificateHttpS3Challenge",
+                    "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[S3](https://aws.amazon.com/s3/) bucket.\n"
+                },
                 "httpWebrootChallenge": {
                     "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge",
                     "description": "Defines an alternate type of HTTP\nchallenge that can be used to place a file at a location that can be served by\nan out-of-band webserver.\n"
@@ -269,7 +284,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records. Defaults to your\nsystem-configured DNS resolvers.\n"
+                    "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records, in addition to some\nin-provider checks such as zone detection. Defaults to your system-configured\nDNS resolvers.\n"
                 },
                 "revokeCertificateOnDestroy": {
                     "type": "boolean",
@@ -284,7 +299,7 @@
                 },
                 "tlsChallenge": {
                     "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
-                    "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, and\n`http_memcached_challenge` can be defined at once. See the section on Using\nHTTP and TLS challenges for more details on\nusing these and `tls_challenge`.\n"
+                    "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`\nand `http_memcached_challenge` can be defined at once. See the section on\nUsing HTTP and TLS challenges for more\ndetails on using these and `tls_challenge`.\n"
                 }
             },
             "required": [
@@ -338,6 +353,10 @@
                     "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge",
                     "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[Memcached](https://memcached.org/) cluster.\n"
                 },
+                "httpS3Challenge": {
+                    "$ref": "#/types/acme:index/CertificateHttpS3Challenge:CertificateHttpS3Challenge",
+                    "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[S3](https://aws.amazon.com/s3/) bucket.\n"
+                },
                 "httpWebrootChallenge": {
                     "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge",
                     "description": "Defines an alternate type of HTTP\nchallenge that can be used to place a file at a location that can be served by\nan out-of-band webserver.\n"
@@ -370,7 +389,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records. Defaults to your\nsystem-configured DNS resolvers.\n"
+                    "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records, in addition to some\nin-provider checks such as zone detection. Defaults to your system-configured\nDNS resolvers.\n"
                 },
                 "revokeCertificateOnDestroy": {
                     "type": "boolean",
@@ -386,7 +405,7 @@
                 },
                 "tlsChallenge": {
                     "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
-                    "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, and\n`http_memcached_challenge` can be defined at once. See the section on Using\nHTTP and TLS challenges for more details on\nusing these and `tls_challenge`.\n"
+                    "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`\nand `http_memcached_challenge` can be defined at once. See the section on\nUsing HTTP and TLS challenges for more\ndetails on using these and `tls_challenge`.\n"
                 }
             },
             "requiredInputs": [
@@ -456,6 +475,10 @@
                         "$ref": "#/types/acme:index/CertificateHttpMemcachedChallenge:CertificateHttpMemcachedChallenge",
                         "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[Memcached](https://memcached.org/) cluster.\n"
                     },
+                    "httpS3Challenge": {
+                        "$ref": "#/types/acme:index/CertificateHttpS3Challenge:CertificateHttpS3Challenge",
+                        "description": "Defines an alternate type of HTTP\nchallenge that can be used to serve up challenges to a\n[S3](https://aws.amazon.com/s3/) bucket.\n"
+                    },
                     "httpWebrootChallenge": {
                         "$ref": "#/types/acme:index/CertificateHttpWebrootChallenge:CertificateHttpWebrootChallenge",
                         "description": "Defines an alternate type of HTTP\nchallenge that can be used to place a file at a location that can be served by\nan out-of-band webserver.\n"
@@ -497,7 +520,7 @@
                         "items": {
                             "type": "string"
                         },
-                        "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records. Defaults to your\nsystem-configured DNS resolvers.\n"
+                        "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records, in addition to some\nin-provider checks such as zone detection. Defaults to your system-configured\nDNS resolvers.\n"
                     },
                     "revokeCertificateOnDestroy": {
                         "type": "boolean",
@@ -513,7 +536,7 @@
                     },
                     "tlsChallenge": {
                         "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
-                        "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, and\n`http_memcached_challenge` can be defined at once. See the section on Using\nHTTP and TLS challenges for more details on\nusing these and `tls_challenge`.\n"
+                        "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`\nand `http_memcached_challenge` can be defined at once. See the section on\nUsing HTTP and TLS challenges for more\ndetails on using these and `tls_challenge`.\n"
                     }
                 },
                 "type": "object"

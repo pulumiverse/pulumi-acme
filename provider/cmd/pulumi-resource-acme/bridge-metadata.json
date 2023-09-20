@@ -20,6 +20,9 @@
                             }
                         }
                     },
+                    "http_s3_challenge": {
+                        "maxItemsOne": true
+                    },
                     "http_webroot_challenge": {
                         "maxItemsOne": true
                     },
@@ -61,6 +64,9 @@
             "acme:index/CertificateHttpChallenge:CertificateHttpChallenge": {
                 "proxyHeader": "proxy_header"
             },
+            "acme:index/CertificateHttpS3Challenge:CertificateHttpS3Challenge": {
+                "s3Bucket": "s3_bucket"
+            },
             "acme:index/RegistrationExternalAccountBinding:RegistrationExternalAccountBinding": {
                 "hmacBase64": "hmac_base64",
                 "keyId": "key_id"
@@ -79,6 +85,7 @@
                 "dnsChallenges": "dns_challenge",
                 "httpChallenge": "http_challenge",
                 "httpMemcachedChallenge": "http_memcached_challenge",
+                "httpS3Challenge": "http_s3_challenge",
                 "httpWebrootChallenge": "http_webroot_challenge",
                 "issuerPem": "issuer_pem",
                 "keyType": "key_type",
