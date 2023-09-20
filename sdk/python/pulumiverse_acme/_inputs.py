@@ -13,6 +13,7 @@ __all__ = [
     'CertificateDnsChallengeArgs',
     'CertificateHttpChallengeArgs',
     'CertificateHttpMemcachedChallengeArgs',
+    'CertificateHttpS3ChallengeArgs',
     'CertificateHttpWebrootChallengeArgs',
     'CertificateTlsChallengeArgs',
     'RegistrationExternalAccountBindingArgs',
@@ -129,6 +130,22 @@ class CertificateHttpMemcachedChallengeArgs:
     @hosts.setter
     def hosts(self, value: pulumi.Input[Sequence[pulumi.Input[str]]]):
         pulumi.set(self, "hosts", value)
+
+
+@pulumi.input_type
+class CertificateHttpS3ChallengeArgs:
+    def __init__(__self__, *,
+                 s3_bucket: pulumi.Input[str]):
+        pulumi.set(__self__, "s3_bucket", s3_bucket)
+
+    @property
+    @pulumi.getter(name="s3Bucket")
+    def s3_bucket(self) -> pulumi.Input[str]:
+        return pulumi.get(self, "s3_bucket")
+
+    @s3_bucket.setter
+    def s3_bucket(self, value: pulumi.Input[str]):
+        pulumi.set(self, "s3_bucket", value)
 
 
 @pulumi.input_type

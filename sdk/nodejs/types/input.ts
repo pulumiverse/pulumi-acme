@@ -40,6 +40,10 @@ export interface CertificateHttpMemcachedChallenge {
     hosts: pulumi.Input<pulumi.Input<string>[]>;
 }
 
+export interface CertificateHttpS3Challenge {
+    s3Bucket: pulumi.Input<string>;
+}
+
 export interface CertificateHttpWebrootChallenge {
     /**
      * The directory to publish the record to.

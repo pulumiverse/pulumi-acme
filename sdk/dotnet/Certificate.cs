@@ -118,6 +118,14 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// Defines an alternate type of HTTP
+        /// challenge that can be used to serve up challenges to a
+        /// [S3](https://aws.amazon.com/s3/) bucket.
+        /// </summary>
+        [Output("httpS3Challenge")]
+        public Output<Outputs.CertificateHttpS3Challenge?> HttpS3Challenge { get; private set; } = null!;
+
+        /// <summary>
+        /// Defines an alternate type of HTTP
         /// challenge that can be used to place a file at a location that can be served by
         /// an out-of-band webserver.
         /// </summary>
@@ -214,8 +222,9 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// The recursive nameservers that will be
-        /// used to check for propagation of DNS challenge records. Defaults to your
-        /// system-configured DNS resolvers.
+        /// used to check for propagation of DNS challenge records, in addition to some
+        /// in-provider checks such as zone detection. Defaults to your system-configured
+        /// DNS resolvers.
         /// </summary>
         [Output("recursiveNameservers")]
         public Output<ImmutableArray<string>> RecursiveNameservers { get; private set; } = null!;
@@ -239,10 +248,10 @@ namespace Pulumiverse.Acme
         /// Defines a TLS challenge to use in fulfilling the
         /// request.
         /// 
-        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, and
-        /// `http_memcached_challenge` can be defined at once. See the section on Using
-        /// HTTP and TLS challenges for more details on
-        /// using these and `tls_challenge`.
+        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+        /// and `http_memcached_challenge` can be defined at once. See the section on
+        /// Using HTTP and TLS challenges for more
+        /// details on using these and `tls_challenge`.
         /// </summary>
         [Output("tlsChallenge")]
         public Output<Outputs.CertificateTlsChallenge?> TlsChallenge { get; private set; } = null!;
@@ -395,6 +404,14 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// Defines an alternate type of HTTP
+        /// challenge that can be used to serve up challenges to a
+        /// [S3](https://aws.amazon.com/s3/) bucket.
+        /// </summary>
+        [Input("httpS3Challenge")]
+        public Input<Inputs.CertificateHttpS3ChallengeArgs>? HttpS3Challenge { get; set; }
+
+        /// <summary>
+        /// Defines an alternate type of HTTP
         /// challenge that can be used to place a file at a location that can be served by
         /// an out-of-band webserver.
         /// </summary>
@@ -477,8 +494,9 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// The recursive nameservers that will be
-        /// used to check for propagation of DNS challenge records. Defaults to your
-        /// system-configured DNS resolvers.
+        /// used to check for propagation of DNS challenge records, in addition to some
+        /// in-provider checks such as zone detection. Defaults to your system-configured
+        /// DNS resolvers.
         /// </summary>
         public InputList<string> RecursiveNameservers
         {
@@ -511,10 +529,10 @@ namespace Pulumiverse.Acme
         /// Defines a TLS challenge to use in fulfilling the
         /// request.
         /// 
-        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, and
-        /// `http_memcached_challenge` can be defined at once. See the section on Using
-        /// HTTP and TLS challenges for more details on
-        /// using these and `tls_challenge`.
+        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+        /// and `http_memcached_challenge` can be defined at once. See the section on
+        /// Using HTTP and TLS challenges for more
+        /// details on using these and `tls_challenge`.
         /// </summary>
         [Input("tlsChallenge")]
         public Input<Inputs.CertificateTlsChallengeArgs>? TlsChallenge { get; set; }
@@ -668,6 +686,14 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// Defines an alternate type of HTTP
+        /// challenge that can be used to serve up challenges to a
+        /// [S3](https://aws.amazon.com/s3/) bucket.
+        /// </summary>
+        [Input("httpS3Challenge")]
+        public Input<Inputs.CertificateHttpS3ChallengeGetArgs>? HttpS3Challenge { get; set; }
+
+        /// <summary>
+        /// Defines an alternate type of HTTP
         /// challenge that can be used to place a file at a location that can be served by
         /// an out-of-band webserver.
         /// </summary>
@@ -777,8 +803,9 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// The recursive nameservers that will be
-        /// used to check for propagation of DNS challenge records. Defaults to your
-        /// system-configured DNS resolvers.
+        /// used to check for propagation of DNS challenge records, in addition to some
+        /// in-provider checks such as zone detection. Defaults to your system-configured
+        /// DNS resolvers.
         /// </summary>
         public InputList<string> RecursiveNameservers
         {
@@ -811,10 +838,10 @@ namespace Pulumiverse.Acme
         /// Defines a TLS challenge to use in fulfilling the
         /// request.
         /// 
-        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, and
-        /// `http_memcached_challenge` can be defined at once. See the section on Using
-        /// HTTP and TLS challenges for more details on
-        /// using these and `tls_challenge`.
+        /// &gt; Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+        /// and `http_memcached_challenge` can be defined at once. See the section on
+        /// Using HTTP and TLS challenges for more
+        /// details on using these and `tls_challenge`.
         /// </summary>
         [Input("tlsChallenge")]
         public Input<Inputs.CertificateTlsChallengeGetArgs>? TlsChallenge { get; set; }

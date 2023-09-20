@@ -17,6 +17,7 @@ package acme
 import (
 	"fmt"
 	"path/filepath"
+
 	// Enable embedding of package metadata
 	_ "embed"
 
@@ -71,7 +72,8 @@ func Provider() tfbridge.ProviderInfo {
 
 		// The GitHub Org for the provider - defaults to `terraform-providers`. Note that this
 		// should match the TF provider module's require directive, not any replace directives.
-		GitHubOrg: "vancluever",
+		GitHubOrg:               "vancluever",
+		TFProviderModuleVersion: "v2",
 
 		ResourcePrefix: "acme",
 		Version:        version.Version,

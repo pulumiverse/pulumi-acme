@@ -13,6 +13,7 @@ __all__ = [
     'CertificateDnsChallenge',
     'CertificateHttpChallenge',
     'CertificateHttpMemcachedChallenge',
+    'CertificateHttpS3Challenge',
     'CertificateHttpWebrootChallenge',
     'CertificateTlsChallenge',
     'RegistrationExternalAccountBinding',
@@ -126,6 +127,35 @@ class CertificateHttpMemcachedChallenge(dict):
         The hosts to publish the record to.
         """
         return pulumi.get(self, "hosts")
+
+
+@pulumi.output_type
+class CertificateHttpS3Challenge(dict):
+    @staticmethod
+    def __key_warning(key: str):
+        suggest = None
+        if key == "s3Bucket":
+            suggest = "s3_bucket"
+
+        if suggest:
+            pulumi.log.warn(f"Key '{key}' not found in CertificateHttpS3Challenge. Access the value via the '{suggest}' property getter instead.")
+
+    def __getitem__(self, key: str) -> Any:
+        CertificateHttpS3Challenge.__key_warning(key)
+        return super().__getitem__(key)
+
+    def get(self, key: str, default = None) -> Any:
+        CertificateHttpS3Challenge.__key_warning(key)
+        return super().get(key, default)
+
+    def __init__(__self__, *,
+                 s3_bucket: str):
+        pulumi.set(__self__, "s3_bucket", s3_bucket)
+
+    @property
+    @pulumi.getter(name="s3Bucket")
+    def s3_bucket(self) -> str:
+        return pulumi.get(self, "s3_bucket")
 
 
 @pulumi.output_type
