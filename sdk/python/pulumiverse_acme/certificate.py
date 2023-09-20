@@ -24,6 +24,7 @@ class CertificateArgs:
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]]] = None,
                  http_challenge: Optional[pulumi.Input['CertificateHttpChallengeArgs']] = None,
                  http_memcached_challenge: Optional[pulumi.Input['CertificateHttpMemcachedChallengeArgs']] = None,
+                 http_s3_challenge: Optional[pulumi.Input['CertificateHttpS3ChallengeArgs']] = None,
                  http_webroot_challenge: Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']] = None,
                  key_type: Optional[pulumi.Input[str]] = None,
                  min_days_remaining: Optional[pulumi.Input[int]] = None,
@@ -62,6 +63,9 @@ class CertificateArgs:
         :param pulumi.Input['CertificateHttpMemcachedChallengeArgs'] http_memcached_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input['CertificateHttpS3ChallengeArgs'] http_s3_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [S3](https://aws.amazon.com/s3/) bucket.
         :param pulumi.Input['CertificateHttpWebrootChallengeArgs'] http_webroot_challenge: Defines an alternate type of HTTP
                challenge that can be used to place a file at a location that can be served by
                an out-of-band webserver.
@@ -112,8 +116,9 @@ class CertificateArgs:
                environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
                Pretend Pear X1`.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
-               used to check for propagation of DNS challenge records. Defaults to your
-               system-configured DNS resolvers.
+               used to check for propagation of DNS challenge records, in addition to some
+               in-provider checks such as zone detection. Defaults to your system-configured
+               DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
@@ -122,10 +127,10 @@ class CertificateArgs:
         :param pulumi.Input['CertificateTlsChallengeArgs'] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
-               > Only one of `http_challenge`, `http_webroot_challenge`, and
-               `http_memcached_challenge` can be defined at once. See the section on Using
-               HTTP and TLS challenges for more details on
-               using these and `tls_challenge`.
+               > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+               and `http_memcached_challenge` can be defined at once. See the section on
+               Using HTTP and TLS challenges for more
+               details on using these and `tls_challenge`.
         """
         pulumi.set(__self__, "account_key_pem", account_key_pem)
         if certificate_p12_password is not None:
@@ -142,6 +147,8 @@ class CertificateArgs:
             pulumi.set(__self__, "http_challenge", http_challenge)
         if http_memcached_challenge is not None:
             pulumi.set(__self__, "http_memcached_challenge", http_memcached_challenge)
+        if http_s3_challenge is not None:
+            pulumi.set(__self__, "http_s3_challenge", http_s3_challenge)
         if http_webroot_challenge is not None:
             pulumi.set(__self__, "http_webroot_challenge", http_webroot_challenge)
         if key_type is not None:
@@ -278,6 +285,20 @@ class CertificateArgs:
         pulumi.set(self, "http_memcached_challenge", value)
 
     @property
+    @pulumi.getter(name="httpS3Challenge")
+    def http_s3_challenge(self) -> Optional[pulumi.Input['CertificateHttpS3ChallengeArgs']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to serve up challenges to a
+        [S3](https://aws.amazon.com/s3/) bucket.
+        """
+        return pulumi.get(self, "http_s3_challenge")
+
+    @http_s3_challenge.setter
+    def http_s3_challenge(self, value: Optional[pulumi.Input['CertificateHttpS3ChallengeArgs']]):
+        pulumi.set(self, "http_s3_challenge", value)
+
+    @property
     @pulumi.getter(name="httpWebrootChallenge")
     def http_webroot_challenge(self) -> Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']]:
         """
@@ -397,8 +418,9 @@ class CertificateArgs:
     def recursive_nameservers(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
         The recursive nameservers that will be
-        used to check for propagation of DNS challenge records. Defaults to your
-        system-configured DNS resolvers.
+        used to check for propagation of DNS challenge records, in addition to some
+        in-provider checks such as zone detection. Defaults to your system-configured
+        DNS resolvers.
         """
         return pulumi.get(self, "recursive_nameservers")
 
@@ -440,10 +462,10 @@ class CertificateArgs:
         Defines a TLS challenge to use in fulfilling the
         request.
 
-        > Only one of `http_challenge`, `http_webroot_challenge`, and
-        `http_memcached_challenge` can be defined at once. See the section on Using
-        HTTP and TLS challenges for more details on
-        using these and `tls_challenge`.
+        > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+        and `http_memcached_challenge` can be defined at once. See the section on
+        Using HTTP and TLS challenges for more
+        details on using these and `tls_challenge`.
         """
         return pulumi.get(self, "tls_challenge")
 
@@ -468,6 +490,7 @@ class _CertificateState:
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]]] = None,
                  http_challenge: Optional[pulumi.Input['CertificateHttpChallengeArgs']] = None,
                  http_memcached_challenge: Optional[pulumi.Input['CertificateHttpMemcachedChallengeArgs']] = None,
+                 http_s3_challenge: Optional[pulumi.Input['CertificateHttpS3ChallengeArgs']] = None,
                  http_webroot_challenge: Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']] = None,
                  issuer_pem: Optional[pulumi.Input[str]] = None,
                  key_type: Optional[pulumi.Input[str]] = None,
@@ -520,6 +543,9 @@ class _CertificateState:
         :param pulumi.Input['CertificateHttpMemcachedChallengeArgs'] http_memcached_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input['CertificateHttpS3ChallengeArgs'] http_s3_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [S3](https://aws.amazon.com/s3/) bucket.
         :param pulumi.Input['CertificateHttpWebrootChallengeArgs'] http_webroot_challenge: Defines an alternate type of HTTP
                challenge that can be used to place a file at a location that can be served by
                an out-of-band webserver.
@@ -577,8 +603,9 @@ class _CertificateState:
                `certificate_request_pem`.  If
                `certificate_request_pem` was used, this will be blank.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
-               used to check for propagation of DNS challenge records. Defaults to your
-               system-configured DNS resolvers.
+               used to check for propagation of DNS challenge records, in addition to some
+               in-provider checks such as zone detection. Defaults to your system-configured
+               DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
@@ -587,10 +614,10 @@ class _CertificateState:
         :param pulumi.Input['CertificateTlsChallengeArgs'] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
-               > Only one of `http_challenge`, `http_webroot_challenge`, and
-               `http_memcached_challenge` can be defined at once. See the section on Using
-               HTTP and TLS challenges for more details on
-               using these and `tls_challenge`.
+               > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+               and `http_memcached_challenge` can be defined at once. See the section on
+               Using HTTP and TLS challenges for more
+               details on using these and `tls_challenge`.
         """
         if account_key_pem is not None:
             pulumi.set(__self__, "account_key_pem", account_key_pem)
@@ -618,6 +645,8 @@ class _CertificateState:
             pulumi.set(__self__, "http_challenge", http_challenge)
         if http_memcached_challenge is not None:
             pulumi.set(__self__, "http_memcached_challenge", http_memcached_challenge)
+        if http_s3_challenge is not None:
+            pulumi.set(__self__, "http_s3_challenge", http_s3_challenge)
         if http_webroot_challenge is not None:
             pulumi.set(__self__, "http_webroot_challenge", http_webroot_challenge)
         if issuer_pem is not None:
@@ -825,6 +854,20 @@ class _CertificateState:
         pulumi.set(self, "http_memcached_challenge", value)
 
     @property
+    @pulumi.getter(name="httpS3Challenge")
+    def http_s3_challenge(self) -> Optional[pulumi.Input['CertificateHttpS3ChallengeArgs']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to serve up challenges to a
+        [S3](https://aws.amazon.com/s3/) bucket.
+        """
+        return pulumi.get(self, "http_s3_challenge")
+
+    @http_s3_challenge.setter
+    def http_s3_challenge(self, value: Optional[pulumi.Input['CertificateHttpS3ChallengeArgs']]):
+        pulumi.set(self, "http_s3_challenge", value)
+
+    @property
     @pulumi.getter(name="httpWebrootChallenge")
     def http_webroot_challenge(self) -> Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']]:
         """
@@ -973,8 +1016,9 @@ class _CertificateState:
     def recursive_nameservers(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
         The recursive nameservers that will be
-        used to check for propagation of DNS challenge records. Defaults to your
-        system-configured DNS resolvers.
+        used to check for propagation of DNS challenge records, in addition to some
+        in-provider checks such as zone detection. Defaults to your system-configured
+        DNS resolvers.
         """
         return pulumi.get(self, "recursive_nameservers")
 
@@ -1016,10 +1060,10 @@ class _CertificateState:
         Defines a TLS challenge to use in fulfilling the
         request.
 
-        > Only one of `http_challenge`, `http_webroot_challenge`, and
-        `http_memcached_challenge` can be defined at once. See the section on Using
-        HTTP and TLS challenges for more details on
-        using these and `tls_challenge`.
+        > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+        and `http_memcached_challenge` can be defined at once. See the section on
+        Using HTTP and TLS challenges for more
+        details on using these and `tls_challenge`.
         """
         return pulumi.get(self, "tls_challenge")
 
@@ -1041,6 +1085,7 @@ class Certificate(pulumi.CustomResource):
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]]] = None,
                  http_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']]] = None,
                  http_memcached_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']]] = None,
+                 http_s3_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']]] = None,
                  http_webroot_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']]] = None,
                  key_type: Optional[pulumi.Input[str]] = None,
                  min_days_remaining: Optional[pulumi.Input[int]] = None,
@@ -1082,6 +1127,9 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']] http_memcached_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']] http_s3_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [S3](https://aws.amazon.com/s3/) bucket.
         :param pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']] http_webroot_challenge: Defines an alternate type of HTTP
                challenge that can be used to place a file at a location that can be served by
                an out-of-band webserver.
@@ -1132,8 +1180,9 @@ class Certificate(pulumi.CustomResource):
                environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
                Pretend Pear X1`.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
-               used to check for propagation of DNS challenge records. Defaults to your
-               system-configured DNS resolvers.
+               used to check for propagation of DNS challenge records, in addition to some
+               in-provider checks such as zone detection. Defaults to your system-configured
+               DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
@@ -1142,10 +1191,10 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
-               > Only one of `http_challenge`, `http_webroot_challenge`, and
-               `http_memcached_challenge` can be defined at once. See the section on Using
-               HTTP and TLS challenges for more details on
-               using these and `tls_challenge`.
+               > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+               and `http_memcached_challenge` can be defined at once. See the section on
+               Using HTTP and TLS challenges for more
+               details on using these and `tls_challenge`.
         """
         ...
     @overload
@@ -1178,6 +1227,7 @@ class Certificate(pulumi.CustomResource):
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]]] = None,
                  http_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']]] = None,
                  http_memcached_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']]] = None,
+                 http_s3_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']]] = None,
                  http_webroot_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']]] = None,
                  key_type: Optional[pulumi.Input[str]] = None,
                  min_days_remaining: Optional[pulumi.Input[int]] = None,
@@ -1207,6 +1257,7 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["dns_challenges"] = dns_challenges
             __props__.__dict__["http_challenge"] = http_challenge
             __props__.__dict__["http_memcached_challenge"] = http_memcached_challenge
+            __props__.__dict__["http_s3_challenge"] = http_s3_challenge
             __props__.__dict__["http_webroot_challenge"] = http_webroot_challenge
             __props__.__dict__["key_type"] = key_type
             __props__.__dict__["min_days_remaining"] = min_days_remaining
@@ -1249,6 +1300,7 @@ class Certificate(pulumi.CustomResource):
             dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]]] = None,
             http_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']]] = None,
             http_memcached_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']]] = None,
+            http_s3_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']]] = None,
             http_webroot_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']]] = None,
             issuer_pem: Optional[pulumi.Input[str]] = None,
             key_type: Optional[pulumi.Input[str]] = None,
@@ -1306,6 +1358,9 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']] http_memcached_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [Memcached](https://memcached.org/) cluster.
+        :param pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']] http_s3_challenge: Defines an alternate type of HTTP
+               challenge that can be used to serve up challenges to a
+               [S3](https://aws.amazon.com/s3/) bucket.
         :param pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']] http_webroot_challenge: Defines an alternate type of HTTP
                challenge that can be used to place a file at a location that can be served by
                an out-of-band webserver.
@@ -1363,8 +1418,9 @@ class Certificate(pulumi.CustomResource):
                `certificate_request_pem`.  If
                `certificate_request_pem` was used, this will be blank.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
-               used to check for propagation of DNS challenge records. Defaults to your
-               system-configured DNS resolvers.
+               used to check for propagation of DNS challenge records, in addition to some
+               in-provider checks such as zone detection. Defaults to your system-configured
+               DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
@@ -1373,10 +1429,10 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
-               > Only one of `http_challenge`, `http_webroot_challenge`, and
-               `http_memcached_challenge` can be defined at once. See the section on Using
-               HTTP and TLS challenges for more details on
-               using these and `tls_challenge`.
+               > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+               and `http_memcached_challenge` can be defined at once. See the section on
+               Using HTTP and TLS challenges for more
+               details on using these and `tls_challenge`.
         """
         opts = pulumi.ResourceOptions.merge(opts, pulumi.ResourceOptions(id=id))
 
@@ -1395,6 +1451,7 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["dns_challenges"] = dns_challenges
         __props__.__dict__["http_challenge"] = http_challenge
         __props__.__dict__["http_memcached_challenge"] = http_memcached_challenge
+        __props__.__dict__["http_s3_challenge"] = http_s3_challenge
         __props__.__dict__["http_webroot_challenge"] = http_webroot_challenge
         __props__.__dict__["issuer_pem"] = issuer_pem
         __props__.__dict__["key_type"] = key_type
@@ -1539,6 +1596,16 @@ class Certificate(pulumi.CustomResource):
         return pulumi.get(self, "http_memcached_challenge")
 
     @property
+    @pulumi.getter(name="httpS3Challenge")
+    def http_s3_challenge(self) -> pulumi.Output[Optional['outputs.CertificateHttpS3Challenge']]:
+        """
+        Defines an alternate type of HTTP
+        challenge that can be used to serve up challenges to a
+        [S3](https://aws.amazon.com/s3/) bucket.
+        """
+        return pulumi.get(self, "http_s3_challenge")
+
+    @property
     @pulumi.getter(name="httpWebrootChallenge")
     def http_webroot_challenge(self) -> pulumi.Output[Optional['outputs.CertificateHttpWebrootChallenge']]:
         """
@@ -1655,8 +1722,9 @@ class Certificate(pulumi.CustomResource):
     def recursive_nameservers(self) -> pulumi.Output[Optional[Sequence[str]]]:
         """
         The recursive nameservers that will be
-        used to check for propagation of DNS challenge records. Defaults to your
-        system-configured DNS resolvers.
+        used to check for propagation of DNS challenge records, in addition to some
+        in-provider checks such as zone detection. Defaults to your system-configured
+        DNS resolvers.
         """
         return pulumi.get(self, "recursive_nameservers")
 
@@ -1686,10 +1754,10 @@ class Certificate(pulumi.CustomResource):
         Defines a TLS challenge to use in fulfilling the
         request.
 
-        > Only one of `http_challenge`, `http_webroot_challenge`, and
-        `http_memcached_challenge` can be defined at once. See the section on Using
-        HTTP and TLS challenges for more details on
-        using these and `tls_challenge`.
+        > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
+        and `http_memcached_challenge` can be defined at once. See the section on
+        Using HTTP and TLS challenges for more
+        details on using these and `tls_challenge`.
         """
         return pulumi.get(self, "tls_challenge")
 

@@ -68,6 +68,10 @@ type Certificate struct {
 	// [Memcached](https://memcached.org/) cluster.
 	HttpMemcachedChallenge CertificateHttpMemcachedChallengePtrOutput `pulumi:"httpMemcachedChallenge"`
 	// Defines an alternate type of HTTP
+	// challenge that can be used to serve up challenges to a
+	// [S3](https://aws.amazon.com/s3/) bucket.
+	HttpS3Challenge CertificateHttpS3ChallengePtrOutput `pulumi:"httpS3Challenge"`
+	// Defines an alternate type of HTTP
 	// challenge that can be used to place a file at a location that can be served by
 	// an out-of-band webserver.
 	HttpWebrootChallenge CertificateHttpWebrootChallengePtrOutput `pulumi:"httpWebrootChallenge"`
@@ -132,8 +136,9 @@ type Certificate struct {
 	// `certificateRequestPem` was used, this will be blank.
 	PrivateKeyPem pulumi.StringOutput `pulumi:"privateKeyPem"`
 	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records. Defaults to your
-	// system-configured DNS resolvers.
+	// used to check for propagation of DNS challenge records, in addition to some
+	// in-provider checks such as zone detection. Defaults to your system-configured
+	// DNS resolvers.
 	RecursiveNameservers pulumi.StringArrayOutput `pulumi:"recursiveNameservers"`
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
@@ -145,10 +150,10 @@ type Certificate struct {
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
 	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-	// `httpMemcachedChallenge` can be defined at once. See the section on Using
-	// HTTP and TLS challenges for more details on
-	// using these and `tlsChallenge`.
+	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+	// and `httpMemcachedChallenge` can be defined at once. See the section on
+	// Using HTTP and TLS challenges for more
+	// details on using these and `tlsChallenge`.
 	TlsChallenge CertificateTlsChallengePtrOutput `pulumi:"tlsChallenge"`
 }
 
@@ -250,6 +255,10 @@ type certificateState struct {
 	// [Memcached](https://memcached.org/) cluster.
 	HttpMemcachedChallenge *CertificateHttpMemcachedChallenge `pulumi:"httpMemcachedChallenge"`
 	// Defines an alternate type of HTTP
+	// challenge that can be used to serve up challenges to a
+	// [S3](https://aws.amazon.com/s3/) bucket.
+	HttpS3Challenge *CertificateHttpS3Challenge `pulumi:"httpS3Challenge"`
+	// Defines an alternate type of HTTP
 	// challenge that can be used to place a file at a location that can be served by
 	// an out-of-band webserver.
 	HttpWebrootChallenge *CertificateHttpWebrootChallenge `pulumi:"httpWebrootChallenge"`
@@ -314,8 +323,9 @@ type certificateState struct {
 	// `certificateRequestPem` was used, this will be blank.
 	PrivateKeyPem *string `pulumi:"privateKeyPem"`
 	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records. Defaults to your
-	// system-configured DNS resolvers.
+	// used to check for propagation of DNS challenge records, in addition to some
+	// in-provider checks such as zone detection. Defaults to your system-configured
+	// DNS resolvers.
 	RecursiveNameservers []string `pulumi:"recursiveNameservers"`
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
@@ -327,10 +337,10 @@ type certificateState struct {
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
 	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-	// `httpMemcachedChallenge` can be defined at once. See the section on Using
-	// HTTP and TLS challenges for more details on
-	// using these and `tlsChallenge`.
+	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+	// and `httpMemcachedChallenge` can be defined at once. See the section on
+	// Using HTTP and TLS challenges for more
+	// details on using these and `tlsChallenge`.
 	TlsChallenge *CertificateTlsChallenge `pulumi:"tlsChallenge"`
 }
 
@@ -386,6 +396,10 @@ type CertificateState struct {
 	// challenge that can be used to serve up challenges to a
 	// [Memcached](https://memcached.org/) cluster.
 	HttpMemcachedChallenge CertificateHttpMemcachedChallengePtrInput
+	// Defines an alternate type of HTTP
+	// challenge that can be used to serve up challenges to a
+	// [S3](https://aws.amazon.com/s3/) bucket.
+	HttpS3Challenge CertificateHttpS3ChallengePtrInput
 	// Defines an alternate type of HTTP
 	// challenge that can be used to place a file at a location that can be served by
 	// an out-of-band webserver.
@@ -451,8 +465,9 @@ type CertificateState struct {
 	// `certificateRequestPem` was used, this will be blank.
 	PrivateKeyPem pulumi.StringPtrInput
 	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records. Defaults to your
-	// system-configured DNS resolvers.
+	// used to check for propagation of DNS challenge records, in addition to some
+	// in-provider checks such as zone detection. Defaults to your system-configured
+	// DNS resolvers.
 	RecursiveNameservers pulumi.StringArrayInput
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
@@ -464,10 +479,10 @@ type CertificateState struct {
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
 	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-	// `httpMemcachedChallenge` can be defined at once. See the section on Using
-	// HTTP and TLS challenges for more details on
-	// using these and `tlsChallenge`.
+	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+	// and `httpMemcachedChallenge` can be defined at once. See the section on
+	// Using HTTP and TLS challenges for more
+	// details on using these and `tlsChallenge`.
 	TlsChallenge CertificateTlsChallengePtrInput
 }
 
@@ -510,6 +525,10 @@ type certificateArgs struct {
 	// challenge that can be used to serve up challenges to a
 	// [Memcached](https://memcached.org/) cluster.
 	HttpMemcachedChallenge *CertificateHttpMemcachedChallenge `pulumi:"httpMemcachedChallenge"`
+	// Defines an alternate type of HTTP
+	// challenge that can be used to serve up challenges to a
+	// [S3](https://aws.amazon.com/s3/) bucket.
+	HttpS3Challenge *CertificateHttpS3Challenge `pulumi:"httpS3Challenge"`
 	// Defines an alternate type of HTTP
 	// challenge that can be used to place a file at a location that can be served by
 	// an out-of-band webserver.
@@ -566,8 +585,9 @@ type certificateArgs struct {
 	// Pretend Pear X1`.
 	PreferredChain *string `pulumi:"preferredChain"`
 	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records. Defaults to your
-	// system-configured DNS resolvers.
+	// used to check for propagation of DNS challenge records, in addition to some
+	// in-provider checks such as zone detection. Defaults to your system-configured
+	// DNS resolvers.
 	RecursiveNameservers []string `pulumi:"recursiveNameservers"`
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
@@ -579,10 +599,10 @@ type certificateArgs struct {
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
 	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-	// `httpMemcachedChallenge` can be defined at once. See the section on Using
-	// HTTP and TLS challenges for more details on
-	// using these and `tlsChallenge`.
+	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+	// and `httpMemcachedChallenge` can be defined at once. See the section on
+	// Using HTTP and TLS challenges for more
+	// details on using these and `tlsChallenge`.
 	TlsChallenge *CertificateTlsChallenge `pulumi:"tlsChallenge"`
 }
 
@@ -622,6 +642,10 @@ type CertificateArgs struct {
 	// challenge that can be used to serve up challenges to a
 	// [Memcached](https://memcached.org/) cluster.
 	HttpMemcachedChallenge CertificateHttpMemcachedChallengePtrInput
+	// Defines an alternate type of HTTP
+	// challenge that can be used to serve up challenges to a
+	// [S3](https://aws.amazon.com/s3/) bucket.
+	HttpS3Challenge CertificateHttpS3ChallengePtrInput
 	// Defines an alternate type of HTTP
 	// challenge that can be used to place a file at a location that can be served by
 	// an out-of-band webserver.
@@ -678,8 +702,9 @@ type CertificateArgs struct {
 	// Pretend Pear X1`.
 	PreferredChain pulumi.StringPtrInput
 	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records. Defaults to your
-	// system-configured DNS resolvers.
+	// used to check for propagation of DNS challenge records, in addition to some
+	// in-provider checks such as zone detection. Defaults to your system-configured
+	// DNS resolvers.
 	RecursiveNameservers pulumi.StringArrayInput
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
@@ -691,10 +716,10 @@ type CertificateArgs struct {
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
 	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-	// `httpMemcachedChallenge` can be defined at once. See the section on Using
-	// HTTP and TLS challenges for more details on
-	// using these and `tlsChallenge`.
+	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+	// and `httpMemcachedChallenge` can be defined at once. See the section on
+	// Using HTTP and TLS challenges for more
+	// details on using these and `tlsChallenge`.
 	TlsChallenge CertificateTlsChallengePtrInput
 }
 
@@ -900,6 +925,13 @@ func (o CertificateOutput) HttpMemcachedChallenge() CertificateHttpMemcachedChal
 }
 
 // Defines an alternate type of HTTP
+// challenge that can be used to serve up challenges to a
+// [S3](https://aws.amazon.com/s3/) bucket.
+func (o CertificateOutput) HttpS3Challenge() CertificateHttpS3ChallengePtrOutput {
+	return o.ApplyT(func(v *Certificate) CertificateHttpS3ChallengePtrOutput { return v.HttpS3Challenge }).(CertificateHttpS3ChallengePtrOutput)
+}
+
+// Defines an alternate type of HTTP
 // challenge that can be used to place a file at a location that can be served by
 // an out-of-band webserver.
 func (o CertificateOutput) HttpWebrootChallenge() CertificateHttpWebrootChallengePtrOutput {
@@ -988,8 +1020,9 @@ func (o CertificateOutput) PrivateKeyPem() pulumi.StringOutput {
 }
 
 // The recursive nameservers that will be
-// used to check for propagation of DNS challenge records. Defaults to your
-// system-configured DNS resolvers.
+// used to check for propagation of DNS challenge records, in addition to some
+// in-provider checks such as zone detection. Defaults to your system-configured
+// DNS resolvers.
 func (o CertificateOutput) RecursiveNameservers() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringArrayOutput { return v.RecursiveNameservers }).(pulumi.StringArrayOutput)
 }
@@ -1010,10 +1043,10 @@ func (o CertificateOutput) SubjectAlternativeNames() pulumi.StringArrayOutput {
 // Defines a TLS challenge to use in fulfilling the
 // request.
 //
-// > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-// `httpMemcachedChallenge` can be defined at once. See the section on Using
-// HTTP and TLS challenges for more details on
-// using these and `tlsChallenge`.
+// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+// and `httpMemcachedChallenge` can be defined at once. See the section on
+// Using HTTP and TLS challenges for more
+// details on using these and `tlsChallenge`.
 func (o CertificateOutput) TlsChallenge() CertificateTlsChallengePtrOutput {
 	return o.ApplyT(func(v *Certificate) CertificateTlsChallengePtrOutput { return v.TlsChallenge }).(CertificateTlsChallengePtrOutput)
 }

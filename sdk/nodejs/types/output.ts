@@ -40,6 +40,10 @@ export interface CertificateHttpMemcachedChallenge {
     hosts: string[];
 }
 
+export interface CertificateHttpS3Challenge {
+    s3Bucket: string;
+}
+
 export interface CertificateHttpWebrootChallenge {
     /**
      * The directory to publish the record to.

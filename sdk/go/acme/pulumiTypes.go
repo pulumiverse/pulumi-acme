@@ -527,6 +527,163 @@ func (o CertificateHttpMemcachedChallengePtrOutput) Hosts() pulumi.StringArrayOu
 	}).(pulumi.StringArrayOutput)
 }
 
+type CertificateHttpS3Challenge struct {
+	S3Bucket string `pulumi:"s3Bucket"`
+}
+
+// CertificateHttpS3ChallengeInput is an input type that accepts CertificateHttpS3ChallengeArgs and CertificateHttpS3ChallengeOutput values.
+// You can construct a concrete instance of `CertificateHttpS3ChallengeInput` via:
+//
+//	CertificateHttpS3ChallengeArgs{...}
+type CertificateHttpS3ChallengeInput interface {
+	pulumi.Input
+
+	ToCertificateHttpS3ChallengeOutput() CertificateHttpS3ChallengeOutput
+	ToCertificateHttpS3ChallengeOutputWithContext(context.Context) CertificateHttpS3ChallengeOutput
+}
+
+type CertificateHttpS3ChallengeArgs struct {
+	S3Bucket pulumi.StringInput `pulumi:"s3Bucket"`
+}
+
+func (CertificateHttpS3ChallengeArgs) ElementType() reflect.Type {
+	return reflect.TypeOf((*CertificateHttpS3Challenge)(nil)).Elem()
+}
+
+func (i CertificateHttpS3ChallengeArgs) ToCertificateHttpS3ChallengeOutput() CertificateHttpS3ChallengeOutput {
+	return i.ToCertificateHttpS3ChallengeOutputWithContext(context.Background())
+}
+
+func (i CertificateHttpS3ChallengeArgs) ToCertificateHttpS3ChallengeOutputWithContext(ctx context.Context) CertificateHttpS3ChallengeOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpS3ChallengeOutput)
+}
+
+func (i CertificateHttpS3ChallengeArgs) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpS3Challenge] {
+	return pulumix.Output[CertificateHttpS3Challenge]{
+		OutputState: i.ToCertificateHttpS3ChallengeOutputWithContext(ctx).OutputState,
+	}
+}
+
+func (i CertificateHttpS3ChallengeArgs) ToCertificateHttpS3ChallengePtrOutput() CertificateHttpS3ChallengePtrOutput {
+	return i.ToCertificateHttpS3ChallengePtrOutputWithContext(context.Background())
+}
+
+func (i CertificateHttpS3ChallengeArgs) ToCertificateHttpS3ChallengePtrOutputWithContext(ctx context.Context) CertificateHttpS3ChallengePtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpS3ChallengeOutput).ToCertificateHttpS3ChallengePtrOutputWithContext(ctx)
+}
+
+// CertificateHttpS3ChallengePtrInput is an input type that accepts CertificateHttpS3ChallengeArgs, CertificateHttpS3ChallengePtr and CertificateHttpS3ChallengePtrOutput values.
+// You can construct a concrete instance of `CertificateHttpS3ChallengePtrInput` via:
+//
+//	        CertificateHttpS3ChallengeArgs{...}
+//
+//	or:
+//
+//	        nil
+type CertificateHttpS3ChallengePtrInput interface {
+	pulumi.Input
+
+	ToCertificateHttpS3ChallengePtrOutput() CertificateHttpS3ChallengePtrOutput
+	ToCertificateHttpS3ChallengePtrOutputWithContext(context.Context) CertificateHttpS3ChallengePtrOutput
+}
+
+type certificateHttpS3ChallengePtrType CertificateHttpS3ChallengeArgs
+
+func CertificateHttpS3ChallengePtr(v *CertificateHttpS3ChallengeArgs) CertificateHttpS3ChallengePtrInput {
+	return (*certificateHttpS3ChallengePtrType)(v)
+}
+
+func (*certificateHttpS3ChallengePtrType) ElementType() reflect.Type {
+	return reflect.TypeOf((**CertificateHttpS3Challenge)(nil)).Elem()
+}
+
+func (i *certificateHttpS3ChallengePtrType) ToCertificateHttpS3ChallengePtrOutput() CertificateHttpS3ChallengePtrOutput {
+	return i.ToCertificateHttpS3ChallengePtrOutputWithContext(context.Background())
+}
+
+func (i *certificateHttpS3ChallengePtrType) ToCertificateHttpS3ChallengePtrOutputWithContext(ctx context.Context) CertificateHttpS3ChallengePtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CertificateHttpS3ChallengePtrOutput)
+}
+
+func (i *certificateHttpS3ChallengePtrType) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpS3Challenge] {
+	return pulumix.Output[*CertificateHttpS3Challenge]{
+		OutputState: i.ToCertificateHttpS3ChallengePtrOutputWithContext(ctx).OutputState,
+	}
+}
+
+type CertificateHttpS3ChallengeOutput struct{ *pulumi.OutputState }
+
+func (CertificateHttpS3ChallengeOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((*CertificateHttpS3Challenge)(nil)).Elem()
+}
+
+func (o CertificateHttpS3ChallengeOutput) ToCertificateHttpS3ChallengeOutput() CertificateHttpS3ChallengeOutput {
+	return o
+}
+
+func (o CertificateHttpS3ChallengeOutput) ToCertificateHttpS3ChallengeOutputWithContext(ctx context.Context) CertificateHttpS3ChallengeOutput {
+	return o
+}
+
+func (o CertificateHttpS3ChallengeOutput) ToCertificateHttpS3ChallengePtrOutput() CertificateHttpS3ChallengePtrOutput {
+	return o.ToCertificateHttpS3ChallengePtrOutputWithContext(context.Background())
+}
+
+func (o CertificateHttpS3ChallengeOutput) ToCertificateHttpS3ChallengePtrOutputWithContext(ctx context.Context) CertificateHttpS3ChallengePtrOutput {
+	return o.ApplyTWithContext(ctx, func(_ context.Context, v CertificateHttpS3Challenge) *CertificateHttpS3Challenge {
+		return &v
+	}).(CertificateHttpS3ChallengePtrOutput)
+}
+
+func (o CertificateHttpS3ChallengeOutput) ToOutput(ctx context.Context) pulumix.Output[CertificateHttpS3Challenge] {
+	return pulumix.Output[CertificateHttpS3Challenge]{
+		OutputState: o.OutputState,
+	}
+}
+
+func (o CertificateHttpS3ChallengeOutput) S3Bucket() pulumi.StringOutput {
+	return o.ApplyT(func(v CertificateHttpS3Challenge) string { return v.S3Bucket }).(pulumi.StringOutput)
+}
+
+type CertificateHttpS3ChallengePtrOutput struct{ *pulumi.OutputState }
+
+func (CertificateHttpS3ChallengePtrOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((**CertificateHttpS3Challenge)(nil)).Elem()
+}
+
+func (o CertificateHttpS3ChallengePtrOutput) ToCertificateHttpS3ChallengePtrOutput() CertificateHttpS3ChallengePtrOutput {
+	return o
+}
+
+func (o CertificateHttpS3ChallengePtrOutput) ToCertificateHttpS3ChallengePtrOutputWithContext(ctx context.Context) CertificateHttpS3ChallengePtrOutput {
+	return o
+}
+
+func (o CertificateHttpS3ChallengePtrOutput) ToOutput(ctx context.Context) pulumix.Output[*CertificateHttpS3Challenge] {
+	return pulumix.Output[*CertificateHttpS3Challenge]{
+		OutputState: o.OutputState,
+	}
+}
+
+func (o CertificateHttpS3ChallengePtrOutput) Elem() CertificateHttpS3ChallengeOutput {
+	return o.ApplyT(func(v *CertificateHttpS3Challenge) CertificateHttpS3Challenge {
+		if v != nil {
+			return *v
+		}
+		var ret CertificateHttpS3Challenge
+		return ret
+	}).(CertificateHttpS3ChallengeOutput)
+}
+
+func (o CertificateHttpS3ChallengePtrOutput) S3Bucket() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *CertificateHttpS3Challenge) *string {
+		if v == nil {
+			return nil
+		}
+		return &v.S3Bucket
+	}).(pulumi.StringPtrOutput)
+}
+
 type CertificateHttpWebrootChallenge struct {
 	// The directory to publish the record to.
 	Directory string `pulumi:"directory"`
@@ -1028,6 +1185,8 @@ func init() {
 	pulumi.RegisterInputType(reflect.TypeOf((*CertificateHttpChallengePtrInput)(nil)).Elem(), CertificateHttpChallengeArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*CertificateHttpMemcachedChallengeInput)(nil)).Elem(), CertificateHttpMemcachedChallengeArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*CertificateHttpMemcachedChallengePtrInput)(nil)).Elem(), CertificateHttpMemcachedChallengeArgs{})
+	pulumi.RegisterInputType(reflect.TypeOf((*CertificateHttpS3ChallengeInput)(nil)).Elem(), CertificateHttpS3ChallengeArgs{})
+	pulumi.RegisterInputType(reflect.TypeOf((*CertificateHttpS3ChallengePtrInput)(nil)).Elem(), CertificateHttpS3ChallengeArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*CertificateHttpWebrootChallengeInput)(nil)).Elem(), CertificateHttpWebrootChallengeArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*CertificateHttpWebrootChallengePtrInput)(nil)).Elem(), CertificateHttpWebrootChallengeArgs{})
 	pulumi.RegisterInputType(reflect.TypeOf((*CertificateTlsChallengeInput)(nil)).Elem(), CertificateTlsChallengeArgs{})
@@ -1040,6 +1199,8 @@ func init() {
 	pulumi.RegisterOutputType(CertificateHttpChallengePtrOutput{})
 	pulumi.RegisterOutputType(CertificateHttpMemcachedChallengeOutput{})
 	pulumi.RegisterOutputType(CertificateHttpMemcachedChallengePtrOutput{})
+	pulumi.RegisterOutputType(CertificateHttpS3ChallengeOutput{})
+	pulumi.RegisterOutputType(CertificateHttpS3ChallengePtrOutput{})
 	pulumi.RegisterOutputType(CertificateHttpWebrootChallengeOutput{})
 	pulumi.RegisterOutputType(CertificateHttpWebrootChallengePtrOutput{})
 	pulumi.RegisterOutputType(CertificateTlsChallengeOutput{})

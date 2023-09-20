@@ -1,6 +1,7 @@
 # ACME Resource Provider
 
-The ACME Resource Provider lets you manage [ACME](http://example.com) resources.
+The ACME Resource Provider lets you manage ACME resources. 
+[Let's Encrypt](https://letsencrypt.org/) is the biggest ACME CA in use.
 
 ## Installing
 

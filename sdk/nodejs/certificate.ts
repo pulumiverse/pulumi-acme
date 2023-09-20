@@ -113,6 +113,12 @@ export class Certificate extends pulumi.CustomResource {
     public readonly httpMemcachedChallenge!: pulumi.Output<outputs.CertificateHttpMemcachedChallenge | undefined>;
     /**
      * Defines an alternate type of HTTP
+     * challenge that can be used to serve up challenges to a
+     * [S3](https://aws.amazon.com/s3/) bucket.
+     */
+    public readonly httpS3Challenge!: pulumi.Output<outputs.CertificateHttpS3Challenge | undefined>;
+    /**
+     * Defines an alternate type of HTTP
      * challenge that can be used to place a file at a location that can be served by
      * an out-of-band webserver.
      */
@@ -193,8 +199,9 @@ export class Certificate extends pulumi.CustomResource {
     public /*out*/ readonly privateKeyPem!: pulumi.Output<string>;
     /**
      * The recursive nameservers that will be
-     * used to check for propagation of DNS challenge records. Defaults to your
-     * system-configured DNS resolvers.
+     * used to check for propagation of DNS challenge records, in addition to some
+     * in-provider checks such as zone detection. Defaults to your system-configured
+     * DNS resolvers.
      */
     public readonly recursiveNameservers!: pulumi.Output<string[] | undefined>;
     /**
@@ -212,10 +219,10 @@ export class Certificate extends pulumi.CustomResource {
      * Defines a TLS challenge to use in fulfilling the
      * request.
      *
-     * > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-     * `httpMemcachedChallenge` can be defined at once. See the section on Using
-     * HTTP and TLS challenges for more details on
-     * using these and `tlsChallenge`.
+     * > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+     * and `httpMemcachedChallenge` can be defined at once. See the section on
+     * Using HTTP and TLS challenges for more
+     * details on using these and `tlsChallenge`.
      */
     public readonly tlsChallenge!: pulumi.Output<outputs.CertificateTlsChallenge | undefined>;
 
@@ -245,6 +252,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["dnsChallenges"] = state ? state.dnsChallenges : undefined;
             resourceInputs["httpChallenge"] = state ? state.httpChallenge : undefined;
             resourceInputs["httpMemcachedChallenge"] = state ? state.httpMemcachedChallenge : undefined;
+            resourceInputs["httpS3Challenge"] = state ? state.httpS3Challenge : undefined;
             resourceInputs["httpWebrootChallenge"] = state ? state.httpWebrootChallenge : undefined;
             resourceInputs["issuerPem"] = state ? state.issuerPem : undefined;
             resourceInputs["keyType"] = state ? state.keyType : undefined;
@@ -270,6 +278,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["dnsChallenges"] = args ? args.dnsChallenges : undefined;
             resourceInputs["httpChallenge"] = args ? args.httpChallenge : undefined;
             resourceInputs["httpMemcachedChallenge"] = args ? args.httpMemcachedChallenge : undefined;
+            resourceInputs["httpS3Challenge"] = args ? args.httpS3Challenge : undefined;
             resourceInputs["httpWebrootChallenge"] = args ? args.httpWebrootChallenge : undefined;
             resourceInputs["keyType"] = args ? args.keyType : undefined;
             resourceInputs["minDaysRemaining"] = args ? args.minDaysRemaining : undefined;
@@ -378,6 +387,12 @@ export interface CertificateState {
     httpMemcachedChallenge?: pulumi.Input<inputs.CertificateHttpMemcachedChallenge>;
     /**
      * Defines an alternate type of HTTP
+     * challenge that can be used to serve up challenges to a
+     * [S3](https://aws.amazon.com/s3/) bucket.
+     */
+    httpS3Challenge?: pulumi.Input<inputs.CertificateHttpS3Challenge>;
+    /**
+     * Defines an alternate type of HTTP
      * challenge that can be used to place a file at a location that can be served by
      * an out-of-band webserver.
      */
@@ -458,8 +473,9 @@ export interface CertificateState {
     privateKeyPem?: pulumi.Input<string>;
     /**
      * The recursive nameservers that will be
-     * used to check for propagation of DNS challenge records. Defaults to your
-     * system-configured DNS resolvers.
+     * used to check for propagation of DNS challenge records, in addition to some
+     * in-provider checks such as zone detection. Defaults to your system-configured
+     * DNS resolvers.
      */
     recursiveNameservers?: pulumi.Input<pulumi.Input<string>[]>;
     /**
@@ -477,10 +493,10 @@ export interface CertificateState {
      * Defines a TLS challenge to use in fulfilling the
      * request.
      *
-     * > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-     * `httpMemcachedChallenge` can be defined at once. See the section on Using
-     * HTTP and TLS challenges for more details on
-     * using these and `tlsChallenge`.
+     * > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+     * and `httpMemcachedChallenge` can be defined at once. See the section on
+     * Using HTTP and TLS challenges for more
+     * details on using these and `tlsChallenge`.
      */
     tlsChallenge?: pulumi.Input<inputs.CertificateTlsChallenge>;
 }
@@ -539,6 +555,12 @@ export interface CertificateArgs {
      * [Memcached](https://memcached.org/) cluster.
      */
     httpMemcachedChallenge?: pulumi.Input<inputs.CertificateHttpMemcachedChallenge>;
+    /**
+     * Defines an alternate type of HTTP
+     * challenge that can be used to serve up challenges to a
+     * [S3](https://aws.amazon.com/s3/) bucket.
+     */
+    httpS3Challenge?: pulumi.Input<inputs.CertificateHttpS3Challenge>;
     /**
      * Defines an alternate type of HTTP
      * challenge that can be used to place a file at a location that can be served by
@@ -608,8 +630,9 @@ export interface CertificateArgs {
     preferredChain?: pulumi.Input<string>;
     /**
      * The recursive nameservers that will be
-     * used to check for propagation of DNS challenge records. Defaults to your
-     * system-configured DNS resolvers.
+     * used to check for propagation of DNS challenge records, in addition to some
+     * in-provider checks such as zone detection. Defaults to your system-configured
+     * DNS resolvers.
      */
     recursiveNameservers?: pulumi.Input<pulumi.Input<string>[]>;
     /**
@@ -627,10 +650,10 @@ export interface CertificateArgs {
      * Defines a TLS challenge to use in fulfilling the
      * request.
      *
-     * > Only one of `httpChallenge`, `httpWebrootChallenge`, and
-     * `httpMemcachedChallenge` can be defined at once. See the section on Using
-     * HTTP and TLS challenges for more details on
-     * using these and `tlsChallenge`.
+     * > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
+     * and `httpMemcachedChallenge` can be defined at once. See the section on
+     * Using HTTP and TLS challenges for more
+     * details on using these and `tlsChallenge`.
      */
     tlsChallenge?: pulumi.Input<inputs.CertificateTlsChallenge>;
 }
