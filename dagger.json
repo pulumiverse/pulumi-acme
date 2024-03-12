@@ -1,0 +1,12 @@
+{
+  "name": "pulumi-acme",
+  "sdk": "go",
+  "dependencies": [
+    {
+      "name": "golang",
+      "source": "github.com/kpenfound/dagger-modules/golang@2bd8c3e7c00c38979b4811fbd1b6b4d95bf03763"
+    }
+  ],
+  "source": "dagger",
+  "engineVersion": "v0.10.1"
+}
