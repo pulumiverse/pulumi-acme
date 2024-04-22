@@ -45,16 +45,9 @@
                     }
                 }
             }
-        },
-        "datasources": {
-            "acme_certificate": {
-                "current": "acme:index/getCertificate:getCertificate"
-            },
-            "acme_registration": {
-                "current": "acme:index/getRegistration:getRegistration"
-            }
         }
     },
+    "auto-settings": {},
     "renames": {
         "resources": {
             "acme:index/certificate:Certificate": "acme_certificate",
