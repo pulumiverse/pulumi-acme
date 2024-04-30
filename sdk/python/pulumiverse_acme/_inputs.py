@@ -114,17 +114,11 @@ class CertificateHttpChallengeArgs:
 class CertificateHttpMemcachedChallengeArgs:
     def __init__(__self__, *,
                  hosts: pulumi.Input[Sequence[pulumi.Input[str]]]):
-        """
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] hosts: The hosts to publish the record to.
-        """
         pulumi.set(__self__, "hosts", hosts)
 
     @property
     @pulumi.getter
     def hosts(self) -> pulumi.Input[Sequence[pulumi.Input[str]]]:
-        """
-        The hosts to publish the record to.
-        """
         return pulumi.get(self, "hosts")
 
     @hosts.setter

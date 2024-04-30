@@ -9,7 +9,6 @@ import (
 
 	"errors"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumix"
 	"github.com/pulumiverse/pulumi-acme/sdk/go/acme/internal"
 )
 
@@ -118,12 +117,6 @@ func (i *Registration) ToRegistrationOutputWithContext(ctx context.Context) Regi
 	return pulumi.ToOutputWithContext(ctx, i).(RegistrationOutput)
 }
 
-func (i *Registration) ToOutput(ctx context.Context) pulumix.Output[*Registration] {
-	return pulumix.Output[*Registration]{
-		OutputState: i.ToRegistrationOutputWithContext(ctx).OutputState,
-	}
-}
-
 // RegistrationArrayInput is an input type that accepts RegistrationArray and RegistrationArrayOutput values.
 // You can construct a concrete instance of `RegistrationArrayInput` via:
 //
@@ -147,12 +140,6 @@ func (i RegistrationArray) ToRegistrationArrayOutput() RegistrationArrayOutput {
 
 func (i RegistrationArray) ToRegistrationArrayOutputWithContext(ctx context.Context) RegistrationArrayOutput {
 	return pulumi.ToOutputWithContext(ctx, i).(RegistrationArrayOutput)
-}
-
-func (i RegistrationArray) ToOutput(ctx context.Context) pulumix.Output[[]*Registration] {
-	return pulumix.Output[[]*Registration]{
-		OutputState: i.ToRegistrationArrayOutputWithContext(ctx).OutputState,
-	}
 }
 
 // RegistrationMapInput is an input type that accepts RegistrationMap and RegistrationMapOutput values.
@@ -180,12 +167,6 @@ func (i RegistrationMap) ToRegistrationMapOutputWithContext(ctx context.Context)
 	return pulumi.ToOutputWithContext(ctx, i).(RegistrationMapOutput)
 }
 
-func (i RegistrationMap) ToOutput(ctx context.Context) pulumix.Output[map[string]*Registration] {
-	return pulumix.Output[map[string]*Registration]{
-		OutputState: i.ToRegistrationMapOutputWithContext(ctx).OutputState,
-	}
-}
-
 type RegistrationOutput struct{ *pulumi.OutputState }
 
 func (RegistrationOutput) ElementType() reflect.Type {
@@ -198,12 +179,6 @@ func (o RegistrationOutput) ToRegistrationOutput() RegistrationOutput {
 
 func (o RegistrationOutput) ToRegistrationOutputWithContext(ctx context.Context) RegistrationOutput {
 	return o
-}
-
-func (o RegistrationOutput) ToOutput(ctx context.Context) pulumix.Output[*Registration] {
-	return pulumix.Output[*Registration]{
-		OutputState: o.OutputState,
-	}
 }
 
 func (o RegistrationOutput) AccountKeyPem() pulumi.StringOutput {
@@ -236,12 +211,6 @@ func (o RegistrationArrayOutput) ToRegistrationArrayOutputWithContext(ctx contex
 	return o
 }
 
-func (o RegistrationArrayOutput) ToOutput(ctx context.Context) pulumix.Output[[]*Registration] {
-	return pulumix.Output[[]*Registration]{
-		OutputState: o.OutputState,
-	}
-}
-
 func (o RegistrationArrayOutput) Index(i pulumi.IntInput) RegistrationOutput {
 	return pulumi.All(o, i).ApplyT(func(vs []interface{}) *Registration {
 		return vs[0].([]*Registration)[vs[1].(int)]
@@ -260,12 +229,6 @@ func (o RegistrationMapOutput) ToRegistrationMapOutput() RegistrationMapOutput {
 
 func (o RegistrationMapOutput) ToRegistrationMapOutputWithContext(ctx context.Context) RegistrationMapOutput {
 	return o
-}
-
-func (o RegistrationMapOutput) ToOutput(ctx context.Context) pulumix.Output[map[string]*Registration] {
-	return pulumix.Output[map[string]*Registration]{
-		OutputState: o.OutputState,
-	}
 }
 
 func (o RegistrationMapOutput) MapIndex(k pulumi.StringInput) RegistrationOutput {

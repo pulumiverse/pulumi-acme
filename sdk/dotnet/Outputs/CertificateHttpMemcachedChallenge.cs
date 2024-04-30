@@ -14,9 +14,6 @@ namespace Pulumiverse.Acme.Outputs
     [OutputType]
     public sealed class CertificateHttpMemcachedChallenge
     {
-        /// <summary>
-        /// The hosts to publish the record to.
-        /// </summary>
         public readonly ImmutableArray<string> Hosts;
 
         [OutputConstructor]
