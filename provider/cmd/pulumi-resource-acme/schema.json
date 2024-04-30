@@ -101,8 +101,7 @@
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "description": "The hosts to publish the record to.\n"
+                    }
                 }
             },
             "type": "object",
