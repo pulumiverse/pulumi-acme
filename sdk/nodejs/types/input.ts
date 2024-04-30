@@ -34,9 +34,6 @@ export interface CertificateHttpChallenge {
 }
 
 export interface CertificateHttpMemcachedChallenge {
-    /**
-     * The hosts to publish the record to.
-     */
     hosts: pulumi.Input<pulumi.Input<string>[]>;
 }
 
