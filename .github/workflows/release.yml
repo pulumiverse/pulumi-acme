@@ -28,28 +28,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v4.0.0
+        uses: actions/checkout@v4.0.0
       - name: Unshallow clone for tags
         run: git fetch --prune --unshallow --tags
       - name: Install Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        uses: actions/setup-go@v5.0.0
         with:
           go-version: ${{matrix.goversion}}
       - name: Install pulumictl
-        uses: jaxxstorm/action-install-gh-release@c5ead9a448b4660cf1e7866ee22e4dc56538031a # tag=v1.10.0
+        uses: jaxxstorm/action-install-gh-release@v1.10.0
         with:
           repo: pulumi/pulumictl
       - name: Set PreRelease Version
         run: echo "GORELEASER_CURRENT_TAG=v$(pulumictl get version --language generic)" >> $GITHUB_ENV
-      - uses: sigstore/cosign-installer@11086d25041f77fe8fe7b9ea4e48e3b9192b8f19 # v3.1.2
-      - uses: anchore/sbom-action/download-syft@78fc58e266e87a38d4194b2137a3d4e9bcaf7ca1 # v0.14.3
+      - uses: sigstore/cosign-installer@v3.1.2
+      - uses: anchore/sbom-action/download-syft@v0.14.3
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@7ec5c2b0c6cdda6e8bbb49444bc797dd33d74dd8 # tag=v5.0.0
+        uses: goreleaser/goreleaser-action@v5.0.0
         with:
           args: -p 3 release --rm-dist
           version: latest
       - name: Create tag
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # tag=v6.4.1
+        uses: actions/github-script@v6.4.1
         with:
           script: |
             github.rest.git.createRef({
@@ -69,30 +69,30 @@ jobs:
     needs: publish_binary
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # tag=v4.0.0
+        uses: actions/checkout@v4.0.0
       - name: Unshallow clone for tags
         run: git fetch --prune --unshallow --tags
       - name: Install Go
-        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        uses: actions/setup-go@v5.0.0
         with:
           go-version: ${{ matrix.goversion }}
       - name: Install pulumictl
-        uses: jaxxstorm/action-install-gh-release@c5ead9a448b4660cf1e7866ee22e4dc56538031a # tag=v1.10.0
+        uses: jaxxstorm/action-install-gh-release@v1.10.0
         with:
           repo: pulumi/pulumictl
       - name: Install Pulumi CLI
-        uses: pulumi/action-install-pulumi-cli@b374ceb6168550de27c6eba92e01c1a774040e11 # tag=v2.0.0
+        uses: pulumi/action-install-pulumi-cli@v2.0.0
       - name: Setup Node
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
+        uses: actions/setup-node@v4.0.2
         with:
           node-version: ${{matrix.nodeversion}}
           registry-url: ${{env.NPM_REGISTRY_URL}}
       - name: Setup DotNet
-        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # tag=v2.1.0
+        uses: actions/setup-dotnet@v2.1.0
         with:
           dotnet-version: ${{matrix.dotnetverson}}
       - name: Setup Python
-        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # tag=v4.2.0
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: ${{matrix.pythonversion}}
       - name: Build SDK
@@ -108,13 +108,13 @@ jobs:
           fi
       - if: ${{ matrix.language == 'python' && env.PUBLISH_PYPI == 'true' }}
         name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e # tag=v1.8.10
+        uses: pypa/gh-action-pypi-publish@v1.8.10
         with:
           user: ${{ env.PYPI_USERNAME }}
           password: ${{ env.PYPI_PASSWORD }}
           packages_dir: ${{github.workspace}}/sdk/python/bin/dist
       - if: ${{ matrix.language == 'nodejs' && env.PUBLISH_NPM == 'true' }}
-        uses: JS-DevTools/npm-publish@fe72237be0920f7a0cafd6a966c9b929c9466e9b # tag=v2.2.2
+        uses: JS-DevTools/npm-publish@v2.2.2
         with:
           access: "public"
           token: ${{ env.NPM_TOKEN }}
