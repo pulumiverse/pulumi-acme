@@ -42,7 +42,7 @@ jobs:
       - name: Set PreRelease Version
         run: echo "GORELEASER_CURRENT_TAG=v$(pulumictl get version --language generic)" >> $GITHUB_ENV
       - uses: sigstore/cosign-installer@v3.1.2
-      - uses: anchore/sbom-action/download-syft@v0.14.3
+      - uses: anchore/sbom-action/download-syft@v0.15.11
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5.1.0
         with:
