@@ -22,6 +22,15 @@ env:
   PUBLISH_PYPI: true
   PUBLISH_NPM: true
   PUBLISH_NUGET: true
+  DOTNETVERSION: |
+      6.0.x
+      3.1.301
+  GOVERSION: 1.22.x
+  GRADLEVERSION: "7.6"
+  JAVAVERSION: "11"
+  NODEVERSION: 20.x
+  PYTHONVERSION: 3.11.8
+
 jobs:
   publish_binary:
     name: publish
@@ -34,7 +43,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5.0.1
         with:
-          go-version: ${{matrix.goversion}}
+          go-version: ${{ env.GOVERSION }}
       - name: Install pulumictl
         uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
@@ -60,9 +69,7 @@ jobs:
             })
     strategy:
       fail-fast: true
-      matrix:
-        goversion:
-          - 1.20.x
+
   publish_sdk:
     name: Publish SDKs
     runs-on: ubuntu-latest
@@ -75,7 +82,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5.0.1
         with:
-          go-version: ${{ matrix.goversion }}
+          go-version: ${{ env.GOVERSION }}
       - name: Install pulumictl
         uses: jaxxstorm/action-install-gh-release@v1.12.0
         with:
@@ -85,16 +92,16 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.0.2
         with:
-          node-version: ${{matrix.nodeversion}}
+          node-version: ${{ env.NODEVERSION }}
           registry-url: ${{env.NPM_REGISTRY_URL}}
       - name: Setup DotNet
         uses: actions/setup-dotnet@v2.1.1
         with:
-          dotnet-version: ${{matrix.dotnetverson}}
+          dotnet-version: ${{ env.DOTNETVERSION }}
       - name: Setup Python
         uses: actions/setup-python@v4.8.0
         with:
-          python-version: ${{matrix.pythonversion}}
+          python-version: ${{ env.PYTHONVERSION }}
       - name: Build SDK
         run: make build_${{ matrix.language }}
       - name: Check worktree clean
@@ -128,16 +135,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        dotnetversion:
-          - 3.1.301
-        goversion:
-          - 1.20.x
         language:
           - nodejs
           - python
           - dotnet
           - go
-        nodeversion:
-          - 18.x
-        pythonversion:
-          - "3.9"
