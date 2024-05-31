@@ -188,6 +188,10 @@
                     "description": "The private key of the account that is\nrequesting the certificate. Forces a new resource when changed.\n",
                     "secret": true
                 },
+                "certTimeout": {
+                    "type": "integer",
+                    "description": "Controls the timeout in seconds for certificate requests\nthat are made after challenges are complete. Defaults to 30 seconds.\n\n\u003e As mentioned, `cert_timeout` does nothing until all challenges are complete.\nIf you are looking to control timeouts related to a particular challenge (such\nas a DNS challenge), see that challenge provider's specific options.\n"
+                },
                 "certificateDomain": {
                     "type": "string",
                     "description": "The common name of the certificate.\n"
@@ -318,6 +322,10 @@
                     "secret": true,
                     "willReplaceOnChanges": true
                 },
+                "certTimeout": {
+                    "type": "integer",
+                    "description": "Controls the timeout in seconds for certificate requests\nthat are made after challenges are complete. Defaults to 30 seconds.\n\n\u003e As mentioned, `cert_timeout` does nothing until all challenges are complete.\nIf you are looking to control timeouts related to a particular challenge (such\nas a DNS challenge), see that challenge provider's specific options.\n"
+                },
                 "certificateP12Password": {
                     "type": "string",
                     "description": "Password to be used when generating\nthe PFX file stored in `certificate_p12`. Defaults to an\nempty string.\n",
@@ -418,6 +426,10 @@
                         "description": "The private key of the account that is\nrequesting the certificate. Forces a new resource when changed.\n",
                         "secret": true,
                         "willReplaceOnChanges": true
+                    },
+                    "certTimeout": {
+                        "type": "integer",
+                        "description": "Controls the timeout in seconds for certificate requests\nthat are made after challenges are complete. Defaults to 30 seconds.\n\n\u003e As mentioned, `cert_timeout` does nothing until all challenges are complete.\nIf you are looking to control timeouts related to a particular challenge (such\nas a DNS challenge), see that challenge provider's specific options.\n"
                     },
                     "certificateDomain": {
                         "type": "string",

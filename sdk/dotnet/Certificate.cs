@@ -21,6 +21,17 @@ namespace Pulumiverse.Acme
         public Output<string> AccountKeyPem { get; private set; } = null!;
 
         /// <summary>
+        /// Controls the timeout in seconds for certificate requests
+        /// that are made after challenges are complete. Defaults to 30 seconds.
+        /// 
+        /// &gt; As mentioned, `cert_timeout` does nothing until all challenges are complete.
+        /// If you are looking to control timeouts related to a particular challenge (such
+        /// as a DNS challenge), see that challenge provider's specific options.
+        /// </summary>
+        [Output("certTimeout")]
+        public Output<int?> CertTimeout { get; private set; } = null!;
+
+        /// <summary>
         /// The common name of the certificate.
         /// </summary>
         [Output("certificateDomain")]
@@ -327,6 +338,17 @@ namespace Pulumiverse.Acme
             }
         }
 
+        /// <summary>
+        /// Controls the timeout in seconds for certificate requests
+        /// that are made after challenges are complete. Defaults to 30 seconds.
+        /// 
+        /// &gt; As mentioned, `cert_timeout` does nothing until all challenges are complete.
+        /// If you are looking to control timeouts related to a particular challenge (such
+        /// as a DNS challenge), see that challenge provider's specific options.
+        /// </summary>
+        [Input("certTimeout")]
+        public Input<int>? CertTimeout { get; set; }
+
         [Input("certificateP12Password")]
         private Input<string>? _certificateP12Password;
 
@@ -561,6 +583,17 @@ namespace Pulumiverse.Acme
                 _accountKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
             }
         }
+
+        /// <summary>
+        /// Controls the timeout in seconds for certificate requests
+        /// that are made after challenges are complete. Defaults to 30 seconds.
+        /// 
+        /// &gt; As mentioned, `cert_timeout` does nothing until all challenges are complete.
+        /// If you are looking to control timeouts related to a particular challenge (such
+        /// as a DNS challenge), see that challenge provider's specific options.
+        /// </summary>
+        [Input("certTimeout")]
+        public Input<int>? CertTimeout { get; set; }
 
         /// <summary>
         /// The common name of the certificate.

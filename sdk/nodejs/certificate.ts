@@ -40,6 +40,15 @@ export class Certificate extends pulumi.CustomResource {
      */
     public readonly accountKeyPem!: pulumi.Output<string>;
     /**
+     * Controls the timeout in seconds for certificate requests
+     * that are made after challenges are complete. Defaults to 30 seconds.
+     *
+     * > As mentioned, `certTimeout` does nothing until all challenges are complete.
+     * If you are looking to control timeouts related to a particular challenge (such
+     * as a DNS challenge), see that challenge provider's specific options.
+     */
+    public readonly certTimeout!: pulumi.Output<number | undefined>;
+    /**
      * The common name of the certificate.
      */
     public /*out*/ readonly certificateDomain!: pulumi.Output<string>;
@@ -240,6 +249,7 @@ export class Certificate extends pulumi.CustomResource {
         if (opts.id) {
             const state = argsOrState as CertificateState | undefined;
             resourceInputs["accountKeyPem"] = state ? state.accountKeyPem : undefined;
+            resourceInputs["certTimeout"] = state ? state.certTimeout : undefined;
             resourceInputs["certificateDomain"] = state ? state.certificateDomain : undefined;
             resourceInputs["certificateNotAfter"] = state ? state.certificateNotAfter : undefined;
             resourceInputs["certificateP12"] = state ? state.certificateP12 : undefined;
@@ -271,6 +281,7 @@ export class Certificate extends pulumi.CustomResource {
                 throw new Error("Missing required property 'accountKeyPem'");
             }
             resourceInputs["accountKeyPem"] = args?.accountKeyPem ? pulumi.secret(args.accountKeyPem) : undefined;
+            resourceInputs["certTimeout"] = args ? args.certTimeout : undefined;
             resourceInputs["certificateP12Password"] = args?.certificateP12Password ? pulumi.secret(args.certificateP12Password) : undefined;
             resourceInputs["certificateRequestPem"] = args ? args.certificateRequestPem : undefined;
             resourceInputs["commonName"] = args ? args.commonName : undefined;
@@ -313,6 +324,15 @@ export interface CertificateState {
      * requesting the certificate. Forces a new resource when changed.
      */
     accountKeyPem?: pulumi.Input<string>;
+    /**
+     * Controls the timeout in seconds for certificate requests
+     * that are made after challenges are complete. Defaults to 30 seconds.
+     *
+     * > As mentioned, `certTimeout` does nothing until all challenges are complete.
+     * If you are looking to control timeouts related to a particular challenge (such
+     * as a DNS challenge), see that challenge provider's specific options.
+     */
+    certTimeout?: pulumi.Input<number>;
     /**
      * The common name of the certificate.
      */
@@ -510,6 +530,15 @@ export interface CertificateArgs {
      * requesting the certificate. Forces a new resource when changed.
      */
     accountKeyPem: pulumi.Input<string>;
+    /**
+     * Controls the timeout in seconds for certificate requests
+     * that are made after challenges are complete. Defaults to 30 seconds.
+     *
+     * > As mentioned, `certTimeout` does nothing until all challenges are complete.
+     * If you are looking to control timeouts related to a particular challenge (such
+     * as a DNS challenge), see that challenge provider's specific options.
+     */
+    certTimeout?: pulumi.Input<number>;
     /**
      * Password to be used when generating
      * the PFX file stored in `certificateP12`. Defaults to an
