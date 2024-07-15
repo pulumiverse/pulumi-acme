@@ -18,6 +18,13 @@ type Certificate struct {
 	// The private key of the account that is
 	// requesting the certificate. Forces a new resource when changed.
 	AccountKeyPem pulumi.StringOutput `pulumi:"accountKeyPem"`
+	// Controls the timeout in seconds for certificate requests
+	// that are made after challenges are complete. Defaults to 30 seconds.
+	//
+	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
+	// If you are looking to control timeouts related to a particular challenge (such
+	// as a DNS challenge), see that challenge provider's specific options.
+	CertTimeout pulumi.IntPtrOutput `pulumi:"certTimeout"`
 	// The common name of the certificate.
 	CertificateDomain pulumi.StringOutput `pulumi:"certificateDomain"`
 	// The expiry date of the certificate, laid out in
@@ -205,6 +212,13 @@ type certificateState struct {
 	// The private key of the account that is
 	// requesting the certificate. Forces a new resource when changed.
 	AccountKeyPem *string `pulumi:"accountKeyPem"`
+	// Controls the timeout in seconds for certificate requests
+	// that are made after challenges are complete. Defaults to 30 seconds.
+	//
+	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
+	// If you are looking to control timeouts related to a particular challenge (such
+	// as a DNS challenge), see that challenge provider's specific options.
+	CertTimeout *int `pulumi:"certTimeout"`
 	// The common name of the certificate.
 	CertificateDomain *string `pulumi:"certificateDomain"`
 	// The expiry date of the certificate, laid out in
@@ -347,6 +361,13 @@ type CertificateState struct {
 	// The private key of the account that is
 	// requesting the certificate. Forces a new resource when changed.
 	AccountKeyPem pulumi.StringPtrInput
+	// Controls the timeout in seconds for certificate requests
+	// that are made after challenges are complete. Defaults to 30 seconds.
+	//
+	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
+	// If you are looking to control timeouts related to a particular challenge (such
+	// as a DNS challenge), see that challenge provider's specific options.
+	CertTimeout pulumi.IntPtrInput
 	// The common name of the certificate.
 	CertificateDomain pulumi.StringPtrInput
 	// The expiry date of the certificate, laid out in
@@ -493,6 +514,13 @@ type certificateArgs struct {
 	// The private key of the account that is
 	// requesting the certificate. Forces a new resource when changed.
 	AccountKeyPem string `pulumi:"accountKeyPem"`
+	// Controls the timeout in seconds for certificate requests
+	// that are made after challenges are complete. Defaults to 30 seconds.
+	//
+	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
+	// If you are looking to control timeouts related to a particular challenge (such
+	// as a DNS challenge), see that challenge provider's specific options.
+	CertTimeout *int `pulumi:"certTimeout"`
 	// Password to be used when generating
 	// the PFX file stored in `certificateP12`. Defaults to an
 	// empty string.
@@ -610,6 +638,13 @@ type CertificateArgs struct {
 	// The private key of the account that is
 	// requesting the certificate. Forces a new resource when changed.
 	AccountKeyPem pulumi.StringInput
+	// Controls the timeout in seconds for certificate requests
+	// that are made after challenges are complete. Defaults to 30 seconds.
+	//
+	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
+	// If you are looking to control timeouts related to a particular challenge (such
+	// as a DNS challenge), see that challenge provider's specific options.
+	CertTimeout pulumi.IntPtrInput
 	// Password to be used when generating
 	// the PFX file stored in `certificateP12`. Defaults to an
 	// empty string.
@@ -813,6 +848,16 @@ func (o CertificateOutput) ToCertificateOutputWithContext(ctx context.Context) C
 // requesting the certificate. Forces a new resource when changed.
 func (o CertificateOutput) AccountKeyPem() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.AccountKeyPem }).(pulumi.StringOutput)
+}
+
+// Controls the timeout in seconds for certificate requests
+// that are made after challenges are complete. Defaults to 30 seconds.
+//
+// > As mentioned, `certTimeout` does nothing until all challenges are complete.
+// If you are looking to control timeouts related to a particular challenge (such
+// as a DNS challenge), see that challenge provider's specific options.
+func (o CertificateOutput) CertTimeout() pulumi.IntPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.CertTimeout }).(pulumi.IntPtrOutput)
 }
 
 // The common name of the certificate.
