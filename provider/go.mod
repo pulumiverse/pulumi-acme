@@ -8,7 +8,7 @@ replace github.com/hashicorp/terraform-plugin-sdk/v2 => github.com/pulumi/terraf
 
 require (
 	github.com/pulumi/pulumi-terraform-bridge/v3 v3.86.0
-	github.com/vancluever/terraform-provider-acme/v2 v2.17.1
+	github.com/vancluever/terraform-provider-acme/v2 v2.18.0
 )
 
 require (
@@ -111,7 +111,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-acme/lego/v4 v4.14.0 // indirect
+	github.com/go-acme/lego/v4 v4.14.2 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.5.0 // indirect
@@ -209,6 +209,7 @@ require (
 	github.com/namedotcom/go v0.0.0-20180403034216-08470befbe04 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	github.com/nrdcg/auroradns v1.1.0 // indirect
+	github.com/nrdcg/bunny-go v0.0.0-20230728143221-c9dda82568d9 // indirect
 	github.com/nrdcg/desec v0.7.0 // indirect
 	github.com/nrdcg/dnspod-go v0.4.0 // indirect
 	github.com/nrdcg/freemyip v0.2.0 // indirect
@@ -221,7 +222,7 @@ require (
 	github.com/opentracing/basictracer-go v1.1.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/oracle/oci-go-sdk v24.3.0+incompatible // indirect
-	github.com/ovh/go-ovh v1.4.1 // indirect
+	github.com/ovh/go-ovh v1.4.2 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pgavlin/fx v0.1.6 // indirect
 	github.com/pgavlin/goldmark v1.1.33-0.20200616210433-b5eb04559386 // indirect
@@ -258,7 +259,6 @@ require (
 	github.com/segmentio/encoding v0.3.5 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
-	github.com/simplesurance/bunny-go v0.0.0-20221115111006-e11d9dc91f04 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/skeema/knownhosts v1.2.2 // indirect
 	github.com/smartystreets/go-aws-auth v0.0.0-20180515143844-0c1422d1fdb9 // indirect
