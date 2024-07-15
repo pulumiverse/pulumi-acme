@@ -17,6 +17,7 @@ __all__ = ['CertificateArgs', 'Certificate']
 class CertificateArgs:
     def __init__(__self__, *,
                  account_key_pem: pulumi.Input[str],
+                 cert_timeout: Optional[pulumi.Input[int]] = None,
                  certificate_p12_password: Optional[pulumi.Input[str]] = None,
                  certificate_request_pem: Optional[pulumi.Input[str]] = None,
                  common_name: Optional[pulumi.Input[str]] = None,
@@ -39,6 +40,12 @@ class CertificateArgs:
         The set of arguments for constructing a Certificate resource.
         :param pulumi.Input[str] account_key_pem: The private key of the account that is
                requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[int] cert_timeout: Controls the timeout in seconds for certificate requests
+               that are made after challenges are complete. Defaults to 30 seconds.
+               
+               > As mentioned, `cert_timeout` does nothing until all challenges are complete.
+               If you are looking to control timeouts related to a particular challenge (such
+               as a DNS challenge), see that challenge provider's specific options.
         :param pulumi.Input[str] certificate_p12_password: Password to be used when generating
                the PFX file stored in `certificate_p12`. Defaults to an
                empty string.
@@ -133,6 +140,8 @@ class CertificateArgs:
                details on using these and `tls_challenge`.
         """
         pulumi.set(__self__, "account_key_pem", account_key_pem)
+        if cert_timeout is not None:
+            pulumi.set(__self__, "cert_timeout", cert_timeout)
         if certificate_p12_password is not None:
             pulumi.set(__self__, "certificate_p12_password", certificate_p12_password)
         if certificate_request_pem is not None:
@@ -182,6 +191,23 @@ class CertificateArgs:
     @account_key_pem.setter
     def account_key_pem(self, value: pulumi.Input[str]):
         pulumi.set(self, "account_key_pem", value)
+
+    @property
+    @pulumi.getter(name="certTimeout")
+    def cert_timeout(self) -> Optional[pulumi.Input[int]]:
+        """
+        Controls the timeout in seconds for certificate requests
+        that are made after challenges are complete. Defaults to 30 seconds.
+
+        > As mentioned, `cert_timeout` does nothing until all challenges are complete.
+        If you are looking to control timeouts related to a particular challenge (such
+        as a DNS challenge), see that challenge provider's specific options.
+        """
+        return pulumi.get(self, "cert_timeout")
+
+    @cert_timeout.setter
+    def cert_timeout(self, value: Optional[pulumi.Input[int]]):
+        pulumi.set(self, "cert_timeout", value)
 
     @property
     @pulumi.getter(name="certificateP12Password")
@@ -478,6 +504,7 @@ class CertificateArgs:
 class _CertificateState:
     def __init__(__self__, *,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
+                 cert_timeout: Optional[pulumi.Input[int]] = None,
                  certificate_domain: Optional[pulumi.Input[str]] = None,
                  certificate_not_after: Optional[pulumi.Input[str]] = None,
                  certificate_p12: Optional[pulumi.Input[str]] = None,
@@ -507,6 +534,12 @@ class _CertificateState:
         Input properties used for looking up and filtering Certificate resources.
         :param pulumi.Input[str] account_key_pem: The private key of the account that is
                requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[int] cert_timeout: Controls the timeout in seconds for certificate requests
+               that are made after challenges are complete. Defaults to 30 seconds.
+               
+               > As mentioned, `cert_timeout` does nothing until all challenges are complete.
+               If you are looking to control timeouts related to a particular challenge (such
+               as a DNS challenge), see that challenge provider's specific options.
         :param pulumi.Input[str] certificate_domain: The common name of the certificate.
         :param pulumi.Input[str] certificate_not_after: The expiry date of the certificate, laid out in
                RFC3339 format (`2006-01-02T15:04:05Z07:00`).
@@ -621,6 +654,8 @@ class _CertificateState:
         """
         if account_key_pem is not None:
             pulumi.set(__self__, "account_key_pem", account_key_pem)
+        if cert_timeout is not None:
+            pulumi.set(__self__, "cert_timeout", cert_timeout)
         if certificate_domain is not None:
             pulumi.set(__self__, "certificate_domain", certificate_domain)
         if certificate_not_after is not None:
@@ -684,6 +719,23 @@ class _CertificateState:
     @account_key_pem.setter
     def account_key_pem(self, value: Optional[pulumi.Input[str]]):
         pulumi.set(self, "account_key_pem", value)
+
+    @property
+    @pulumi.getter(name="certTimeout")
+    def cert_timeout(self) -> Optional[pulumi.Input[int]]:
+        """
+        Controls the timeout in seconds for certificate requests
+        that are made after challenges are complete. Defaults to 30 seconds.
+
+        > As mentioned, `cert_timeout` does nothing until all challenges are complete.
+        If you are looking to control timeouts related to a particular challenge (such
+        as a DNS challenge), see that challenge provider's specific options.
+        """
+        return pulumi.get(self, "cert_timeout")
+
+    @cert_timeout.setter
+    def cert_timeout(self, value: Optional[pulumi.Input[int]]):
+        pulumi.set(self, "cert_timeout", value)
 
     @property
     @pulumi.getter(name="certificateDomain")
@@ -1078,6 +1130,7 @@ class Certificate(pulumi.CustomResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
+                 cert_timeout: Optional[pulumi.Input[int]] = None,
                  certificate_p12_password: Optional[pulumi.Input[str]] = None,
                  certificate_request_pem: Optional[pulumi.Input[str]] = None,
                  common_name: Optional[pulumi.Input[str]] = None,
@@ -1103,6 +1156,12 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[str] account_key_pem: The private key of the account that is
                requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[int] cert_timeout: Controls the timeout in seconds for certificate requests
+               that are made after challenges are complete. Defaults to 30 seconds.
+               
+               > As mentioned, `cert_timeout` does nothing until all challenges are complete.
+               If you are looking to control timeouts related to a particular challenge (such
+               as a DNS challenge), see that challenge provider's specific options.
         :param pulumi.Input[str] certificate_p12_password: Password to be used when generating
                the PFX file stored in `certificate_p12`. Defaults to an
                empty string.
@@ -1220,6 +1279,7 @@ class Certificate(pulumi.CustomResource):
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
+                 cert_timeout: Optional[pulumi.Input[int]] = None,
                  certificate_p12_password: Optional[pulumi.Input[str]] = None,
                  certificate_request_pem: Optional[pulumi.Input[str]] = None,
                  common_name: Optional[pulumi.Input[str]] = None,
@@ -1250,6 +1310,7 @@ class Certificate(pulumi.CustomResource):
             if account_key_pem is None and not opts.urn:
                 raise TypeError("Missing required property 'account_key_pem'")
             __props__.__dict__["account_key_pem"] = None if account_key_pem is None else pulumi.Output.secret(account_key_pem)
+            __props__.__dict__["cert_timeout"] = cert_timeout
             __props__.__dict__["certificate_p12_password"] = None if certificate_p12_password is None else pulumi.Output.secret(certificate_p12_password)
             __props__.__dict__["certificate_request_pem"] = certificate_request_pem
             __props__.__dict__["common_name"] = common_name
@@ -1288,6 +1349,7 @@ class Certificate(pulumi.CustomResource):
             id: pulumi.Input[str],
             opts: Optional[pulumi.ResourceOptions] = None,
             account_key_pem: Optional[pulumi.Input[str]] = None,
+            cert_timeout: Optional[pulumi.Input[int]] = None,
             certificate_domain: Optional[pulumi.Input[str]] = None,
             certificate_not_after: Optional[pulumi.Input[str]] = None,
             certificate_p12: Optional[pulumi.Input[str]] = None,
@@ -1322,6 +1384,12 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.ResourceOptions opts: Options for the resource.
         :param pulumi.Input[str] account_key_pem: The private key of the account that is
                requesting the certificate. Forces a new resource when changed.
+        :param pulumi.Input[int] cert_timeout: Controls the timeout in seconds for certificate requests
+               that are made after challenges are complete. Defaults to 30 seconds.
+               
+               > As mentioned, `cert_timeout` does nothing until all challenges are complete.
+               If you are looking to control timeouts related to a particular challenge (such
+               as a DNS challenge), see that challenge provider's specific options.
         :param pulumi.Input[str] certificate_domain: The common name of the certificate.
         :param pulumi.Input[str] certificate_not_after: The expiry date of the certificate, laid out in
                RFC3339 format (`2006-01-02T15:04:05Z07:00`).
@@ -1439,6 +1507,7 @@ class Certificate(pulumi.CustomResource):
         __props__ = _CertificateState.__new__(_CertificateState)
 
         __props__.__dict__["account_key_pem"] = account_key_pem
+        __props__.__dict__["cert_timeout"] = cert_timeout
         __props__.__dict__["certificate_domain"] = certificate_domain
         __props__.__dict__["certificate_not_after"] = certificate_not_after
         __props__.__dict__["certificate_p12"] = certificate_p12
@@ -1474,6 +1543,19 @@ class Certificate(pulumi.CustomResource):
         requesting the certificate. Forces a new resource when changed.
         """
         return pulumi.get(self, "account_key_pem")
+
+    @property
+    @pulumi.getter(name="certTimeout")
+    def cert_timeout(self) -> pulumi.Output[Optional[int]]:
+        """
+        Controls the timeout in seconds for certificate requests
+        that are made after challenges are complete. Defaults to 30 seconds.
+
+        > As mentioned, `cert_timeout` does nothing until all challenges are complete.
+        If you are looking to control timeouts related to a particular challenge (such
+        as a DNS challenge), see that challenge provider's specific options.
+        """
+        return pulumi.get(self, "cert_timeout")
 
     @property
     @pulumi.getter(name="certificateDomain")
