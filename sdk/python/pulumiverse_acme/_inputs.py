@@ -130,11 +130,17 @@ class CertificateHttpMemcachedChallengeArgs:
 class CertificateHttpS3ChallengeArgs:
     def __init__(__self__, *,
                  s3_bucket: pulumi.Input[str]):
+        """
+        :param pulumi.Input[str] s3_bucket: The s3_bucket to publish the record to.
+        """
         pulumi.set(__self__, "s3_bucket", s3_bucket)
 
     @property
     @pulumi.getter(name="s3Bucket")
     def s3_bucket(self) -> pulumi.Input[str]:
+        """
+        The s3_bucket to publish the record to.
+        """
         return pulumi.get(self, "s3_bucket")
 
     @s3_bucket.setter

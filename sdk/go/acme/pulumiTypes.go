@@ -451,6 +451,7 @@ func (o CertificateHttpMemcachedChallengePtrOutput) Hosts() pulumi.StringArrayOu
 }
 
 type CertificateHttpS3Challenge struct {
+	// The s3Bucket to publish the record to.
 	S3Bucket string `pulumi:"s3Bucket"`
 }
 
@@ -466,6 +467,7 @@ type CertificateHttpS3ChallengeInput interface {
 }
 
 type CertificateHttpS3ChallengeArgs struct {
+	// The s3Bucket to publish the record to.
 	S3Bucket pulumi.StringInput `pulumi:"s3Bucket"`
 }
 
@@ -546,6 +548,7 @@ func (o CertificateHttpS3ChallengeOutput) ToCertificateHttpS3ChallengePtrOutputW
 	}).(CertificateHttpS3ChallengePtrOutput)
 }
 
+// The s3Bucket to publish the record to.
 func (o CertificateHttpS3ChallengeOutput) S3Bucket() pulumi.StringOutput {
 	return o.ApplyT(func(v CertificateHttpS3Challenge) string { return v.S3Bucket }).(pulumi.StringOutput)
 }
@@ -574,6 +577,7 @@ func (o CertificateHttpS3ChallengePtrOutput) Elem() CertificateHttpS3ChallengeOu
 	}).(CertificateHttpS3ChallengeOutput)
 }
 
+// The s3Bucket to publish the record to.
 func (o CertificateHttpS3ChallengePtrOutput) S3Bucket() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *CertificateHttpS3Challenge) *string {
 		if v == nil {

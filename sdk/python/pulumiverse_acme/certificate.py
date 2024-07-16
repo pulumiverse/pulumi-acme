@@ -34,6 +34,7 @@ class CertificateArgs:
                  preferred_chain: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
+                 revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None):
         """
@@ -128,6 +129,19 @@ class CertificateArgs:
                DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
+               Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+               By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+               * unspecified
+               * key-compromise
+               * ca-compromise
+               * affiliation-changed
+               * superseded
+               * cessation-of-operation
+               * certificate-hold
+               * remove-from-crl
+               * privilege-withdrawn
+               * aa-compromise
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
                domains that this certificate will also be recognized for. Only valid when not
                specifying a CSR. Forces a new resource when changed.
@@ -174,6 +188,8 @@ class CertificateArgs:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
         if revoke_certificate_on_destroy is not None:
             pulumi.set(__self__, "revoke_certificate_on_destroy", revoke_certificate_on_destroy)
+        if revoke_certificate_reason is not None:
+            pulumi.set(__self__, "revoke_certificate_reason", revoke_certificate_reason)
         if subject_alternative_names is not None:
             pulumi.set(__self__, "subject_alternative_names", subject_alternative_names)
         if tls_challenge is not None:
@@ -468,6 +484,30 @@ class CertificateArgs:
         pulumi.set(self, "revoke_certificate_on_destroy", value)
 
     @property
+    @pulumi.getter(name="revokeCertificateReason")
+    def revoke_certificate_reason(self) -> Optional[pulumi.Input[str]]:
+        """
+        Some CA's require a reason for revocation to be provided.
+        Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+        By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+        * unspecified
+        * key-compromise
+        * ca-compromise
+        * affiliation-changed
+        * superseded
+        * cessation-of-operation
+        * certificate-hold
+        * remove-from-crl
+        * privilege-withdrawn
+        * aa-compromise
+        """
+        return pulumi.get(self, "revoke_certificate_reason")
+
+    @revoke_certificate_reason.setter
+    def revoke_certificate_reason(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "revoke_certificate_reason", value)
+
+    @property
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
@@ -528,6 +568,7 @@ class _CertificateState:
                  private_key_pem: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
+                 revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None):
         """
@@ -641,6 +682,19 @@ class _CertificateState:
                DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
+               Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+               By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+               * unspecified
+               * key-compromise
+               * ca-compromise
+               * affiliation-changed
+               * superseded
+               * cessation-of-operation
+               * certificate-hold
+               * remove-from-crl
+               * privilege-withdrawn
+               * aa-compromise
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
                domains that this certificate will also be recognized for. Only valid when not
                specifying a CSR. Forces a new resource when changed.
@@ -702,6 +756,8 @@ class _CertificateState:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
         if revoke_certificate_on_destroy is not None:
             pulumi.set(__self__, "revoke_certificate_on_destroy", revoke_certificate_on_destroy)
+        if revoke_certificate_reason is not None:
+            pulumi.set(__self__, "revoke_certificate_reason", revoke_certificate_reason)
         if subject_alternative_names is not None:
             pulumi.set(__self__, "subject_alternative_names", subject_alternative_names)
         if tls_challenge is not None:
@@ -1092,6 +1148,30 @@ class _CertificateState:
         pulumi.set(self, "revoke_certificate_on_destroy", value)
 
     @property
+    @pulumi.getter(name="revokeCertificateReason")
+    def revoke_certificate_reason(self) -> Optional[pulumi.Input[str]]:
+        """
+        Some CA's require a reason for revocation to be provided.
+        Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+        By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+        * unspecified
+        * key-compromise
+        * ca-compromise
+        * affiliation-changed
+        * superseded
+        * cessation-of-operation
+        * certificate-hold
+        * remove-from-crl
+        * privilege-withdrawn
+        * aa-compromise
+        """
+        return pulumi.get(self, "revoke_certificate_reason")
+
+    @revoke_certificate_reason.setter
+    def revoke_certificate_reason(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "revoke_certificate_reason", value)
+
+    @property
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
@@ -1147,6 +1227,7 @@ class Certificate(pulumi.CustomResource):
                  preferred_chain: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
+                 revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  tls_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']]] = None,
                  __props__=None):
@@ -1244,6 +1325,19 @@ class Certificate(pulumi.CustomResource):
                DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
+               Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+               By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+               * unspecified
+               * key-compromise
+               * ca-compromise
+               * affiliation-changed
+               * superseded
+               * cessation-of-operation
+               * certificate-hold
+               * remove-from-crl
+               * privilege-withdrawn
+               * aa-compromise
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
                domains that this certificate will also be recognized for. Only valid when not
                specifying a CSR. Forces a new resource when changed.
@@ -1296,6 +1390,7 @@ class Certificate(pulumi.CustomResource):
                  preferred_chain: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
+                 revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  tls_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']]] = None,
                  __props__=None):
@@ -1327,6 +1422,7 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["preferred_chain"] = preferred_chain
             __props__.__dict__["recursive_nameservers"] = recursive_nameservers
             __props__.__dict__["revoke_certificate_on_destroy"] = revoke_certificate_on_destroy
+            __props__.__dict__["revoke_certificate_reason"] = revoke_certificate_reason
             __props__.__dict__["subject_alternative_names"] = subject_alternative_names
             __props__.__dict__["tls_challenge"] = tls_challenge
             __props__.__dict__["certificate_domain"] = None
@@ -1373,6 +1469,7 @@ class Certificate(pulumi.CustomResource):
             private_key_pem: Optional[pulumi.Input[str]] = None,
             recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
             revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
+            revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
             subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
             tls_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']]] = None) -> 'Certificate':
         """
@@ -1491,6 +1588,19 @@ class Certificate(pulumi.CustomResource):
                DNS resolvers.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
+        :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
+               Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+               By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+               * unspecified
+               * key-compromise
+               * ca-compromise
+               * affiliation-changed
+               * superseded
+               * cessation-of-operation
+               * certificate-hold
+               * remove-from-crl
+               * privilege-withdrawn
+               * aa-compromise
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
                domains that this certificate will also be recognized for. Only valid when not
                specifying a CSR. Forces a new resource when changed.
@@ -1531,6 +1641,7 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["private_key_pem"] = private_key_pem
         __props__.__dict__["recursive_nameservers"] = recursive_nameservers
         __props__.__dict__["revoke_certificate_on_destroy"] = revoke_certificate_on_destroy
+        __props__.__dict__["revoke_certificate_reason"] = revoke_certificate_reason
         __props__.__dict__["subject_alternative_names"] = subject_alternative_names
         __props__.__dict__["tls_challenge"] = tls_challenge
         return Certificate(resource_name, opts=opts, __props__=__props__)
@@ -1818,6 +1929,26 @@ class Certificate(pulumi.CustomResource):
         which includes when a resource is re-created. Default is `true`.
         """
         return pulumi.get(self, "revoke_certificate_on_destroy")
+
+    @property
+    @pulumi.getter(name="revokeCertificateReason")
+    def revoke_certificate_reason(self) -> pulumi.Output[Optional[str]]:
+        """
+        Some CA's require a reason for revocation to be provided.
+        Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+        By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+        * unspecified
+        * key-compromise
+        * ca-compromise
+        * affiliation-changed
+        * superseded
+        * cessation-of-operation
+        * certificate-hold
+        * remove-from-crl
+        * privilege-withdrawn
+        * aa-compromise
+        """
+        return pulumi.get(self, "revoke_certificate_reason")
 
     @property
     @pulumi.getter(name="subjectAlternativeNames")
