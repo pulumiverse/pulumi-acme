@@ -112,7 +112,8 @@
         "acme:index/CertificateHttpS3Challenge:CertificateHttpS3Challenge": {
             "properties": {
                 "s3Bucket": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "The s3_bucket to publish the record to.\n"
                 }
             },
             "type": "object",
@@ -293,6 +294,10 @@
                     "type": "boolean",
                     "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
                 },
+                "revokeCertificateReason": {
+                    "type": "string",
+                    "description": "Some CA's require a reason for revocation to be provided.\nUse this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).\nBy default, no reason provided in revocation requests. The reason is a string, when provided should be one of:\n* unspecified\n* key-compromise\n* ca-compromise\n* affiliation-changed\n* superseded\n* cessation-of-operation\n* certificate-hold\n* remove-from-crl\n* privilege-withdrawn\n* aa-compromise\n"
+                },
                 "subjectAlternativeNames": {
                     "type": "array",
                     "items": {
@@ -401,6 +406,10 @@
                 "revokeCertificateOnDestroy": {
                     "type": "boolean",
                     "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
+                },
+                "revokeCertificateReason": {
+                    "type": "string",
+                    "description": "Some CA's require a reason for revocation to be provided.\nUse this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).\nBy default, no reason provided in revocation requests. The reason is a string, when provided should be one of:\n* unspecified\n* key-compromise\n* ca-compromise\n* affiliation-changed\n* superseded\n* cessation-of-operation\n* certificate-hold\n* remove-from-crl\n* privilege-withdrawn\n* aa-compromise\n"
                 },
                 "subjectAlternativeNames": {
                     "type": "array",
@@ -536,6 +545,10 @@
                     "revokeCertificateOnDestroy": {
                         "type": "boolean",
                         "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
+                    },
+                    "revokeCertificateReason": {
+                        "type": "string",
+                        "description": "Some CA's require a reason for revocation to be provided.\nUse this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).\nBy default, no reason provided in revocation requests. The reason is a string, when provided should be one of:\n* unspecified\n* key-compromise\n* ca-compromise\n* affiliation-changed\n* superseded\n* cessation-of-operation\n* certificate-hold\n* remove-from-crl\n* privilege-withdrawn\n* aa-compromise\n"
                     },
                     "subjectAlternativeNames": {
                         "type": "array",

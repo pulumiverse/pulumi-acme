@@ -8,7 +8,7 @@ replace github.com/hashicorp/terraform-plugin-sdk/v2 => github.com/pulumi/terraf
 
 require (
 	github.com/pulumi/pulumi-terraform-bridge/v3 v3.86.0
-	github.com/vancluever/terraform-provider-acme/v2 v2.18.0
+	github.com/vancluever/terraform-provider-acme/v2 v2.19.1
 )
 
 require (
@@ -326,5 +326,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	lukechampine.com/frand v1.4.2 // indirect
-	software.sslmate.com/src/go-pkcs12 v0.2.1 // indirect
+	software.sslmate.com/src/go-pkcs12 v0.4.0 // indirect
 )
