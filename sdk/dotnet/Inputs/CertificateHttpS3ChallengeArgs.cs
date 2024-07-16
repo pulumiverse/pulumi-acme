@@ -13,6 +13,9 @@ namespace Pulumiverse.Acme.Inputs
 
     public sealed class CertificateHttpS3ChallengeArgs : global::Pulumi.ResourceArgs
     {
+        /// <summary>
+        /// The s3_bucket to publish the record to.
+        /// </summary>
         [Input("s3Bucket", required: true)]
         public Input<string> S3Bucket { get; set; } = null!;
 

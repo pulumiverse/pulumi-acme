@@ -219,6 +219,22 @@ export class Certificate extends pulumi.CustomResource {
      */
     public readonly revokeCertificateOnDestroy!: pulumi.Output<boolean | undefined>;
     /**
+     * Some CA's require a reason for revocation to be provided.
+     * Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+     * By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+     * * unspecified
+     * * key-compromise
+     * * ca-compromise
+     * * affiliation-changed
+     * * superseded
+     * * cessation-of-operation
+     * * certificate-hold
+     * * remove-from-crl
+     * * privilege-withdrawn
+     * * aa-compromise
+     */
+    public readonly revokeCertificateReason!: pulumi.Output<string | undefined>;
+    /**
      * The certificate's subject alternative names,
      * domains that this certificate will also be recognized for. Only valid when not
      * specifying a CSR. Forces a new resource when changed.
@@ -273,6 +289,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["privateKeyPem"] = state ? state.privateKeyPem : undefined;
             resourceInputs["recursiveNameservers"] = state ? state.recursiveNameservers : undefined;
             resourceInputs["revokeCertificateOnDestroy"] = state ? state.revokeCertificateOnDestroy : undefined;
+            resourceInputs["revokeCertificateReason"] = state ? state.revokeCertificateReason : undefined;
             resourceInputs["subjectAlternativeNames"] = state ? state.subjectAlternativeNames : undefined;
             resourceInputs["tlsChallenge"] = state ? state.tlsChallenge : undefined;
         } else {
@@ -298,6 +315,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["preferredChain"] = args ? args.preferredChain : undefined;
             resourceInputs["recursiveNameservers"] = args ? args.recursiveNameservers : undefined;
             resourceInputs["revokeCertificateOnDestroy"] = args ? args.revokeCertificateOnDestroy : undefined;
+            resourceInputs["revokeCertificateReason"] = args ? args.revokeCertificateReason : undefined;
             resourceInputs["subjectAlternativeNames"] = args ? args.subjectAlternativeNames : undefined;
             resourceInputs["tlsChallenge"] = args ? args.tlsChallenge : undefined;
             resourceInputs["certificateDomain"] = undefined /*out*/;
@@ -504,6 +522,22 @@ export interface CertificateState {
      */
     revokeCertificateOnDestroy?: pulumi.Input<boolean>;
     /**
+     * Some CA's require a reason for revocation to be provided.
+     * Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+     * By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+     * * unspecified
+     * * key-compromise
+     * * ca-compromise
+     * * affiliation-changed
+     * * superseded
+     * * cessation-of-operation
+     * * certificate-hold
+     * * remove-from-crl
+     * * privilege-withdrawn
+     * * aa-compromise
+     */
+    revokeCertificateReason?: pulumi.Input<string>;
+    /**
      * The certificate's subject alternative names,
      * domains that this certificate will also be recognized for. Only valid when not
      * specifying a CSR. Forces a new resource when changed.
@@ -669,6 +703,22 @@ export interface CertificateArgs {
      * which includes when a resource is re-created. Default is `true`.
      */
     revokeCertificateOnDestroy?: pulumi.Input<boolean>;
+    /**
+     * Some CA's require a reason for revocation to be provided.
+     * Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+     * By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+     * * unspecified
+     * * key-compromise
+     * * ca-compromise
+     * * affiliation-changed
+     * * superseded
+     * * cessation-of-operation
+     * * certificate-hold
+     * * remove-from-crl
+     * * privilege-withdrawn
+     * * aa-compromise
+     */
+    revokeCertificateReason?: pulumi.Input<string>;
     /**
      * The certificate's subject alternative names,
      * domains that this certificate will also be recognized for. Only valid when not

@@ -149,6 +149,20 @@ type Certificate struct {
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy pulumi.BoolPtrOutput `pulumi:"revokeCertificateOnDestroy"`
+	// Some CA's require a reason for revocation to be provided.
+	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+	// * unspecified
+	// * key-compromise
+	// * ca-compromise
+	// * affiliation-changed
+	// * superseded
+	// * cessation-of-operation
+	// * certificate-hold
+	// * remove-from-crl
+	// * privilege-withdrawn
+	// * aa-compromise
+	RevokeCertificateReason pulumi.StringPtrOutput `pulumi:"revokeCertificateReason"`
 	// The certificate's subject alternative names,
 	// domains that this certificate will also be recognized for. Only valid when not
 	// specifying a CSR. Forces a new resource when changed.
@@ -343,6 +357,20 @@ type certificateState struct {
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy *bool `pulumi:"revokeCertificateOnDestroy"`
+	// Some CA's require a reason for revocation to be provided.
+	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+	// * unspecified
+	// * key-compromise
+	// * ca-compromise
+	// * affiliation-changed
+	// * superseded
+	// * cessation-of-operation
+	// * certificate-hold
+	// * remove-from-crl
+	// * privilege-withdrawn
+	// * aa-compromise
+	RevokeCertificateReason *string `pulumi:"revokeCertificateReason"`
 	// The certificate's subject alternative names,
 	// domains that this certificate will also be recognized for. Only valid when not
 	// specifying a CSR. Forces a new resource when changed.
@@ -492,6 +520,20 @@ type CertificateState struct {
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy pulumi.BoolPtrInput
+	// Some CA's require a reason for revocation to be provided.
+	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+	// * unspecified
+	// * key-compromise
+	// * ca-compromise
+	// * affiliation-changed
+	// * superseded
+	// * cessation-of-operation
+	// * certificate-hold
+	// * remove-from-crl
+	// * privilege-withdrawn
+	// * aa-compromise
+	RevokeCertificateReason pulumi.StringPtrInput
 	// The certificate's subject alternative names,
 	// domains that this certificate will also be recognized for. Only valid when not
 	// specifying a CSR. Forces a new resource when changed.
@@ -619,6 +661,20 @@ type certificateArgs struct {
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy *bool `pulumi:"revokeCertificateOnDestroy"`
+	// Some CA's require a reason for revocation to be provided.
+	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+	// * unspecified
+	// * key-compromise
+	// * ca-compromise
+	// * affiliation-changed
+	// * superseded
+	// * cessation-of-operation
+	// * certificate-hold
+	// * remove-from-crl
+	// * privilege-withdrawn
+	// * aa-compromise
+	RevokeCertificateReason *string `pulumi:"revokeCertificateReason"`
 	// The certificate's subject alternative names,
 	// domains that this certificate will also be recognized for. Only valid when not
 	// specifying a CSR. Forces a new resource when changed.
@@ -743,6 +799,20 @@ type CertificateArgs struct {
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy pulumi.BoolPtrInput
+	// Some CA's require a reason for revocation to be provided.
+	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+	// * unspecified
+	// * key-compromise
+	// * ca-compromise
+	// * affiliation-changed
+	// * superseded
+	// * cessation-of-operation
+	// * certificate-hold
+	// * remove-from-crl
+	// * privilege-withdrawn
+	// * aa-compromise
+	RevokeCertificateReason pulumi.StringPtrInput
 	// The certificate's subject alternative names,
 	// domains that this certificate will also be recognized for. Only valid when not
 	// specifying a CSR. Forces a new resource when changed.
@@ -1051,6 +1121,23 @@ func (o CertificateOutput) RecursiveNameservers() pulumi.StringArrayOutput {
 // which includes when a resource is re-created. Default is `true`.
 func (o CertificateOutput) RevokeCertificateOnDestroy() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.RevokeCertificateOnDestroy }).(pulumi.BoolPtrOutput)
+}
+
+// Some CA's require a reason for revocation to be provided.
+// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+// * unspecified
+// * key-compromise
+// * ca-compromise
+// * affiliation-changed
+// * superseded
+// * cessation-of-operation
+// * certificate-hold
+// * remove-from-crl
+// * privilege-withdrawn
+// * aa-compromise
+func (o CertificateOutput) RevokeCertificateReason() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.RevokeCertificateReason }).(pulumi.StringPtrOutput)
 }
 
 // The certificate's subject alternative names,

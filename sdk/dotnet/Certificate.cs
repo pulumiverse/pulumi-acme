@@ -248,6 +248,24 @@ namespace Pulumiverse.Acme
         public Output<bool?> RevokeCertificateOnDestroy { get; private set; } = null!;
 
         /// <summary>
+        /// Some CA's require a reason for revocation to be provided.
+        /// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+        /// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+        /// * unspecified
+        /// * key-compromise
+        /// * ca-compromise
+        /// * affiliation-changed
+        /// * superseded
+        /// * cessation-of-operation
+        /// * certificate-hold
+        /// * remove-from-crl
+        /// * privilege-withdrawn
+        /// * aa-compromise
+        /// </summary>
+        [Output("revokeCertificateReason")]
+        public Output<string?> RevokeCertificateReason { get; private set; } = null!;
+
+        /// <summary>
         /// The certificate's subject alternative names,
         /// domains that this certificate will also be recognized for. Only valid when not
         /// specifying a CSR. Forces a new resource when changed.
@@ -532,6 +550,24 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("revokeCertificateOnDestroy")]
         public Input<bool>? RevokeCertificateOnDestroy { get; set; }
+
+        /// <summary>
+        /// Some CA's require a reason for revocation to be provided.
+        /// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+        /// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+        /// * unspecified
+        /// * key-compromise
+        /// * ca-compromise
+        /// * affiliation-changed
+        /// * superseded
+        /// * cessation-of-operation
+        /// * certificate-hold
+        /// * remove-from-crl
+        /// * privilege-withdrawn
+        /// * aa-compromise
+        /// </summary>
+        [Input("revokeCertificateReason")]
+        public Input<string>? RevokeCertificateReason { get; set; }
 
         [Input("subjectAlternativeNames")]
         private InputList<string>? _subjectAlternativeNames;
@@ -852,6 +888,24 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("revokeCertificateOnDestroy")]
         public Input<bool>? RevokeCertificateOnDestroy { get; set; }
+
+        /// <summary>
+        /// Some CA's require a reason for revocation to be provided.
+        /// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
+        /// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
+        /// * unspecified
+        /// * key-compromise
+        /// * ca-compromise
+        /// * affiliation-changed
+        /// * superseded
+        /// * cessation-of-operation
+        /// * certificate-hold
+        /// * remove-from-crl
+        /// * privilege-withdrawn
+        /// * aa-compromise
+        /// </summary>
+        [Input("revokeCertificateReason")]
+        public Input<string>? RevokeCertificateReason { get; set; }
 
         [Input("subjectAlternativeNames")]
         private InputList<string>? _subjectAlternativeNames;

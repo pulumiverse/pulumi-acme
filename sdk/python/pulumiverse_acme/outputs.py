@@ -144,11 +144,17 @@ class CertificateHttpS3Challenge(dict):
 
     def __init__(__self__, *,
                  s3_bucket: str):
+        """
+        :param str s3_bucket: The s3_bucket to publish the record to.
+        """
         pulumi.set(__self__, "s3_bucket", s3_bucket)
 
     @property
     @pulumi.getter(name="s3Bucket")
     def s3_bucket(self) -> str:
+        """
+        The s3_bucket to publish the record to.
+        """
         return pulumi.get(self, "s3_bucket")
 
 

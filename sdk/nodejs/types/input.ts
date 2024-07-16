@@ -38,6 +38,9 @@ export interface CertificateHttpMemcachedChallenge {
 }
 
 export interface CertificateHttpS3Challenge {
+    /**
+     * The s3Bucket to publish the record to.
+     */
     s3Bucket: pulumi.Input<string>;
 }
 
