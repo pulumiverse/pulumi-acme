@@ -135,8 +135,8 @@ require (
 	github.com/google/wire v0.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.2 // indirect
-	github.com/gophercloud/gophercloud v1.0.0 // indirect
-	github.com/gophercloud/utils v0.0.0-20210216074907-f6de111f2eae // indirect
+	github.com/gophercloud/gophercloud v1.3.0 // indirect
+	github.com/gophercloud/utils v0.0.0-20231010081019-80377eca5d56 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/grpc-ecosystem/grpc-opentracing v0.0.0-20180507213350-8e809c8a8645 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
