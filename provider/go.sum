@@ -2148,6 +2148,8 @@ github.com/nrdcg/auroradns v1.1.0 h1:KekGh8kmf2MNwqZVVYo/fw/ZONt8QMEmbMFOeljteWo
 github.com/nrdcg/auroradns v1.1.0/go.mod h1:O7tViUZbAcnykVnrGkXzIJTHoQCHcgalgAe6X1mzHfk=
 github.com/nrdcg/bunny-go v0.0.0-20230728143221-c9dda82568d9 h1:qpB3wZR4+MPK92cTC9zZPnndkJgDgPvQqPUAgVc1NXU=
 github.com/nrdcg/bunny-go v0.0.0-20230728143221-c9dda82568d9/go.mod h1:HUoHXDrFvidN1NK9Wb/mZKNOfDNutKkzF2Pg71M9hHA=
+github.com/nrdcg/bunny-go v0.0.0-20240207213615-dde5bf4577a3 h1:ouZ2JWDl8IW5k1qugYbmpbmW8hn85Ig6buSMBRlz3KI=
+github.com/nrdcg/bunny-go v0.0.0-20240207213615-dde5bf4577a3/go.mod h1:ZwadWt7mVhMHMbAQ1w8IhDqtWO3eWqWq72W7trnaiE8=
 github.com/nrdcg/desec v0.7.0 h1:iuGhi4pstF3+vJWwt292Oqe2+AsSPKDynQna/eu1fDs=
 github.com/nrdcg/desec v0.7.0/go.mod h1:e1uRqqKv1mJdd5+SQROAhmy75lKMphLzWIuASLkpeFY=
 github.com/nrdcg/dnspod-go v0.4.0 h1:c/jn1mLZNKF3/osJ6mz3QPxTudvPArXTjpkmYj0uK6U=
