@@ -2,7 +2,7 @@ module github.com/pulumiverse/pulumi-acme/provider
 
 go 1.21
 
-toolchain go1.21.9
+toolchain go1.22.6
 
 replace github.com/hashicorp/terraform-plugin-sdk/v2 => github.com/pulumi/terraform-plugin-sdk/v2 v2.0.0-20240520223432-0c0bf0d65f10
 
