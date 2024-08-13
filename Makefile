@@ -68,14 +68,17 @@ build_nodejs:: install_plugins tfgen # build the node sdk
 
 build_python:: PYPI_VERSION := $(shell pulumictl get version --language python)
 build_python:: install_plugins tfgen # build the python sdk
+	rm -rf sdk/python/
 	$(WORKING_DIR)/bin/$(TFGEN) python --overlays provider/overlays/python --out sdk/python/
 	cd sdk/python/ && \
+		printf "module fake_python_module // Exclude this directory from Go tools\n\ngo 1.17\n" > go.mod && \
         cp ../../README.md . && \
-        python3 setup.py clean --all 2>/dev/null && \
-        rm -rf ./bin/ ../python.bin/ && cp -R . ../python.bin && mv ../python.bin ./bin && \
-        sed -i.bak -e 's/^VERSION = .*/VERSION = "$(PYPI_VERSION)"/g' -e 's/^PLUGIN_VERSION = .*/PLUGIN_VERSION = "$(VERSION)"/g' ./bin/setup.py && \
-        rm ./bin/setup.py.bak && \
-        cd ./bin && python3 setup.py build sdist
+		rm -rf ./bin/ ../python.bin/ && cp -R . ../python.bin && mv ../python.bin ./bin && \
+		rm ./bin/go.mod && \
+		python3 -m venv venv && \
+		./venv/bin/python -m pip install build==1.2.1 && \
+		cd ./bin && \
+		../venv/bin/python -m build .
 
 build_dotnet:: DOTNET_VERSION := $(shell pulumictl get version --language dotnet)
 build_dotnet:: install_plugins tfgen # build the dotnet sdk
