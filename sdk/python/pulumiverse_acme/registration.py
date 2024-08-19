@@ -118,7 +118,7 @@ class Registration(pulumi.CustomResource):
                  opts: Optional[pulumi.ResourceOptions] = None,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
                  email_address: Optional[pulumi.Input[str]] = None,
-                 external_account_binding: Optional[pulumi.Input[pulumi.InputType['RegistrationExternalAccountBindingArgs']]] = None,
+                 external_account_binding: Optional[pulumi.Input[Union['RegistrationExternalAccountBindingArgs', 'RegistrationExternalAccountBindingArgsDict']]] = None,
                  __props__=None):
         """
         Create a Registration resource with the given unique name, props, and options.
@@ -150,7 +150,7 @@ class Registration(pulumi.CustomResource):
                  opts: Optional[pulumi.ResourceOptions] = None,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
                  email_address: Optional[pulumi.Input[str]] = None,
-                 external_account_binding: Optional[pulumi.Input[pulumi.InputType['RegistrationExternalAccountBindingArgs']]] = None,
+                 external_account_binding: Optional[pulumi.Input[Union['RegistrationExternalAccountBindingArgs', 'RegistrationExternalAccountBindingArgsDict']]] = None,
                  __props__=None):
         opts = pulumi.ResourceOptions.merge(_utilities.get_resource_opts_defaults(), opts)
         if not isinstance(opts, pulumi.ResourceOptions):
@@ -182,7 +182,7 @@ class Registration(pulumi.CustomResource):
             opts: Optional[pulumi.ResourceOptions] = None,
             account_key_pem: Optional[pulumi.Input[str]] = None,
             email_address: Optional[pulumi.Input[str]] = None,
-            external_account_binding: Optional[pulumi.Input[pulumi.InputType['RegistrationExternalAccountBindingArgs']]] = None,
+            external_account_binding: Optional[pulumi.Input[Union['RegistrationExternalAccountBindingArgs', 'RegistrationExternalAccountBindingArgsDict']]] = None,
             registration_url: Optional[pulumi.Input[str]] = None) -> 'Registration':
         """
         Get an existing Registration resource's state with the given name, id, and optional extra

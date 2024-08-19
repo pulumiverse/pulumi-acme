@@ -6,7 +6,7 @@ import * as inputs from "../types/input";
 import * as outputs from "../types/output";
 
 export interface CertificateDnsChallenge {
-    config?: {[key: string]: any};
+    config?: {[key: string]: string};
     provider: string;
 }
 
