@@ -6,7 +6,7 @@ import * as inputs from "../types/input";
 import * as outputs from "../types/output";
 
 export interface CertificateDnsChallenge {
-    config?: pulumi.Input<{[key: string]: any}>;
+    config?: pulumi.Input<{[key: string]: pulumi.Input<string>}>;
     provider: pulumi.Input<string>;
 }
 

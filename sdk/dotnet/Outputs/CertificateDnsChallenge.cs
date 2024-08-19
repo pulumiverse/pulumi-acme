@@ -14,12 +14,12 @@ namespace Pulumiverse.Acme.Outputs
     [OutputType]
     public sealed class CertificateDnsChallenge
     {
-        public readonly ImmutableDictionary<string, object>? Config;
+        public readonly ImmutableDictionary<string, string>? Config;
         public readonly string Provider;
 
         [OutputConstructor]
         private CertificateDnsChallenge(
-            ImmutableDictionary<string, object>? config,
+            ImmutableDictionary<string, string>? config,
 
             string provider)
         {

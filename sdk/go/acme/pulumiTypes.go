@@ -14,8 +14,8 @@ import (
 var _ = internal.GetEnvOrDefault
 
 type CertificateDnsChallenge struct {
-	Config   map[string]interface{} `pulumi:"config"`
-	Provider string                 `pulumi:"provider"`
+	Config   map[string]string `pulumi:"config"`
+	Provider string            `pulumi:"provider"`
 }
 
 // CertificateDnsChallengeInput is an input type that accepts CertificateDnsChallengeArgs and CertificateDnsChallengeOutput values.
@@ -30,8 +30,8 @@ type CertificateDnsChallengeInput interface {
 }
 
 type CertificateDnsChallengeArgs struct {
-	Config   pulumi.MapInput    `pulumi:"config"`
-	Provider pulumi.StringInput `pulumi:"provider"`
+	Config   pulumi.StringMapInput `pulumi:"config"`
+	Provider pulumi.StringInput    `pulumi:"provider"`
 }
 
 func (CertificateDnsChallengeArgs) ElementType() reflect.Type {
@@ -85,8 +85,8 @@ func (o CertificateDnsChallengeOutput) ToCertificateDnsChallengeOutputWithContex
 	return o
 }
 
-func (o CertificateDnsChallengeOutput) Config() pulumi.MapOutput {
-	return o.ApplyT(func(v CertificateDnsChallenge) map[string]interface{} { return v.Config }).(pulumi.MapOutput)
+func (o CertificateDnsChallengeOutput) Config() pulumi.StringMapOutput {
+	return o.ApplyT(func(v CertificateDnsChallenge) map[string]string { return v.Config }).(pulumi.StringMapOutput)
 }
 
 func (o CertificateDnsChallengeOutput) Provider() pulumi.StringOutput {

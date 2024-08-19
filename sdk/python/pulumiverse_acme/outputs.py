@@ -23,7 +23,7 @@ __all__ = [
 class CertificateDnsChallenge(dict):
     def __init__(__self__, *,
                  provider: str,
-                 config: Optional[Mapping[str, Any]] = None):
+                 config: Optional[Mapping[str, str]] = None):
         pulumi.set(__self__, "provider", provider)
         if config is not None:
             pulumi.set(__self__, "config", config)
@@ -35,7 +35,7 @@ class CertificateDnsChallenge(dict):
 
     @property
     @pulumi.getter
-    def config(self) -> Optional[Mapping[str, Any]]:
+    def config(self) -> Optional[Mapping[str, str]]:
         return pulumi.get(self, "config")
 
 

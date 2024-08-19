@@ -14,13 +14,13 @@ namespace Pulumiverse.Acme.Inputs
     public sealed class CertificateDnsChallengeArgs : global::Pulumi.ResourceArgs
     {
         [Input("config")]
-        private InputMap<object>? _config;
-        public InputMap<object> Config
+        private InputMap<string>? _config;
+        public InputMap<string> Config
         {
-            get => _config ?? (_config = new InputMap<object>());
+            get => _config ?? (_config = new InputMap<string>());
             set
             {
-                var emptySecret = Output.CreateSecret(ImmutableDictionary.Create<string, object>());
+                var emptySecret = Output.CreateSecret(ImmutableDictionary.Create<string, string>());
                 _config = Output.All(value, emptySecret).Apply(v => v[0]);
             }
         }

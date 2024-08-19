@@ -1215,11 +1215,11 @@ class Certificate(pulumi.CustomResource):
                  certificate_request_pem: Optional[pulumi.Input[str]] = None,
                  common_name: Optional[pulumi.Input[str]] = None,
                  disable_complete_propagation: Optional[pulumi.Input[bool]] = None,
-                 dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]]] = None,
-                 http_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']]] = None,
-                 http_memcached_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']]] = None,
-                 http_s3_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']]] = None,
-                 http_webroot_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']]] = None,
+                 dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]]] = None,
+                 http_challenge: Optional[pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']]] = None,
+                 http_memcached_challenge: Optional[pulumi.Input[Union['CertificateHttpMemcachedChallengeArgs', 'CertificateHttpMemcachedChallengeArgsDict']]] = None,
+                 http_s3_challenge: Optional[pulumi.Input[Union['CertificateHttpS3ChallengeArgs', 'CertificateHttpS3ChallengeArgsDict']]] = None,
+                 http_webroot_challenge: Optional[pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']]] = None,
                  key_type: Optional[pulumi.Input[str]] = None,
                  min_days_remaining: Optional[pulumi.Input[int]] = None,
                  must_staple: Optional[pulumi.Input[bool]] = None,
@@ -1229,7 +1229,7 @@ class Certificate(pulumi.CustomResource):
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 tls_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']]] = None,
+                 tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
                  __props__=None):
         """
         Create a Certificate resource with the given unique name, props, and options.
@@ -1260,17 +1260,17 @@ class Certificate(pulumi.CustomResource):
                
                > See About DNS propagation checks for details
                on the `recursive_nameservers` and `disable_complete_propagation` settings.
-        :param pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]] dns_challenges: The DNS challenges to
+        :param pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]] dns_challenges: The DNS challenges to
                use in fulfilling the request.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']] http_challenge: Defines an HTTP challenge to use in fulfilling
+        :param pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']] http_challenge: Defines an HTTP challenge to use in fulfilling
                the request.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']] http_memcached_challenge: Defines an alternate type of HTTP
+        :param pulumi.Input[Union['CertificateHttpMemcachedChallengeArgs', 'CertificateHttpMemcachedChallengeArgsDict']] http_memcached_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [Memcached](https://memcached.org/) cluster.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']] http_s3_challenge: Defines an alternate type of HTTP
+        :param pulumi.Input[Union['CertificateHttpS3ChallengeArgs', 'CertificateHttpS3ChallengeArgsDict']] http_s3_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [S3](https://aws.amazon.com/s3/) bucket.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']] http_webroot_challenge: Defines an alternate type of HTTP
+        :param pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']] http_webroot_challenge: Defines an alternate type of HTTP
                challenge that can be used to place a file at a location that can be served by
                an out-of-band webserver.
         :param pulumi.Input[str] key_type: The key type for the certificate's private key. Can be one of:
@@ -1341,7 +1341,7 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
                domains that this certificate will also be recognized for. Only valid when not
                specifying a CSR. Forces a new resource when changed.
-        :param pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']] tls_challenge: Defines a TLS challenge to use in fulfilling the
+        :param pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
                > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
@@ -1378,11 +1378,11 @@ class Certificate(pulumi.CustomResource):
                  certificate_request_pem: Optional[pulumi.Input[str]] = None,
                  common_name: Optional[pulumi.Input[str]] = None,
                  disable_complete_propagation: Optional[pulumi.Input[bool]] = None,
-                 dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]]] = None,
-                 http_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']]] = None,
-                 http_memcached_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']]] = None,
-                 http_s3_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']]] = None,
-                 http_webroot_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']]] = None,
+                 dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]]] = None,
+                 http_challenge: Optional[pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']]] = None,
+                 http_memcached_challenge: Optional[pulumi.Input[Union['CertificateHttpMemcachedChallengeArgs', 'CertificateHttpMemcachedChallengeArgsDict']]] = None,
+                 http_s3_challenge: Optional[pulumi.Input[Union['CertificateHttpS3ChallengeArgs', 'CertificateHttpS3ChallengeArgsDict']]] = None,
+                 http_webroot_challenge: Optional[pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']]] = None,
                  key_type: Optional[pulumi.Input[str]] = None,
                  min_days_remaining: Optional[pulumi.Input[int]] = None,
                  must_staple: Optional[pulumi.Input[bool]] = None,
@@ -1392,7 +1392,7 @@ class Certificate(pulumi.CustomResource):
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 tls_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']]] = None,
+                 tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
                  __props__=None):
         opts = pulumi.ResourceOptions.merge(_utilities.get_resource_opts_defaults(), opts)
         if not isinstance(opts, pulumi.ResourceOptions):
@@ -1455,11 +1455,11 @@ class Certificate(pulumi.CustomResource):
             certificate_url: Optional[pulumi.Input[str]] = None,
             common_name: Optional[pulumi.Input[str]] = None,
             disable_complete_propagation: Optional[pulumi.Input[bool]] = None,
-            dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]]] = None,
-            http_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']]] = None,
-            http_memcached_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']]] = None,
-            http_s3_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']]] = None,
-            http_webroot_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']]] = None,
+            dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]]] = None,
+            http_challenge: Optional[pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']]] = None,
+            http_memcached_challenge: Optional[pulumi.Input[Union['CertificateHttpMemcachedChallengeArgs', 'CertificateHttpMemcachedChallengeArgsDict']]] = None,
+            http_s3_challenge: Optional[pulumi.Input[Union['CertificateHttpS3ChallengeArgs', 'CertificateHttpS3ChallengeArgsDict']]] = None,
+            http_webroot_challenge: Optional[pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']]] = None,
             issuer_pem: Optional[pulumi.Input[str]] = None,
             key_type: Optional[pulumi.Input[str]] = None,
             min_days_remaining: Optional[pulumi.Input[int]] = None,
@@ -1471,7 +1471,7 @@ class Certificate(pulumi.CustomResource):
             revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
             revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
             subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-            tls_challenge: Optional[pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']]] = None) -> 'Certificate':
+            tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None) -> 'Certificate':
         """
         Get an existing Certificate resource's state with the given name, id, and optional extra
         properties used to qualify the lookup.
@@ -1516,17 +1516,17 @@ class Certificate(pulumi.CustomResource):
                
                > See About DNS propagation checks for details
                on the `recursive_nameservers` and `disable_complete_propagation` settings.
-        :param pulumi.Input[Sequence[pulumi.Input[pulumi.InputType['CertificateDnsChallengeArgs']]]] dns_challenges: The DNS challenges to
+        :param pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]] dns_challenges: The DNS challenges to
                use in fulfilling the request.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpChallengeArgs']] http_challenge: Defines an HTTP challenge to use in fulfilling
+        :param pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']] http_challenge: Defines an HTTP challenge to use in fulfilling
                the request.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpMemcachedChallengeArgs']] http_memcached_challenge: Defines an alternate type of HTTP
+        :param pulumi.Input[Union['CertificateHttpMemcachedChallengeArgs', 'CertificateHttpMemcachedChallengeArgsDict']] http_memcached_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [Memcached](https://memcached.org/) cluster.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpS3ChallengeArgs']] http_s3_challenge: Defines an alternate type of HTTP
+        :param pulumi.Input[Union['CertificateHttpS3ChallengeArgs', 'CertificateHttpS3ChallengeArgsDict']] http_s3_challenge: Defines an alternate type of HTTP
                challenge that can be used to serve up challenges to a
                [S3](https://aws.amazon.com/s3/) bucket.
-        :param pulumi.Input[pulumi.InputType['CertificateHttpWebrootChallengeArgs']] http_webroot_challenge: Defines an alternate type of HTTP
+        :param pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']] http_webroot_challenge: Defines an alternate type of HTTP
                challenge that can be used to place a file at a location that can be served by
                an out-of-band webserver.
         :param pulumi.Input[str] issuer_pem: The intermediate certificates of the issuer. Multiple
@@ -1604,7 +1604,7 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
                domains that this certificate will also be recognized for. Only valid when not
                specifying a CSR. Forces a new resource when changed.
-        :param pulumi.Input[pulumi.InputType['CertificateTlsChallengeArgs']] tls_challenge: Defines a TLS challenge to use in fulfilling the
+        :param pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
                > Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`
