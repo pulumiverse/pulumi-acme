@@ -71,7 +71,7 @@
                 "config": {
                     "type": "object",
                     "additionalProperties": {
-                        "$ref": "pulumi.json#/Any"
+                        "type": "string"
                     },
                     "secret": true
                 },
