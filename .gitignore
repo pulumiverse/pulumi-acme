@@ -7,7 +7,7 @@
 Pulumi.*.yaml
 **/node_modules/
 .DS_Store
-go.work.sum
+go.work*
 
 **/command-output/
 
