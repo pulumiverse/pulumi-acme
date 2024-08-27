@@ -132,11 +132,10 @@ jobs:
       fail-fast: false
       matrix:
         language:
-        - nodejs
-        - python
-        - dotnet
-        - go
-        - java
+          - dotnet
+          - go
+          - nodejs
+          - python
 name: main
 on:
   workflow_dispatch: {}

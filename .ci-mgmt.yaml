@@ -5,3 +5,8 @@ providerDefaultBranch: main
 upstreamProviderOrg: vancluever
 publishRegistry: false
 enableAutoRelease: false
+languages:
+  - dotnet
+  - go
+  - nodejs
+  - python
