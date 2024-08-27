@@ -1,6 +1,6 @@
 provider: acme
 organization: pulumiverse
-major-version: 1
+major-version: 0
 providerDefaultBranch: main
 upstreamProviderOrg: vancluever
 publishRegistry: false

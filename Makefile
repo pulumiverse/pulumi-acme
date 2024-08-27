@@ -16,7 +16,7 @@ PULUMI_MISSING_DOCS_ERROR := true
 
 # Override during CI using `make [TARGET] PROVIDER_VERSION=""` or by setting a PROVIDER_VERSION environment variable
 # Local & branch builds will just used this fixed default version unless specified
-PROVIDER_VERSION ?= 1.0.0-alpha.0+dev
+PROVIDER_VERSION ?= 0.0.0-alpha.0+dev
 # Use this normalised version everywhere rather than the raw input to ensure consistency.
 VERSION_GENERIC = $(shell pulumictl convert-version --language generic --version "$(PROVIDER_VERSION)")
 
@@ -29,7 +29,7 @@ development: install_plugins provider build_sdks install_sdks
 
 build: install_plugins provider build_sdks install_sdks
 
-build_sdks: build_nodejs build_python build_go build_dotnet build_java
+build_sdks: build_dotnet build_go build_nodejs build_python 
 
 install_go_sdk:
 
