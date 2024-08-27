@@ -4,3 +4,4 @@ major-version: 1
 providerDefaultBranch: main
 upstreamProviderOrg: vancluever
 publishRegistry: false
+enableAutoRelease: false
