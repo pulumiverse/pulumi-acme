@@ -21,11 +21,13 @@ import (
 	// Enable embedding of package metadata
 	_ "embed"
 
+	"github.com/vancluever/terraform-provider-acme/v2/acme"
+
 	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfbridge"
 	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfbridge/tokens"
 	shimv2 "github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfshim/sdk-v2"
+
 	"github.com/pulumiverse/pulumi-acme/provider/pkg/version"
-	"github.com/vancluever/terraform-provider-acme/v2/acme"
 )
 
 // all of the token components used below.
