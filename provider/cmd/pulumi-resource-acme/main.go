@@ -17,13 +17,16 @@
 package main
 
 import (
-	_ "embed"
 	"os"
 
+	_ "embed"
+
+	"github.com/vancluever/terraform-provider-acme/v2/acme/dnsplugin"
+
 	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfbridge"
+
 	acme "github.com/pulumiverse/pulumi-acme/provider"
 	"github.com/pulumiverse/pulumi-acme/provider/pkg/version"
-	"github.com/vancluever/terraform-provider-acme/v2/acme/dnsplugin"
 )
 
 //go:embed schema-embed.json
