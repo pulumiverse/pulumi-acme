@@ -34,10 +34,10 @@ jobs:
       fail-fast: true
       matrix:
         language:
-          - dotnet
-          - go
-          - nodejs
-          - python
+        - dotnet
+        - go
+        - nodejs
+        - python
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
