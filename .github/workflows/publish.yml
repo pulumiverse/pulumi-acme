@@ -51,16 +51,6 @@ jobs:
       uses: ./.github/actions/setup-tools
       with:
         tools: pulumictl, pulumicli, go, schema-tools
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-region: us-east-2
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        role-duration-seconds: 7200
-        role-external-id: upload-pulumi-release
-        role-session-name: acme@githubActions
-        role-to-assume: ${{ secrets.AWS_UPLOAD_ROLE_ARN }}
     - name: Create dist directory
       run: mkdir -p dist
     - name: Download provider assets
@@ -86,8 +76,6 @@ jobs:
           fi
           echo 'EOF'
         } >> "$GITHUB_OUTPUT"
-    - name: Upload Provider Binaries
-      run: aws s3 cp dist s3://get.pulumi.com/releases/plugins/ --recursive
     - name: Create GH Release
       uses: softprops/action-gh-release@v1
       if: inputs.isPrerelease == false
@@ -136,25 +124,6 @@ jobs:
           go.*
           go/**
           !*.tar.gz
-
-  clean_up_release_labels:
-    name: Clean up release labels
-    # Only run for non-prerelease, if the publish_go_sdk job was successful or skipped
-    if: inputs.isPrerelease == false
-    
-    needs: publish_sdk
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v4
-    - name: Clean up release labels
-      uses: pulumi/action-release-by-pr-label@main
-      with:
-        command: "clean-up-release-labels"
-        repo: ${{ github.repository }}
-        commit: ${{ github.sha }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   verify_release:
     name: verify_release
