@@ -16,25 +16,26 @@ __all__ = ['RegistrationArgs', 'Registration']
 @pulumi.input_type
 class RegistrationArgs:
     def __init__(__self__, *,
-                 account_key_pem: pulumi.Input[str],
                  email_address: pulumi.Input[str],
+                 account_key_algorithm: Optional[pulumi.Input[str]] = None,
+                 account_key_ecdsa_curve: Optional[pulumi.Input[str]] = None,
+                 account_key_pem: Optional[pulumi.Input[str]] = None,
+                 account_key_rsa_bits: Optional[pulumi.Input[int]] = None,
                  external_account_binding: Optional[pulumi.Input['RegistrationExternalAccountBindingArgs']] = None):
         """
         The set of arguments for constructing a Registration resource.
         """
-        pulumi.set(__self__, "account_key_pem", account_key_pem)
         pulumi.set(__self__, "email_address", email_address)
+        if account_key_algorithm is not None:
+            pulumi.set(__self__, "account_key_algorithm", account_key_algorithm)
+        if account_key_ecdsa_curve is not None:
+            pulumi.set(__self__, "account_key_ecdsa_curve", account_key_ecdsa_curve)
+        if account_key_pem is not None:
+            pulumi.set(__self__, "account_key_pem", account_key_pem)
+        if account_key_rsa_bits is not None:
+            pulumi.set(__self__, "account_key_rsa_bits", account_key_rsa_bits)
         if external_account_binding is not None:
             pulumi.set(__self__, "external_account_binding", external_account_binding)
-
-    @property
-    @pulumi.getter(name="accountKeyPem")
-    def account_key_pem(self) -> pulumi.Input[str]:
-        return pulumi.get(self, "account_key_pem")
-
-    @account_key_pem.setter
-    def account_key_pem(self, value: pulumi.Input[str]):
-        pulumi.set(self, "account_key_pem", value)
 
     @property
     @pulumi.getter(name="emailAddress")
@@ -44,6 +45,42 @@ class RegistrationArgs:
     @email_address.setter
     def email_address(self, value: pulumi.Input[str]):
         pulumi.set(self, "email_address", value)
+
+    @property
+    @pulumi.getter(name="accountKeyAlgorithm")
+    def account_key_algorithm(self) -> Optional[pulumi.Input[str]]:
+        return pulumi.get(self, "account_key_algorithm")
+
+    @account_key_algorithm.setter
+    def account_key_algorithm(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "account_key_algorithm", value)
+
+    @property
+    @pulumi.getter(name="accountKeyEcdsaCurve")
+    def account_key_ecdsa_curve(self) -> Optional[pulumi.Input[str]]:
+        return pulumi.get(self, "account_key_ecdsa_curve")
+
+    @account_key_ecdsa_curve.setter
+    def account_key_ecdsa_curve(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "account_key_ecdsa_curve", value)
+
+    @property
+    @pulumi.getter(name="accountKeyPem")
+    def account_key_pem(self) -> Optional[pulumi.Input[str]]:
+        return pulumi.get(self, "account_key_pem")
+
+    @account_key_pem.setter
+    def account_key_pem(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "account_key_pem", value)
+
+    @property
+    @pulumi.getter(name="accountKeyRsaBits")
+    def account_key_rsa_bits(self) -> Optional[pulumi.Input[int]]:
+        return pulumi.get(self, "account_key_rsa_bits")
+
+    @account_key_rsa_bits.setter
+    def account_key_rsa_bits(self, value: Optional[pulumi.Input[int]]):
+        pulumi.set(self, "account_key_rsa_bits", value)
 
     @property
     @pulumi.getter(name="externalAccountBinding")
@@ -58,21 +95,48 @@ class RegistrationArgs:
 @pulumi.input_type
 class _RegistrationState:
     def __init__(__self__, *,
+                 account_key_algorithm: Optional[pulumi.Input[str]] = None,
+                 account_key_ecdsa_curve: Optional[pulumi.Input[str]] = None,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
+                 account_key_rsa_bits: Optional[pulumi.Input[int]] = None,
                  email_address: Optional[pulumi.Input[str]] = None,
                  external_account_binding: Optional[pulumi.Input['RegistrationExternalAccountBindingArgs']] = None,
                  registration_url: Optional[pulumi.Input[str]] = None):
         """
         Input properties used for looking up and filtering Registration resources.
         """
+        if account_key_algorithm is not None:
+            pulumi.set(__self__, "account_key_algorithm", account_key_algorithm)
+        if account_key_ecdsa_curve is not None:
+            pulumi.set(__self__, "account_key_ecdsa_curve", account_key_ecdsa_curve)
         if account_key_pem is not None:
             pulumi.set(__self__, "account_key_pem", account_key_pem)
+        if account_key_rsa_bits is not None:
+            pulumi.set(__self__, "account_key_rsa_bits", account_key_rsa_bits)
         if email_address is not None:
             pulumi.set(__self__, "email_address", email_address)
         if external_account_binding is not None:
             pulumi.set(__self__, "external_account_binding", external_account_binding)
         if registration_url is not None:
             pulumi.set(__self__, "registration_url", registration_url)
+
+    @property
+    @pulumi.getter(name="accountKeyAlgorithm")
+    def account_key_algorithm(self) -> Optional[pulumi.Input[str]]:
+        return pulumi.get(self, "account_key_algorithm")
+
+    @account_key_algorithm.setter
+    def account_key_algorithm(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "account_key_algorithm", value)
+
+    @property
+    @pulumi.getter(name="accountKeyEcdsaCurve")
+    def account_key_ecdsa_curve(self) -> Optional[pulumi.Input[str]]:
+        return pulumi.get(self, "account_key_ecdsa_curve")
+
+    @account_key_ecdsa_curve.setter
+    def account_key_ecdsa_curve(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "account_key_ecdsa_curve", value)
 
     @property
     @pulumi.getter(name="accountKeyPem")
@@ -82,6 +146,15 @@ class _RegistrationState:
     @account_key_pem.setter
     def account_key_pem(self, value: Optional[pulumi.Input[str]]):
         pulumi.set(self, "account_key_pem", value)
+
+    @property
+    @pulumi.getter(name="accountKeyRsaBits")
+    def account_key_rsa_bits(self) -> Optional[pulumi.Input[int]]:
+        return pulumi.get(self, "account_key_rsa_bits")
+
+    @account_key_rsa_bits.setter
+    def account_key_rsa_bits(self, value: Optional[pulumi.Input[int]]):
+        pulumi.set(self, "account_key_rsa_bits", value)
 
     @property
     @pulumi.getter(name="emailAddress")
@@ -116,7 +189,10 @@ class Registration(pulumi.CustomResource):
     def __init__(__self__,
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
+                 account_key_algorithm: Optional[pulumi.Input[str]] = None,
+                 account_key_ecdsa_curve: Optional[pulumi.Input[str]] = None,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
+                 account_key_rsa_bits: Optional[pulumi.Input[int]] = None,
                  email_address: Optional[pulumi.Input[str]] = None,
                  external_account_binding: Optional[pulumi.Input[Union['RegistrationExternalAccountBindingArgs', 'RegistrationExternalAccountBindingArgsDict']]] = None,
                  __props__=None):
@@ -148,7 +224,10 @@ class Registration(pulumi.CustomResource):
     def _internal_init(__self__,
                  resource_name: str,
                  opts: Optional[pulumi.ResourceOptions] = None,
+                 account_key_algorithm: Optional[pulumi.Input[str]] = None,
+                 account_key_ecdsa_curve: Optional[pulumi.Input[str]] = None,
                  account_key_pem: Optional[pulumi.Input[str]] = None,
+                 account_key_rsa_bits: Optional[pulumi.Input[int]] = None,
                  email_address: Optional[pulumi.Input[str]] = None,
                  external_account_binding: Optional[pulumi.Input[Union['RegistrationExternalAccountBindingArgs', 'RegistrationExternalAccountBindingArgsDict']]] = None,
                  __props__=None):
@@ -160,9 +239,10 @@ class Registration(pulumi.CustomResource):
                 raise TypeError('__props__ is only valid when passed in combination with a valid opts.id to get an existing resource')
             __props__ = RegistrationArgs.__new__(RegistrationArgs)
 
-            if account_key_pem is None and not opts.urn:
-                raise TypeError("Missing required property 'account_key_pem'")
+            __props__.__dict__["account_key_algorithm"] = account_key_algorithm
+            __props__.__dict__["account_key_ecdsa_curve"] = account_key_ecdsa_curve
             __props__.__dict__["account_key_pem"] = None if account_key_pem is None else pulumi.Output.secret(account_key_pem)
+            __props__.__dict__["account_key_rsa_bits"] = account_key_rsa_bits
             if email_address is None and not opts.urn:
                 raise TypeError("Missing required property 'email_address'")
             __props__.__dict__["email_address"] = email_address
@@ -180,7 +260,10 @@ class Registration(pulumi.CustomResource):
     def get(resource_name: str,
             id: pulumi.Input[str],
             opts: Optional[pulumi.ResourceOptions] = None,
+            account_key_algorithm: Optional[pulumi.Input[str]] = None,
+            account_key_ecdsa_curve: Optional[pulumi.Input[str]] = None,
             account_key_pem: Optional[pulumi.Input[str]] = None,
+            account_key_rsa_bits: Optional[pulumi.Input[int]] = None,
             email_address: Optional[pulumi.Input[str]] = None,
             external_account_binding: Optional[pulumi.Input[Union['RegistrationExternalAccountBindingArgs', 'RegistrationExternalAccountBindingArgsDict']]] = None,
             registration_url: Optional[pulumi.Input[str]] = None) -> 'Registration':
@@ -196,16 +279,34 @@ class Registration(pulumi.CustomResource):
 
         __props__ = _RegistrationState.__new__(_RegistrationState)
 
+        __props__.__dict__["account_key_algorithm"] = account_key_algorithm
+        __props__.__dict__["account_key_ecdsa_curve"] = account_key_ecdsa_curve
         __props__.__dict__["account_key_pem"] = account_key_pem
+        __props__.__dict__["account_key_rsa_bits"] = account_key_rsa_bits
         __props__.__dict__["email_address"] = email_address
         __props__.__dict__["external_account_binding"] = external_account_binding
         __props__.__dict__["registration_url"] = registration_url
         return Registration(resource_name, opts=opts, __props__=__props__)
 
     @property
+    @pulumi.getter(name="accountKeyAlgorithm")
+    def account_key_algorithm(self) -> pulumi.Output[Optional[str]]:
+        return pulumi.get(self, "account_key_algorithm")
+
+    @property
+    @pulumi.getter(name="accountKeyEcdsaCurve")
+    def account_key_ecdsa_curve(self) -> pulumi.Output[Optional[str]]:
+        return pulumi.get(self, "account_key_ecdsa_curve")
+
+    @property
     @pulumi.getter(name="accountKeyPem")
     def account_key_pem(self) -> pulumi.Output[str]:
         return pulumi.get(self, "account_key_pem")
+
+    @property
+    @pulumi.getter(name="accountKeyRsaBits")
+    def account_key_rsa_bits(self) -> pulumi.Output[Optional[int]]:
+        return pulumi.get(self, "account_key_rsa_bits")
 
     @property
     @pulumi.getter(name="emailAddress")

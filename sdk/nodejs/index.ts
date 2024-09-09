@@ -10,6 +10,11 @@ export type Certificate = import("./certificate").Certificate;
 export const Certificate: typeof import("./certificate").Certificate = null as any;
 utilities.lazyLoad(exports, ["Certificate"], () => require("./certificate"));
 
+export { GetServerUrlResult } from "./getServerUrl";
+export const getServerUrl: typeof import("./getServerUrl").getServerUrl = null as any;
+export const getServerUrlOutput: typeof import("./getServerUrl").getServerUrlOutput = null as any;
+utilities.lazyLoad(exports, ["getServerUrl","getServerUrlOutput"], () => require("./getServerUrl"));
+
 export { ProviderArgs } from "./provider";
 export type Provider = import("./provider").Provider;
 export const Provider: typeof import("./provider").Provider = null as any;

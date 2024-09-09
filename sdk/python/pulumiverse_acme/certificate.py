@@ -551,6 +551,7 @@ class _CertificateState:
                  certificate_p12_password: Optional[pulumi.Input[str]] = None,
                  certificate_pem: Optional[pulumi.Input[str]] = None,
                  certificate_request_pem: Optional[pulumi.Input[str]] = None,
+                 certificate_serial: Optional[pulumi.Input[str]] = None,
                  certificate_url: Optional[pulumi.Input[str]] = None,
                  common_name: Optional[pulumi.Input[str]] = None,
                  disable_complete_propagation: Optional[pulumi.Input[bool]] = None,
@@ -600,6 +601,8 @@ class _CertificateState:
                in PEM format.  Either this, or the in-resource request options
                (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
                to be specified. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_serial: The serial number, in string format, as reported by
+               the CA.
         :param pulumi.Input[str] certificate_url: The full URL of the certificate within the ACME CA.
         :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
                certificate will be recognized for. Required when not specifying a CSR. Forces
@@ -722,6 +725,8 @@ class _CertificateState:
             pulumi.set(__self__, "certificate_pem", certificate_pem)
         if certificate_request_pem is not None:
             pulumi.set(__self__, "certificate_request_pem", certificate_request_pem)
+        if certificate_serial is not None:
+            pulumi.set(__self__, "certificate_serial", certificate_serial)
         if certificate_url is not None:
             pulumi.set(__self__, "certificate_url", certificate_url)
         if common_name is not None:
@@ -877,6 +882,19 @@ class _CertificateState:
     @certificate_request_pem.setter
     def certificate_request_pem(self, value: Optional[pulumi.Input[str]]):
         pulumi.set(self, "certificate_request_pem", value)
+
+    @property
+    @pulumi.getter(name="certificateSerial")
+    def certificate_serial(self) -> Optional[pulumi.Input[str]]:
+        """
+        The serial number, in string format, as reported by
+        the CA.
+        """
+        return pulumi.get(self, "certificate_serial")
+
+    @certificate_serial.setter
+    def certificate_serial(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "certificate_serial", value)
 
     @property
     @pulumi.getter(name="certificateUrl")
@@ -1429,6 +1447,7 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["certificate_not_after"] = None
             __props__.__dict__["certificate_p12"] = None
             __props__.__dict__["certificate_pem"] = None
+            __props__.__dict__["certificate_serial"] = None
             __props__.__dict__["certificate_url"] = None
             __props__.__dict__["issuer_pem"] = None
             __props__.__dict__["private_key_pem"] = None
@@ -1452,6 +1471,7 @@ class Certificate(pulumi.CustomResource):
             certificate_p12_password: Optional[pulumi.Input[str]] = None,
             certificate_pem: Optional[pulumi.Input[str]] = None,
             certificate_request_pem: Optional[pulumi.Input[str]] = None,
+            certificate_serial: Optional[pulumi.Input[str]] = None,
             certificate_url: Optional[pulumi.Input[str]] = None,
             common_name: Optional[pulumi.Input[str]] = None,
             disable_complete_propagation: Optional[pulumi.Input[bool]] = None,
@@ -1506,6 +1526,8 @@ class Certificate(pulumi.CustomResource):
                in PEM format.  Either this, or the in-resource request options
                (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
                to be specified. Forces a new resource when changed.
+        :param pulumi.Input[str] certificate_serial: The serial number, in string format, as reported by
+               the CA.
         :param pulumi.Input[str] certificate_url: The full URL of the certificate within the ACME CA.
         :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
                certificate will be recognized for. Required when not specifying a CSR. Forces
@@ -1624,6 +1646,7 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["certificate_p12_password"] = certificate_p12_password
         __props__.__dict__["certificate_pem"] = certificate_pem
         __props__.__dict__["certificate_request_pem"] = certificate_request_pem
+        __props__.__dict__["certificate_serial"] = certificate_serial
         __props__.__dict__["certificate_url"] = certificate_url
         __props__.__dict__["common_name"] = common_name
         __props__.__dict__["disable_complete_propagation"] = disable_complete_propagation
@@ -1728,6 +1751,15 @@ class Certificate(pulumi.CustomResource):
         to be specified. Forces a new resource when changed.
         """
         return pulumi.get(self, "certificate_request_pem")
+
+    @property
+    @pulumi.getter(name="certificateSerial")
+    def certificate_serial(self) -> pulumi.Output[str]:
+        """
+        The serial number, in string format, as reported by
+        the CA.
+        """
+        return pulumi.get(self, "certificate_serial")
 
     @property
     @pulumi.getter(name="certificateUrl")

@@ -34,7 +34,10 @@ export class Registration extends pulumi.CustomResource {
         return obj['__pulumiType'] === Registration.__pulumiType;
     }
 
+    public readonly accountKeyAlgorithm!: pulumi.Output<string | undefined>;
+    public readonly accountKeyEcdsaCurve!: pulumi.Output<string | undefined>;
     public readonly accountKeyPem!: pulumi.Output<string>;
+    public readonly accountKeyRsaBits!: pulumi.Output<number | undefined>;
     public readonly emailAddress!: pulumi.Output<string>;
     public readonly externalAccountBinding!: pulumi.Output<outputs.RegistrationExternalAccountBinding | undefined>;
     public /*out*/ readonly registrationUrl!: pulumi.Output<string>;
@@ -52,19 +55,22 @@ export class Registration extends pulumi.CustomResource {
         opts = opts || {};
         if (opts.id) {
             const state = argsOrState as RegistrationState | undefined;
+            resourceInputs["accountKeyAlgorithm"] = state ? state.accountKeyAlgorithm : undefined;
+            resourceInputs["accountKeyEcdsaCurve"] = state ? state.accountKeyEcdsaCurve : undefined;
             resourceInputs["accountKeyPem"] = state ? state.accountKeyPem : undefined;
+            resourceInputs["accountKeyRsaBits"] = state ? state.accountKeyRsaBits : undefined;
             resourceInputs["emailAddress"] = state ? state.emailAddress : undefined;
             resourceInputs["externalAccountBinding"] = state ? state.externalAccountBinding : undefined;
             resourceInputs["registrationUrl"] = state ? state.registrationUrl : undefined;
         } else {
             const args = argsOrState as RegistrationArgs | undefined;
-            if ((!args || args.accountKeyPem === undefined) && !opts.urn) {
-                throw new Error("Missing required property 'accountKeyPem'");
-            }
             if ((!args || args.emailAddress === undefined) && !opts.urn) {
                 throw new Error("Missing required property 'emailAddress'");
             }
+            resourceInputs["accountKeyAlgorithm"] = args ? args.accountKeyAlgorithm : undefined;
+            resourceInputs["accountKeyEcdsaCurve"] = args ? args.accountKeyEcdsaCurve : undefined;
             resourceInputs["accountKeyPem"] = args?.accountKeyPem ? pulumi.secret(args.accountKeyPem) : undefined;
+            resourceInputs["accountKeyRsaBits"] = args ? args.accountKeyRsaBits : undefined;
             resourceInputs["emailAddress"] = args ? args.emailAddress : undefined;
             resourceInputs["externalAccountBinding"] = args ? args.externalAccountBinding : undefined;
             resourceInputs["registrationUrl"] = undefined /*out*/;
@@ -80,7 +86,10 @@ export class Registration extends pulumi.CustomResource {
  * Input properties used for looking up and filtering Registration resources.
  */
 export interface RegistrationState {
+    accountKeyAlgorithm?: pulumi.Input<string>;
+    accountKeyEcdsaCurve?: pulumi.Input<string>;
     accountKeyPem?: pulumi.Input<string>;
+    accountKeyRsaBits?: pulumi.Input<number>;
     emailAddress?: pulumi.Input<string>;
     externalAccountBinding?: pulumi.Input<inputs.RegistrationExternalAccountBinding>;
     registrationUrl?: pulumi.Input<string>;
@@ -90,7 +99,10 @@ export interface RegistrationState {
  * The set of arguments for constructing a Registration resource.
  */
 export interface RegistrationArgs {
-    accountKeyPem: pulumi.Input<string>;
+    accountKeyAlgorithm?: pulumi.Input<string>;
+    accountKeyEcdsaCurve?: pulumi.Input<string>;
+    accountKeyPem?: pulumi.Input<string>;
+    accountKeyRsaBits?: pulumi.Input<number>;
     emailAddress: pulumi.Input<string>;
     externalAccountBinding?: pulumi.Input<inputs.RegistrationExternalAccountBinding>;
 }

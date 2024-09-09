@@ -15,7 +15,10 @@ import (
 type Registration struct {
 	pulumi.CustomResourceState
 
+	AccountKeyAlgorithm    pulumi.StringPtrOutput                      `pulumi:"accountKeyAlgorithm"`
+	AccountKeyEcdsaCurve   pulumi.StringPtrOutput                      `pulumi:"accountKeyEcdsaCurve"`
 	AccountKeyPem          pulumi.StringOutput                         `pulumi:"accountKeyPem"`
+	AccountKeyRsaBits      pulumi.IntPtrOutput                         `pulumi:"accountKeyRsaBits"`
 	EmailAddress           pulumi.StringOutput                         `pulumi:"emailAddress"`
 	ExternalAccountBinding RegistrationExternalAccountBindingPtrOutput `pulumi:"externalAccountBinding"`
 	RegistrationUrl        pulumi.StringOutput                         `pulumi:"registrationUrl"`
@@ -28,14 +31,11 @@ func NewRegistration(ctx *pulumi.Context,
 		return nil, errors.New("missing one or more required arguments")
 	}
 
-	if args.AccountKeyPem == nil {
-		return nil, errors.New("invalid value for required argument 'AccountKeyPem'")
-	}
 	if args.EmailAddress == nil {
 		return nil, errors.New("invalid value for required argument 'EmailAddress'")
 	}
 	if args.AccountKeyPem != nil {
-		args.AccountKeyPem = pulumi.ToSecret(args.AccountKeyPem).(pulumi.StringInput)
+		args.AccountKeyPem = pulumi.ToSecret(args.AccountKeyPem).(pulumi.StringPtrInput)
 	}
 	secrets := pulumi.AdditionalSecretOutputs([]string{
 		"accountKeyPem",
@@ -64,14 +64,20 @@ func GetRegistration(ctx *pulumi.Context,
 
 // Input properties used for looking up and filtering Registration resources.
 type registrationState struct {
+	AccountKeyAlgorithm    *string                             `pulumi:"accountKeyAlgorithm"`
+	AccountKeyEcdsaCurve   *string                             `pulumi:"accountKeyEcdsaCurve"`
 	AccountKeyPem          *string                             `pulumi:"accountKeyPem"`
+	AccountKeyRsaBits      *int                                `pulumi:"accountKeyRsaBits"`
 	EmailAddress           *string                             `pulumi:"emailAddress"`
 	ExternalAccountBinding *RegistrationExternalAccountBinding `pulumi:"externalAccountBinding"`
 	RegistrationUrl        *string                             `pulumi:"registrationUrl"`
 }
 
 type RegistrationState struct {
+	AccountKeyAlgorithm    pulumi.StringPtrInput
+	AccountKeyEcdsaCurve   pulumi.StringPtrInput
 	AccountKeyPem          pulumi.StringPtrInput
+	AccountKeyRsaBits      pulumi.IntPtrInput
 	EmailAddress           pulumi.StringPtrInput
 	ExternalAccountBinding RegistrationExternalAccountBindingPtrInput
 	RegistrationUrl        pulumi.StringPtrInput
@@ -82,14 +88,20 @@ func (RegistrationState) ElementType() reflect.Type {
 }
 
 type registrationArgs struct {
-	AccountKeyPem          string                              `pulumi:"accountKeyPem"`
+	AccountKeyAlgorithm    *string                             `pulumi:"accountKeyAlgorithm"`
+	AccountKeyEcdsaCurve   *string                             `pulumi:"accountKeyEcdsaCurve"`
+	AccountKeyPem          *string                             `pulumi:"accountKeyPem"`
+	AccountKeyRsaBits      *int                                `pulumi:"accountKeyRsaBits"`
 	EmailAddress           string                              `pulumi:"emailAddress"`
 	ExternalAccountBinding *RegistrationExternalAccountBinding `pulumi:"externalAccountBinding"`
 }
 
 // The set of arguments for constructing a Registration resource.
 type RegistrationArgs struct {
-	AccountKeyPem          pulumi.StringInput
+	AccountKeyAlgorithm    pulumi.StringPtrInput
+	AccountKeyEcdsaCurve   pulumi.StringPtrInput
+	AccountKeyPem          pulumi.StringPtrInput
+	AccountKeyRsaBits      pulumi.IntPtrInput
 	EmailAddress           pulumi.StringInput
 	ExternalAccountBinding RegistrationExternalAccountBindingPtrInput
 }
@@ -181,8 +193,20 @@ func (o RegistrationOutput) ToRegistrationOutputWithContext(ctx context.Context)
 	return o
 }
 
+func (o RegistrationOutput) AccountKeyAlgorithm() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *Registration) pulumi.StringPtrOutput { return v.AccountKeyAlgorithm }).(pulumi.StringPtrOutput)
+}
+
+func (o RegistrationOutput) AccountKeyEcdsaCurve() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *Registration) pulumi.StringPtrOutput { return v.AccountKeyEcdsaCurve }).(pulumi.StringPtrOutput)
+}
+
 func (o RegistrationOutput) AccountKeyPem() pulumi.StringOutput {
 	return o.ApplyT(func(v *Registration) pulumi.StringOutput { return v.AccountKeyPem }).(pulumi.StringOutput)
+}
+
+func (o RegistrationOutput) AccountKeyRsaBits() pulumi.IntPtrOutput {
+	return o.ApplyT(func(v *Registration) pulumi.IntPtrOutput { return v.AccountKeyRsaBits }).(pulumi.IntPtrOutput)
 }
 
 func (o RegistrationOutput) EmailAddress() pulumi.StringOutput {
