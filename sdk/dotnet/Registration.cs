@@ -13,8 +13,17 @@ namespace Pulumiverse.Acme
     [AcmeResourceType("acme:index/registration:Registration")]
     public partial class Registration : global::Pulumi.CustomResource
     {
+        [Output("accountKeyAlgorithm")]
+        public Output<string?> AccountKeyAlgorithm { get; private set; } = null!;
+
+        [Output("accountKeyEcdsaCurve")]
+        public Output<string?> AccountKeyEcdsaCurve { get; private set; } = null!;
+
         [Output("accountKeyPem")]
         public Output<string> AccountKeyPem { get; private set; } = null!;
+
+        [Output("accountKeyRsaBits")]
+        public Output<int?> AccountKeyRsaBits { get; private set; } = null!;
 
         [Output("emailAddress")]
         public Output<string> EmailAddress { get; private set; } = null!;
@@ -76,7 +85,13 @@ namespace Pulumiverse.Acme
 
     public sealed class RegistrationArgs : global::Pulumi.ResourceArgs
     {
-        [Input("accountKeyPem", required: true)]
+        [Input("accountKeyAlgorithm")]
+        public Input<string>? AccountKeyAlgorithm { get; set; }
+
+        [Input("accountKeyEcdsaCurve")]
+        public Input<string>? AccountKeyEcdsaCurve { get; set; }
+
+        [Input("accountKeyPem")]
         private Input<string>? _accountKeyPem;
         public Input<string>? AccountKeyPem
         {
@@ -87,6 +102,9 @@ namespace Pulumiverse.Acme
                 _accountKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
             }
         }
+
+        [Input("accountKeyRsaBits")]
+        public Input<int>? AccountKeyRsaBits { get; set; }
 
         [Input("emailAddress", required: true)]
         public Input<string> EmailAddress { get; set; } = null!;
@@ -102,6 +120,12 @@ namespace Pulumiverse.Acme
 
     public sealed class RegistrationState : global::Pulumi.ResourceArgs
     {
+        [Input("accountKeyAlgorithm")]
+        public Input<string>? AccountKeyAlgorithm { get; set; }
+
+        [Input("accountKeyEcdsaCurve")]
+        public Input<string>? AccountKeyEcdsaCurve { get; set; }
+
         [Input("accountKeyPem")]
         private Input<string>? _accountKeyPem;
         public Input<string>? AccountKeyPem
@@ -113,6 +137,9 @@ namespace Pulumiverse.Acme
                 _accountKeyPem = Output.Tuple<Input<string>?, int>(value, emptySecret).Apply(t => t.Item1);
             }
         }
+
+        [Input("accountKeyRsaBits")]
+        public Input<int>? AccountKeyRsaBits { get; set; }
 
         [Input("emailAddress")]
         public Input<string>? EmailAddress { get; set; }

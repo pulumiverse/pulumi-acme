@@ -81,6 +81,13 @@ namespace Pulumiverse.Acme
         public Output<string?> CertificateRequestPem { get; private set; } = null!;
 
         /// <summary>
+        /// The serial number, in string format, as reported by
+        /// the CA.
+        /// </summary>
+        [Output("certificateSerial")]
+        public Output<string> CertificateSerial { get; private set; } = null!;
+
+        /// <summary>
         /// The full URL of the certificate within the ACME CA.
         /// </summary>
         [Output("certificateUrl")]
@@ -699,6 +706,13 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("certificateRequestPem")]
         public Input<string>? CertificateRequestPem { get; set; }
+
+        /// <summary>
+        /// The serial number, in string format, as reported by
+        /// the CA.
+        /// </summary>
+        [Input("certificateSerial")]
+        public Input<string>? CertificateSerial { get; set; }
 
         /// <summary>
         /// The full URL of the certificate within the ACME CA.

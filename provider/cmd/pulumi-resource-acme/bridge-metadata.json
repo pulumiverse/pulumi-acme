@@ -45,6 +45,11 @@
                     }
                 }
             }
+        },
+        "datasources": {
+            "acme_server_url": {
+                "current": "acme:index/getServerUrl:getServerUrl"
+            }
         }
     },
     "auto-settings": {},

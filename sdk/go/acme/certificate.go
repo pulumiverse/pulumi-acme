@@ -50,6 +50,9 @@ type Certificate struct {
 	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
 	// to be specified. Forces a new resource when changed.
 	CertificateRequestPem pulumi.StringPtrOutput `pulumi:"certificateRequestPem"`
+	// The serial number, in string format, as reported by
+	// the CA.
+	CertificateSerial pulumi.StringOutput `pulumi:"certificateSerial"`
 	// The full URL of the certificate within the ACME CA.
 	CertificateUrl pulumi.StringOutput `pulumi:"certificateUrl"`
 	// The certificate's common name, the primary domain that the
@@ -258,6 +261,9 @@ type certificateState struct {
 	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
 	// to be specified. Forces a new resource when changed.
 	CertificateRequestPem *string `pulumi:"certificateRequestPem"`
+	// The serial number, in string format, as reported by
+	// the CA.
+	CertificateSerial *string `pulumi:"certificateSerial"`
 	// The full URL of the certificate within the ACME CA.
 	CertificateUrl *string `pulumi:"certificateUrl"`
 	// The certificate's common name, the primary domain that the
@@ -421,6 +427,9 @@ type CertificateState struct {
 	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
 	// to be specified. Forces a new resource when changed.
 	CertificateRequestPem pulumi.StringPtrInput
+	// The serial number, in string format, as reported by
+	// the CA.
+	CertificateSerial pulumi.StringPtrInput
 	// The full URL of the certificate within the ACME CA.
 	CertificateUrl pulumi.StringPtrInput
 	// The certificate's common name, the primary domain that the
@@ -971,6 +980,12 @@ func (o CertificateOutput) CertificatePem() pulumi.StringOutput {
 // to be specified. Forces a new resource when changed.
 func (o CertificateOutput) CertificateRequestPem() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.CertificateRequestPem }).(pulumi.StringPtrOutput)
+}
+
+// The serial number, in string format, as reported by
+// the CA.
+func (o CertificateOutput) CertificateSerial() pulumi.StringOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateSerial }).(pulumi.StringOutput)
 }
 
 // The full URL of the certificate within the ACME CA.

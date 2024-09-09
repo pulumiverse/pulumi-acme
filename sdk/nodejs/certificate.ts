@@ -86,6 +86,11 @@ export class Certificate extends pulumi.CustomResource {
      */
     public readonly certificateRequestPem!: pulumi.Output<string | undefined>;
     /**
+     * The serial number, in string format, as reported by
+     * the CA.
+     */
+    public /*out*/ readonly certificateSerial!: pulumi.Output<string>;
+    /**
      * The full URL of the certificate within the ACME CA.
      */
     public /*out*/ readonly certificateUrl!: pulumi.Output<string>;
@@ -272,6 +277,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["certificateP12Password"] = state ? state.certificateP12Password : undefined;
             resourceInputs["certificatePem"] = state ? state.certificatePem : undefined;
             resourceInputs["certificateRequestPem"] = state ? state.certificateRequestPem : undefined;
+            resourceInputs["certificateSerial"] = state ? state.certificateSerial : undefined;
             resourceInputs["certificateUrl"] = state ? state.certificateUrl : undefined;
             resourceInputs["commonName"] = state ? state.commonName : undefined;
             resourceInputs["disableCompletePropagation"] = state ? state.disableCompletePropagation : undefined;
@@ -322,6 +328,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["certificateNotAfter"] = undefined /*out*/;
             resourceInputs["certificateP12"] = undefined /*out*/;
             resourceInputs["certificatePem"] = undefined /*out*/;
+            resourceInputs["certificateSerial"] = undefined /*out*/;
             resourceInputs["certificateUrl"] = undefined /*out*/;
             resourceInputs["issuerPem"] = undefined /*out*/;
             resourceInputs["privateKeyPem"] = undefined /*out*/;
@@ -388,6 +395,11 @@ export interface CertificateState {
      * to be specified. Forces a new resource when changed.
      */
     certificateRequestPem?: pulumi.Input<string>;
+    /**
+     * The serial number, in string format, as reported by
+     * the CA.
+     */
+    certificateSerial?: pulumi.Input<string>;
     /**
      * The full URL of the certificate within the ACME CA.
      */
