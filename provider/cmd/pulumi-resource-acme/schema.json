@@ -221,6 +221,10 @@
                     "type": "string",
                     "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n"
                 },
+                "certificateSerial": {
+                    "type": "string",
+                    "description": "The serial number, in string format, as reported by\nthe CA.\n"
+                },
                 "certificateUrl": {
                     "type": "string",
                     "description": "The full URL of the certificate within the ACME CA.\n"
@@ -318,6 +322,7 @@
                 "certificateNotAfter",
                 "certificateP12",
                 "certificatePem",
+                "certificateSerial",
                 "certificateUrl",
                 "issuerPem",
                 "privateKeyPem"
@@ -469,6 +474,10 @@
                         "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n",
                         "willReplaceOnChanges": true
                     },
+                    "certificateSerial": {
+                        "type": "string",
+                        "description": "The serial number, in string format, as reported by\nthe CA.\n"
+                    },
                     "certificateUrl": {
                         "type": "string",
                         "description": "The full URL of the certificate within the ACME CA.\n"
@@ -570,9 +579,18 @@
         },
         "acme:index/registration:Registration": {
             "properties": {
+                "accountKeyAlgorithm": {
+                    "type": "string"
+                },
+                "accountKeyEcdsaCurve": {
+                    "type": "string"
+                },
                 "accountKeyPem": {
                     "type": "string",
                     "secret": true
+                },
+                "accountKeyRsaBits": {
+                    "type": "integer"
                 },
                 "emailAddress": {
                     "type": "string"
@@ -590,9 +608,21 @@
                 "registrationUrl"
             ],
             "inputProperties": {
+                "accountKeyAlgorithm": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
+                "accountKeyEcdsaCurve": {
+                    "type": "string",
+                    "willReplaceOnChanges": true
+                },
                 "accountKeyPem": {
                     "type": "string",
                     "secret": true,
+                    "willReplaceOnChanges": true
+                },
+                "accountKeyRsaBits": {
+                    "type": "integer",
                     "willReplaceOnChanges": true
                 },
                 "emailAddress": {
@@ -605,15 +635,26 @@
                 }
             },
             "requiredInputs": [
-                "accountKeyPem",
                 "emailAddress"
             ],
             "stateInputs": {
                 "description": "Input properties used for looking up and filtering Registration resources.\n",
                 "properties": {
+                    "accountKeyAlgorithm": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
+                    "accountKeyEcdsaCurve": {
+                        "type": "string",
+                        "willReplaceOnChanges": true
+                    },
                     "accountKeyPem": {
                         "type": "string",
                         "secret": true,
+                        "willReplaceOnChanges": true
+                    },
+                    "accountKeyRsaBits": {
+                        "type": "integer",
                         "willReplaceOnChanges": true
                     },
                     "emailAddress": {
@@ -629,6 +670,28 @@
                     }
                 },
                 "type": "object"
+            }
+        }
+    },
+    "functions": {
+        "acme:index/getServerUrl:getServerUrl": {
+            "description": "## # acme.getServerUrl\n\nThe `acme.getServerUrl` data source can be used to retrieve the CA server URL\nthat the provider is currently configured for.\n\n## Example\n\nThe following example populates the `server_url` output with the currently\nconfigured CA server URL.\n\n\u003c!--Start PulumiCodeChooser --\u003e\n```typescript\nimport * as pulumi from \"@pulumi/pulumi\";\nimport * as acme from \"@pulumi/acme\";\n\nconst url = acme.getServerUrl({});\nexport const serverUrl = url.then(url =\u003e url.serverUrl);\n```\n```python\nimport pulumi\nimport pulumi_acme as acme\n\nurl = acme.get_server_url()\npulumi.export(\"serverUrl\", url.server_url)\n```\n```csharp\nusing System.Collections.Generic;\nusing System.Linq;\nusing Pulumi;\nusing Acme = Pulumi.Acme;\n\nreturn await Deployment.RunAsync(() =\u003e \n{\n    var url = Acme.GetServerUrl.Invoke();\n\n    return new Dictionary\u003cstring, object?\u003e\n    {\n        [\"serverUrl\"] = url.Apply(getServerUrlResult =\u003e getServerUrlResult.ServerUrl),\n    };\n});\n```\n```go\npackage main\n\nimport (\n\t\"github.com/pulumi/pulumi/sdk/v3/go/pulumi\"\n\t\"github.com/pulumiverse/pulumi-acme/sdk/go/acme\"\n)\n\nfunc main() {\n\tpulumi.Run(func(ctx *pulumi.Context) error {\n\t\turl, err := acme.GetServerUrl(ctx, nil, nil)\n\t\tif err != nil {\n\t\t\treturn err\n\t\t}\n\t\tctx.Export(\"serverUrl\", url.ServerUrl)\n\t\treturn nil\n\t})\n}\n```\n```java\npackage generated_program;\n\nimport com.pulumi.Context;\nimport com.pulumi.Pulumi;\nimport com.pulumi.core.Output;\nimport com.pulumi.acme.AcmeFunctions;\nimport java.util.List;\nimport java.util.ArrayList;\nimport java.util.Map;\nimport java.io.File;\nimport java.nio.file.Files;\nimport java.nio.file.Paths;\n\npublic class App {\n    public static void main(String[] args) {\n        Pulumi.run(App::stack);\n    }\n\n    public static void stack(Context ctx) {\n        final var url = AcmeFunctions.getServerUrl();\n\n        ctx.export(\"serverUrl\", url.applyValue(getServerUrlResult -\u003e getServerUrlResult.serverUrl()));\n    }\n}\n```\n```yaml\nvariables:\n  url:\n    fn::invoke:\n      Function: acme:getServerUrl\n      Arguments: {}\noutputs:\n  serverUrl: ${url.serverUrl}\n```\n\u003c!--End PulumiCodeChooser --\u003e\n\n#### Argument Reference\n\nThis data source takes no arguments.\n\n#### Attribute Reference\n\nThe following attributes are exported:\n\n* `id`: the CA server URL that the provider is currently configured for. \n* `server_url`: the CA server URL that the provider is currently configured\n  for. Same as `id`.\n",
+            "outputs": {
+                "description": "A collection of values returned by getServerUrl.\n",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The provider-assigned unique ID for this managed resource.\n"
+                    },
+                    "serverUrl": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "serverUrl",
+                    "id"
+                ]
             }
         }
     }
