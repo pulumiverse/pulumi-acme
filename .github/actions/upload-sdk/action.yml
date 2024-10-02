@@ -13,7 +13,7 @@ runs:
       shell: bash
       run: tar -zcf sdk/${{ inputs.language }}.tar.gz -C sdk/${{ inputs.language }} .
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4
       with:
         name: ${{ inputs.language  }}-sdk.tar.gz
         path: ${{ github.workspace}}/sdk/${{ inputs.language }}.tar.gz

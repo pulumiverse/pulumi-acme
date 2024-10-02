@@ -8,7 +8,7 @@ runs:
       shell: bash
       run: tar -zcf ${{ github.workspace }}/bin/provider.tar.gz -C ${{ github.workspace }}/bin/ pulumi-resource-acme pulumi-tfgen-acme
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4
       with:
         name: acme-provider.tar.gz
         path: ${{ github.workspace }}/bin/provider.tar.gz
