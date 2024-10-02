@@ -120,12 +120,12 @@ install_plugins: export PATH := $(WORKING_DIR)/.pulumi/bin:$(PATH)
 install_plugins: .pulumi/bin/pulumi
 
 lint_provider: provider
-	cd provider && golangci-lint run -c ../.golangci.yml
+	cd provider && golangci-lint run --path-prefix provider -c ../.golangci.yml
 
 # `lint_provider.fix` is a utility target meant to be run manually
 # that will run the linter and fix errors when possible.
 lint_provider.fix:
-	cd provider && golangci-lint run -c ../.golangci.yml --fix
+	cd provider && golangci-lint run --path-prefix provider -c ../.golangci.yml --fix
 
 # `make provider_no_deps` builds the provider binary directly, without ensuring that
 # `cmd/pulumi-resource-acme/schema.json` is valid and up to date.
@@ -174,11 +174,11 @@ bin/pulumi-java-gen: .pulumi-java-gen.version
 # - Run make ci-mgmt to apply the change locally.
 #
 ci-mgmt: .ci-mgmt.yaml
-	rm -f .github/workflows/*.yml # Copied from update-workflows.yml
+	find .github/workflows/*.yml -type f ! -name "$(PACK)*.yml" -delete
 	go run github.com/pulumi/ci-mgmt/provider-ci@master generate \
 		--name $(ORG)/pulumi-$(PACK) \
 		--out . \
-		--template bridged-provider \
+		--template external-bridged-provider \
 		--config $<
 
 # Because some codegen depends on the version of the CLI used, we install a local CLI
