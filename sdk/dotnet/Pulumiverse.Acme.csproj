@@ -9,6 +9,7 @@
     <PackageProjectUrl>https://www.pulumi.com</PackageProjectUrl>
     <RepositoryUrl>https://github.com/pulumiverse/pulumi-acme</RepositoryUrl>
     <PackageIcon>logo.png</PackageIcon>
+    <Version>0.3.2-alpha.0+dev</Version>
 
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
