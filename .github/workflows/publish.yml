@@ -37,6 +37,8 @@ env:
 jobs:
   publish:
     name: publish
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - name: Validate prerelease
@@ -88,7 +90,7 @@ jobs:
         generate_release_notes: true
         files: dist/*
       env:
-        GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish_sdk:
     name: publish_sdk
