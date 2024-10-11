@@ -2,23 +2,23 @@
 name: Upgrade provider
 
 on:
-  issues:
-    types:
-    - opened
   workflow_dispatch: {}
+  schedule:
+    # At 05:00 on Monday
+    - cron: 0 5 * * 1
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
   upgrade_provider:
-    if: ${{ (github.event.issue.user.login == 'pulumi-bot' && contains(github.event.issue.title, 'Upgrade terraform-provider-')) || github.event_name == 'workflow_dispatch' }}
     name: upgrade-provider
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -26,14 +26,14 @@ jobs:
       - name: Setup tools
         uses: ./.github/actions/setup-tools
         with:
-          tools: pulumictl, pulumicli, go, nodejs, dotnet, python, java
+          tools: pulumictl, pulumicli, dotnet, go, nodejs, python
       - name: Install upgrade-provider
         run: go install github.com/pulumi/upgrade-provider@main
         shell: bash
       - name: "Set up git identity: name"
         run: |
-          git config --global user.name 'bot@pulumi.com'
-          git config --global user.email 'bot@pulumi.com'
+          git config --global user.name 'Github Actions'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
         shell: bash
       - name: Run upgrade-provider
         run: upgrade-provider "${{ github.repository }}" --kind="all" 
