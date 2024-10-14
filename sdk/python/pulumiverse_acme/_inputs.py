@@ -4,20 +4,41 @@
 
 import copy
 import warnings
+import sys
 import pulumi
 import pulumi.runtime
 from typing import Any, Mapping, Optional, Sequence, Union, overload
+if sys.version_info >= (3, 11):
+    from typing import NotRequired, TypedDict, TypeAlias
+else:
+    from typing_extensions import NotRequired, TypedDict, TypeAlias
 from . import _utilities
 
 __all__ = [
     'CertificateDnsChallengeArgs',
+    'CertificateDnsChallengeArgsDict',
     'CertificateHttpChallengeArgs',
+    'CertificateHttpChallengeArgsDict',
     'CertificateHttpMemcachedChallengeArgs',
+    'CertificateHttpMemcachedChallengeArgsDict',
     'CertificateHttpS3ChallengeArgs',
+    'CertificateHttpS3ChallengeArgsDict',
     'CertificateHttpWebrootChallengeArgs',
+    'CertificateHttpWebrootChallengeArgsDict',
     'CertificateTlsChallengeArgs',
+    'CertificateTlsChallengeArgsDict',
     'RegistrationExternalAccountBindingArgs',
+    'RegistrationExternalAccountBindingArgsDict',
 ]
+
+MYPY = False
+
+if not MYPY:
+    class CertificateDnsChallengeArgsDict(TypedDict):
+        provider: pulumi.Input[str]
+        config: NotRequired[pulumi.Input[Mapping[str, pulumi.Input[str]]]]
+elif False:
+    CertificateDnsChallengeArgsDict: TypeAlias = Mapping[str, Any]
 
 @pulumi.input_type
 class CertificateDnsChallengeArgs:
@@ -46,6 +67,31 @@ class CertificateDnsChallengeArgs:
     def config(self, value: Optional[pulumi.Input[Mapping[str, pulumi.Input[str]]]]):
         pulumi.set(self, "config", value)
 
+
+if not MYPY:
+    class CertificateHttpChallengeArgsDict(TypedDict):
+        port: NotRequired[pulumi.Input[int]]
+        """
+        The port that the challenge server listens on. Default: `80`.
+        """
+        proxy_header: NotRequired[pulumi.Input[str]]
+        """
+        The proxy header to match against. Default:
+        `Host`.
+
+        The `proxy_header` option behaves differently depending on its definition:
+
+        * When set to `Host`, standard host header validation is used.
+        * When set to `Forwarded`, the server looks in the `Forwarded` header for a
+        section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
+        resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
+        for more details.
+        * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
+        checked for the host entry in the same way the host header would normally be
+        checked.
+        """
+elif False:
+    CertificateHttpChallengeArgsDict: TypeAlias = Mapping[str, Any]
 
 @pulumi.input_type
 class CertificateHttpChallengeArgs:
@@ -110,6 +156,12 @@ class CertificateHttpChallengeArgs:
         pulumi.set(self, "proxy_header", value)
 
 
+if not MYPY:
+    class CertificateHttpMemcachedChallengeArgsDict(TypedDict):
+        hosts: pulumi.Input[Sequence[pulumi.Input[str]]]
+elif False:
+    CertificateHttpMemcachedChallengeArgsDict: TypeAlias = Mapping[str, Any]
+
 @pulumi.input_type
 class CertificateHttpMemcachedChallengeArgs:
     def __init__(__self__, *,
@@ -125,6 +177,15 @@ class CertificateHttpMemcachedChallengeArgs:
     def hosts(self, value: pulumi.Input[Sequence[pulumi.Input[str]]]):
         pulumi.set(self, "hosts", value)
 
+
+if not MYPY:
+    class CertificateHttpS3ChallengeArgsDict(TypedDict):
+        s3_bucket: pulumi.Input[str]
+        """
+        The s3_bucket to publish the record to.
+        """
+elif False:
+    CertificateHttpS3ChallengeArgsDict: TypeAlias = Mapping[str, Any]
 
 @pulumi.input_type
 class CertificateHttpS3ChallengeArgs:
@@ -148,6 +209,15 @@ class CertificateHttpS3ChallengeArgs:
         pulumi.set(self, "s3_bucket", value)
 
 
+if not MYPY:
+    class CertificateHttpWebrootChallengeArgsDict(TypedDict):
+        directory: pulumi.Input[str]
+        """
+        The directory to publish the record to.
+        """
+elif False:
+    CertificateHttpWebrootChallengeArgsDict: TypeAlias = Mapping[str, Any]
+
 @pulumi.input_type
 class CertificateHttpWebrootChallengeArgs:
     def __init__(__self__, *,
@@ -169,6 +239,15 @@ class CertificateHttpWebrootChallengeArgs:
     def directory(self, value: pulumi.Input[str]):
         pulumi.set(self, "directory", value)
 
+
+if not MYPY:
+    class CertificateTlsChallengeArgsDict(TypedDict):
+        port: NotRequired[pulumi.Input[int]]
+        """
+        The port that the challenge server listens on. Default: `443`.
+        """
+elif False:
+    CertificateTlsChallengeArgsDict: TypeAlias = Mapping[str, Any]
 
 @pulumi.input_type
 class CertificateTlsChallengeArgs:
@@ -192,6 +271,13 @@ class CertificateTlsChallengeArgs:
     def port(self, value: Optional[pulumi.Input[int]]):
         pulumi.set(self, "port", value)
 
+
+if not MYPY:
+    class RegistrationExternalAccountBindingArgsDict(TypedDict):
+        hmac_base64: pulumi.Input[str]
+        key_id: pulumi.Input[str]
+elif False:
+    RegistrationExternalAccountBindingArgsDict: TypeAlias = Mapping[str, Any]
 
 @pulumi.input_type
 class RegistrationExternalAccountBindingArgs:

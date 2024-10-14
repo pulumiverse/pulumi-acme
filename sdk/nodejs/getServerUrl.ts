@@ -36,7 +36,6 @@ import * as utilities from "./utilities";
  *   for. Same as `id`.
  */
 export function getServerUrl(opts?: pulumi.InvokeOptions): Promise<GetServerUrlResult> {
-
     opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts || {});
     return pulumi.runtime.invoke("acme:index/getServerUrl:getServerUrl", {
     }, opts);
@@ -84,5 +83,7 @@ export interface GetServerUrlResult {
  *   for. Same as `id`.
  */
 export function getServerUrlOutput(opts?: pulumi.InvokeOptions): pulumi.Output<GetServerUrlResult> {
-    return pulumi.output(getServerUrl(opts))
+    opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts || {});
+    return pulumi.runtime.invokeOutput("acme:index/getServerUrl:getServerUrl", {
+    }, opts);
 }
