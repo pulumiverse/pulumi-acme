@@ -33,7 +33,7 @@ import (
 //
 //	func main() {
 //		pulumi.Run(func(ctx *pulumi.Context) error {
-//			url, err := acme.GetServerUrl(ctx, nil, nil)
+//			url, err := acme.GetServerUrl(ctx, map[string]interface{}{}, nil)
 //			if err != nil {
 //				return err
 //			}
@@ -73,13 +73,19 @@ type GetServerUrlResult struct {
 }
 
 func GetServerUrlOutput(ctx *pulumi.Context, opts ...pulumi.InvokeOption) GetServerUrlResultOutput {
-	return pulumi.ToOutput(0).ApplyT(func(int) (GetServerUrlResult, error) {
-		r, err := GetServerUrl(ctx, opts...)
-		var s GetServerUrlResult
-		if r != nil {
-			s = *r
+	return pulumi.ToOutput(0).ApplyT(func(int) (GetServerUrlResultOutput, error) {
+		opts = internal.PkgInvokeDefaultOpts(opts)
+		var rv GetServerUrlResult
+		secret, err := ctx.InvokePackageRaw("acme:index/getServerUrl:getServerUrl", nil, &rv, "", opts...)
+		if err != nil {
+			return GetServerUrlResultOutput{}, err
 		}
-		return s, err
+
+		output := pulumi.ToOutput(rv).(GetServerUrlResultOutput)
+		if secret {
+			return pulumi.ToSecret(output).(GetServerUrlResultOutput), nil
+		}
+		return output, nil
 	}).(GetServerUrlResultOutput)
 }
 

@@ -4,9 +4,14 @@
 
 import copy
 import warnings
+import sys
 import pulumi
 import pulumi.runtime
 from typing import Any, Mapping, Optional, Sequence, Union, overload
+if sys.version_info >= (3, 11):
+    from typing import NotRequired, TypedDict, TypeAlias
+else:
+    from typing_extensions import NotRequired, TypedDict, TypeAlias
 from . import _utilities
 
 __all__ = [
@@ -92,9 +97,6 @@ def get_server_url(opts: Optional[pulumi.InvokeOptions] = None) -> AwaitableGetS
     return AwaitableGetServerUrlResult(
         id=pulumi.get(__ret__, 'id'),
         server_url=pulumi.get(__ret__, 'server_url'))
-
-
-@_utilities.lift_output_func(get_server_url)
 def get_server_url_output(opts: Optional[pulumi.InvokeOptions] = None) -> pulumi.Output[GetServerUrlResult]:
     """
     ## # get_server_url
@@ -127,4 +129,9 @@ def get_server_url_output(opts: Optional[pulumi.InvokeOptions] = None) -> pulumi
     * `server_url`: the CA server URL that the provider is currently configured
       for. Same as `id`.
     """
-    ...
+    __args__ = dict()
+    opts = pulumi.InvokeOptions.merge(_utilities.get_invoke_opts_defaults(), opts)
+    __ret__ = pulumi.runtime.invoke_output('acme:index/getServerUrl:getServerUrl', __args__, opts=opts, typ=GetServerUrlResult)
+    return __ret__.apply(lambda __response__: GetServerUrlResult(
+        id=pulumi.get(__response__, 'id'),
+        server_url=pulumi.get(__response__, 'server_url')))
