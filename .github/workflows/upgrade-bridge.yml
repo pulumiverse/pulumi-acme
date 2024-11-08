@@ -50,18 +50,19 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+        
 jobs:
   upgrade_provider:
     name: upgrade-provider
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v4
