@@ -3,7 +3,7 @@ name: "Pull Workflow Changes"
 on:
   schedule:
     # 3 AM UTC ~ 8 PM PDT / 7 PM PST every Tuesday. Time chosen to run during off hours.
-    - cron: 0 3 * * TUE
+    - cron: 0 3 * * * #TUE Temporarily running every day for fast feedback.
 
 permissions:
   contents: write
