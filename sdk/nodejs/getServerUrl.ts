@@ -82,7 +82,7 @@ export interface GetServerUrlResult {
  * * `serverUrl`: the CA server URL that the provider is currently configured
  *   for. Same as `id`.
  */
-export function getServerUrlOutput(opts?: pulumi.InvokeOptions): pulumi.Output<GetServerUrlResult> {
+export function getServerUrlOutput(opts?: pulumi.InvokeOutputOptions): pulumi.Output<GetServerUrlResult> {
     opts = pulumi.mergeOptions(utilities.resourceOptsDefaults(), opts || {});
     return pulumi.runtime.invokeOutput("acme:index/getServerUrl:getServerUrl", {
     }, opts);

@@ -74,18 +74,8 @@ type GetServerUrlResult struct {
 
 func GetServerUrlOutput(ctx *pulumi.Context, opts ...pulumi.InvokeOption) GetServerUrlResultOutput {
 	return pulumi.ToOutput(0).ApplyT(func(int) (GetServerUrlResultOutput, error) {
-		opts = internal.PkgInvokeDefaultOpts(opts)
-		var rv GetServerUrlResult
-		secret, err := ctx.InvokePackageRaw("acme:index/getServerUrl:getServerUrl", nil, &rv, "", opts...)
-		if err != nil {
-			return GetServerUrlResultOutput{}, err
-		}
-
-		output := pulumi.ToOutput(rv).(GetServerUrlResultOutput)
-		if secret {
-			return pulumi.ToSecret(output).(GetServerUrlResultOutput), nil
-		}
-		return output, nil
+		options := pulumi.InvokeOutputOptions{InvokeOptions: internal.PkgInvokeDefaultOpts(opts)}
+		return ctx.InvokeOutput("acme:index/getServerUrl:getServerUrl", nil, GetServerUrlResultOutput{}, options).(GetServerUrlResultOutput), nil
 	}).(GetServerUrlResultOutput)
 }
 

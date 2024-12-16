@@ -97,6 +97,49 @@ namespace Pulumiverse.Acme
         /// </summary>
         public static Output<GetServerUrlResult> Invoke(InvokeOptions? options = null)
             => global::Pulumi.Deployment.Instance.Invoke<GetServerUrlResult>("acme:index/getServerUrl:getServerUrl", InvokeArgs.Empty, options.WithDefaults());
+
+        /// <summary>
+        /// ## # acme.getServerUrl
+        /// 
+        /// The `acme.getServerUrl` data source can be used to retrieve the CA server URL
+        /// that the provider is currently configured for.
+        /// 
+        /// ## Example
+        /// 
+        /// The following example populates the `server_url` output with the currently
+        /// configured CA server URL.
+        /// 
+        /// ```csharp
+        /// using System.Collections.Generic;
+        /// using System.Linq;
+        /// using Pulumi;
+        /// using Acme = Pulumi.Acme;
+        /// 
+        /// return await Deployment.RunAsync(() =&gt; 
+        /// {
+        ///     var url = Acme.GetServerUrl.Invoke();
+        /// 
+        ///     return new Dictionary&lt;string, object?&gt;
+        ///     {
+        ///         ["serverUrl"] = url.Apply(getServerUrlResult =&gt; getServerUrlResult.ServerUrl),
+        ///     };
+        /// });
+        /// ```
+        /// 
+        /// #### Argument Reference
+        /// 
+        /// This data source takes no arguments.
+        /// 
+        /// #### Attribute Reference
+        /// 
+        /// The following attributes are exported:
+        /// 
+        /// * `id`: the CA server URL that the provider is currently configured for. 
+        /// * `server_url`: the CA server URL that the provider is currently configured
+        ///   for. Same as `id`.
+        /// </summary>
+        public static Output<GetServerUrlResult> Invoke(InvokeOutputOptions options)
+            => global::Pulumi.Deployment.Instance.Invoke<GetServerUrlResult>("acme:index/getServerUrl:getServerUrl", InvokeArgs.Empty, options.WithDefaults());
     }
 
 
