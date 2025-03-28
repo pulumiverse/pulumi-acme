@@ -223,7 +223,7 @@
                 },
                 "certificateRequestPem": {
                     "type": "string",
-                    "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n"
+                    "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format. Forces a new resource when changed.\n\n\u003e One of `common_name`, `subject_alternative_names`, or\n`certificate_request_pem` must be specified. `certificate_request_pem`\nconflicts with `common_name` and `subject_alternative_names`; You cannot have\n`certificate_request_pem` defined at the same time as `common_name` or\n`subject_alternative_names`, and vice versa. Finally, `common_name` can be\nblank while `subject_alternative_names` is defined, and vice versa; in this\ncase with the `classic` Let's Encrypt profile, the first domain defined in\n`subject_alternative_names` becomes the common name.\n"
                 },
                 "certificateSerial": {
                     "type": "string",
@@ -235,7 +235,7 @@
                 },
                 "commonName": {
                     "type": "string",
-                    "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Required when not specifying a CSR. Forces\na new resource when changed.\n"
+                    "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Forces a new resource when changed.\n"
                 },
                 "disableCompletePropagation": {
                     "type": "boolean",
@@ -293,6 +293,10 @@
                     "description": "The certificate's private key, in PEM format, if the\ncertificate was generated from scratch and not with\n`certificate_request_pem`.  If\n`certificate_request_pem` was used, this will be blank.\n",
                     "secret": true
                 },
+                "profile": {
+                    "type": "string",
+                    "description": "The ACME profile to use when requesting the\ncertificate. This can be used to control generation parameters according to\nthe specific CA. The default is blank (no profile); forces a new resource\nwhen changed.\n\n\u003e Let's Encrypt publishes details on their profiles at\n\u003chttps://letsencrypt.org/docs/profiles/\u003e.\n"
+                },
                 "recursiveNameservers": {
                     "type": "array",
                     "items": {
@@ -313,7 +317,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "The certificate's subject alternative names,\ndomains that this certificate will also be recognized for. Only valid when not\nspecifying a CSR. Forces a new resource when changed.\n"
+                    "description": "The certificate's subject alternative names;\ndomains that this certificate will also be recognized for. Forces a new\nresource when changed.\n"
                 },
                 "tlsChallenge": {
                     "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
@@ -349,12 +353,12 @@
                 },
                 "certificateRequestPem": {
                     "type": "string",
-                    "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n",
+                    "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format. Forces a new resource when changed.\n\n\u003e One of `common_name`, `subject_alternative_names`, or\n`certificate_request_pem` must be specified. `certificate_request_pem`\nconflicts with `common_name` and `subject_alternative_names`; You cannot have\n`certificate_request_pem` defined at the same time as `common_name` or\n`subject_alternative_names`, and vice versa. Finally, `common_name` can be\nblank while `subject_alternative_names` is defined, and vice versa; in this\ncase with the `classic` Let's Encrypt profile, the first domain defined in\n`subject_alternative_names` becomes the common name.\n",
                     "willReplaceOnChanges": true
                 },
                 "commonName": {
                     "type": "string",
-                    "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Required when not specifying a CSR. Forces\na new resource when changed.\n",
+                    "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Forces a new resource when changed.\n",
                     "willReplaceOnChanges": true
                 },
                 "disableCompletePropagation": {
@@ -407,6 +411,11 @@
                     "description": "The common name of the root of a preferred\nalternate certificate chain offered by the CA. The certificates in\n`issuer_pem` will reflect the chain requested, if available, otherwise the\ndefault chain will be provided. Forces a new resource when changed.\n\n\u003e `preferred_chain` can be used to request alternate chains on Let's Encrypt\nduring the transition away from their old cross-signed intermediates. See [this\narticle for more\ndetails](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).\nIn their example titled **\"What about the alternate chain?\"**, the root you\nwould put in to the `preferred_chain` field would be `ISRG Root X1`. The\nequivalent in the [staging\nenvironment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)\nPretend Pear X1`.\n",
                     "willReplaceOnChanges": true
                 },
+                "profile": {
+                    "type": "string",
+                    "description": "The ACME profile to use when requesting the\ncertificate. This can be used to control generation parameters according to\nthe specific CA. The default is blank (no profile); forces a new resource\nwhen changed.\n\n\u003e Let's Encrypt publishes details on their profiles at\n\u003chttps://letsencrypt.org/docs/profiles/\u003e.\n",
+                    "willReplaceOnChanges": true
+                },
                 "recursiveNameservers": {
                     "type": "array",
                     "items": {
@@ -427,7 +436,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "The certificate's subject alternative names,\ndomains that this certificate will also be recognized for. Only valid when not\nspecifying a CSR. Forces a new resource when changed.\n",
+                    "description": "The certificate's subject alternative names;\ndomains that this certificate will also be recognized for. Forces a new\nresource when changed.\n",
                     "willReplaceOnChanges": true
                 },
                 "tlsChallenge": {
@@ -475,7 +484,7 @@
                     },
                     "certificateRequestPem": {
                         "type": "string",
-                        "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format.  Either this, or the in-resource request options\n(`common_name`, `key_type`, and optionally `subject_alternative_names`) need\nto be specified. Forces a new resource when changed.\n",
+                        "description": "A pre-created certificate request, such as one\nfrom [`tls_cert_request`][tls-cert-request], or one from an external source,\nin PEM format. Forces a new resource when changed.\n\n\u003e One of `common_name`, `subject_alternative_names`, or\n`certificate_request_pem` must be specified. `certificate_request_pem`\nconflicts with `common_name` and `subject_alternative_names`; You cannot have\n`certificate_request_pem` defined at the same time as `common_name` or\n`subject_alternative_names`, and vice versa. Finally, `common_name` can be\nblank while `subject_alternative_names` is defined, and vice versa; in this\ncase with the `classic` Let's Encrypt profile, the first domain defined in\n`subject_alternative_names` becomes the common name.\n",
                         "willReplaceOnChanges": true
                     },
                     "certificateSerial": {
@@ -488,7 +497,7 @@
                     },
                     "commonName": {
                         "type": "string",
-                        "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Required when not specifying a CSR. Forces\na new resource when changed.\n",
+                        "description": "The certificate's common name, the primary domain that the\ncertificate will be recognized for. Forces a new resource when changed.\n",
                         "willReplaceOnChanges": true
                     },
                     "disableCompletePropagation": {
@@ -550,6 +559,11 @@
                         "description": "The certificate's private key, in PEM format, if the\ncertificate was generated from scratch and not with\n`certificate_request_pem`.  If\n`certificate_request_pem` was used, this will be blank.\n",
                         "secret": true
                     },
+                    "profile": {
+                        "type": "string",
+                        "description": "The ACME profile to use when requesting the\ncertificate. This can be used to control generation parameters according to\nthe specific CA. The default is blank (no profile); forces a new resource\nwhen changed.\n\n\u003e Let's Encrypt publishes details on their profiles at\n\u003chttps://letsencrypt.org/docs/profiles/\u003e.\n",
+                        "willReplaceOnChanges": true
+                    },
                     "recursiveNameservers": {
                         "type": "array",
                         "items": {
@@ -570,7 +584,7 @@
                         "items": {
                             "type": "string"
                         },
-                        "description": "The certificate's subject alternative names,\ndomains that this certificate will also be recognized for. Only valid when not\nspecifying a CSR. Forces a new resource when changed.\n",
+                        "description": "The certificate's subject alternative names;\ndomains that this certificate will also be recognized for. Forces a new\nresource when changed.\n",
                         "willReplaceOnChanges": true
                     },
                     "tlsChallenge": {
