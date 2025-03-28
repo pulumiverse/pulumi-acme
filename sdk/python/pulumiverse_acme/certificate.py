@@ -37,6 +37,7 @@ class CertificateArgs:
                  must_staple: Optional[pulumi.Input[bool]] = None,
                  pre_check_delay: Optional[pulumi.Input[int]] = None,
                  preferred_chain: Optional[pulumi.Input[str]] = None,
+                 profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
@@ -57,12 +58,18 @@ class CertificateArgs:
                empty string.
         :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
                from [`tls_cert_request`][tls-cert-request], or one from an external source,
-               in PEM format.  Either this, or the in-resource request options
-               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-               to be specified. Forces a new resource when changed.
+               in PEM format. Forces a new resource when changed.
+               
+               > One of `common_name`, `subject_alternative_names`, or
+               `certificate_request_pem` must be specified. `certificate_request_pem`
+               conflicts with `common_name` and `subject_alternative_names`; You cannot have
+               `certificate_request_pem` defined at the same time as `common_name` or
+               `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+               blank while `subject_alternative_names` is defined, and vice versa; in this
+               case with the `classic` Let's Encrypt profile, the first domain defined in
+               `subject_alternative_names` becomes the common name.
         :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
-               certificate will be recognized for. Required when not specifying a CSR. Forces
-               a new resource when changed.
+               certificate will be recognized for. Forces a new resource when changed.
         :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
@@ -128,6 +135,13 @@ class CertificateArgs:
                equivalent in the [staging
                environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
                Pretend Pear X1`.
+        :param pulumi.Input[str] profile: The ACME profile to use when requesting the
+               certificate. This can be used to control generation parameters according to
+               the specific CA. The default is blank (no profile); forces a new resource
+               when changed.
+               
+               > Let's Encrypt publishes details on their profiles at
+               <https://letsencrypt.org/docs/profiles/>.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -147,9 +161,9 @@ class CertificateArgs:
                * remove-from-crl
                * privilege-withdrawn
                * aa-compromise
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
-               domains that this certificate will also be recognized for. Only valid when not
-               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names;
+               domains that this certificate will also be recognized for. Forces a new
+               resource when changed.
         :param pulumi.Input['CertificateTlsChallengeArgs'] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
@@ -189,6 +203,8 @@ class CertificateArgs:
             pulumi.set(__self__, "pre_check_delay", pre_check_delay)
         if preferred_chain is not None:
             pulumi.set(__self__, "preferred_chain", preferred_chain)
+        if profile is not None:
+            pulumi.set(__self__, "profile", profile)
         if recursive_nameservers is not None:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
         if revoke_certificate_on_destroy is not None:
@@ -250,9 +266,16 @@ class CertificateArgs:
         """
         A pre-created certificate request, such as one
         from [`tls_cert_request`][tls-cert-request], or one from an external source,
-        in PEM format.  Either this, or the in-resource request options
-        (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-        to be specified. Forces a new resource when changed.
+        in PEM format. Forces a new resource when changed.
+
+        > One of `common_name`, `subject_alternative_names`, or
+        `certificate_request_pem` must be specified. `certificate_request_pem`
+        conflicts with `common_name` and `subject_alternative_names`; You cannot have
+        `certificate_request_pem` defined at the same time as `common_name` or
+        `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+        blank while `subject_alternative_names` is defined, and vice versa; in this
+        case with the `classic` Let's Encrypt profile, the first domain defined in
+        `subject_alternative_names` becomes the common name.
         """
         return pulumi.get(self, "certificate_request_pem")
 
@@ -265,8 +288,7 @@ class CertificateArgs:
     def common_name(self) -> Optional[pulumi.Input[str]]:
         """
         The certificate's common name, the primary domain that the
-        certificate will be recognized for. Required when not specifying a CSR. Forces
-        a new resource when changed.
+        certificate will be recognized for. Forces a new resource when changed.
         """
         return pulumi.get(self, "common_name")
 
@@ -461,6 +483,24 @@ class CertificateArgs:
         pulumi.set(self, "preferred_chain", value)
 
     @property
+    @pulumi.getter
+    def profile(self) -> Optional[pulumi.Input[str]]:
+        """
+        The ACME profile to use when requesting the
+        certificate. This can be used to control generation parameters according to
+        the specific CA. The default is blank (no profile); forces a new resource
+        when changed.
+
+        > Let's Encrypt publishes details on their profiles at
+        <https://letsencrypt.org/docs/profiles/>.
+        """
+        return pulumi.get(self, "profile")
+
+    @profile.setter
+    def profile(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "profile", value)
+
+    @property
     @pulumi.getter(name="recursiveNameservers")
     def recursive_nameservers(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
@@ -516,9 +556,9 @@ class CertificateArgs:
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
-        The certificate's subject alternative names,
-        domains that this certificate will also be recognized for. Only valid when not
-        specifying a CSR. Forces a new resource when changed.
+        The certificate's subject alternative names;
+        domains that this certificate will also be recognized for. Forces a new
+        resource when changed.
         """
         return pulumi.get(self, "subject_alternative_names")
 
@@ -572,6 +612,7 @@ class _CertificateState:
                  pre_check_delay: Optional[pulumi.Input[int]] = None,
                  preferred_chain: Optional[pulumi.Input[str]] = None,
                  private_key_pem: Optional[pulumi.Input[str]] = None,
+                 profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
@@ -603,15 +644,21 @@ class _CertificateState:
                a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
         :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
                from [`tls_cert_request`][tls-cert-request], or one from an external source,
-               in PEM format.  Either this, or the in-resource request options
-               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-               to be specified. Forces a new resource when changed.
+               in PEM format. Forces a new resource when changed.
+               
+               > One of `common_name`, `subject_alternative_names`, or
+               `certificate_request_pem` must be specified. `certificate_request_pem`
+               conflicts with `common_name` and `subject_alternative_names`; You cannot have
+               `certificate_request_pem` defined at the same time as `common_name` or
+               `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+               blank while `subject_alternative_names` is defined, and vice versa; in this
+               case with the `classic` Let's Encrypt profile, the first domain defined in
+               `subject_alternative_names` becomes the common name.
         :param pulumi.Input[str] certificate_serial: The serial number, in string format, as reported by
                the CA.
         :param pulumi.Input[str] certificate_url: The full URL of the certificate within the ACME CA.
         :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
-               certificate will be recognized for. Required when not specifying a CSR. Forces
-               a new resource when changed.
+               certificate will be recognized for. Forces a new resource when changed.
         :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
@@ -684,6 +731,13 @@ class _CertificateState:
                certificate was generated from scratch and not with
                `certificate_request_pem`.  If
                `certificate_request_pem` was used, this will be blank.
+        :param pulumi.Input[str] profile: The ACME profile to use when requesting the
+               certificate. This can be used to control generation parameters according to
+               the specific CA. The default is blank (no profile); forces a new resource
+               when changed.
+               
+               > Let's Encrypt publishes details on their profiles at
+               <https://letsencrypt.org/docs/profiles/>.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -703,9 +757,9 @@ class _CertificateState:
                * remove-from-crl
                * privilege-withdrawn
                * aa-compromise
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
-               domains that this certificate will also be recognized for. Only valid when not
-               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names;
+               domains that this certificate will also be recognized for. Forces a new
+               resource when changed.
         :param pulumi.Input['CertificateTlsChallengeArgs'] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
@@ -762,6 +816,8 @@ class _CertificateState:
             pulumi.set(__self__, "preferred_chain", preferred_chain)
         if private_key_pem is not None:
             pulumi.set(__self__, "private_key_pem", private_key_pem)
+        if profile is not None:
+            pulumi.set(__self__, "profile", profile)
         if recursive_nameservers is not None:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
         if revoke_certificate_on_destroy is not None:
@@ -878,9 +934,16 @@ class _CertificateState:
         """
         A pre-created certificate request, such as one
         from [`tls_cert_request`][tls-cert-request], or one from an external source,
-        in PEM format.  Either this, or the in-resource request options
-        (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-        to be specified. Forces a new resource when changed.
+        in PEM format. Forces a new resource when changed.
+
+        > One of `common_name`, `subject_alternative_names`, or
+        `certificate_request_pem` must be specified. `certificate_request_pem`
+        conflicts with `common_name` and `subject_alternative_names`; You cannot have
+        `certificate_request_pem` defined at the same time as `common_name` or
+        `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+        blank while `subject_alternative_names` is defined, and vice versa; in this
+        case with the `classic` Let's Encrypt profile, the first domain defined in
+        `subject_alternative_names` becomes the common name.
         """
         return pulumi.get(self, "certificate_request_pem")
 
@@ -918,8 +981,7 @@ class _CertificateState:
     def common_name(self) -> Optional[pulumi.Input[str]]:
         """
         The certificate's common name, the primary domain that the
-        certificate will be recognized for. Required when not specifying a CSR. Forces
-        a new resource when changed.
+        certificate will be recognized for. Forces a new resource when changed.
         """
         return pulumi.get(self, "common_name")
 
@@ -1143,6 +1205,24 @@ class _CertificateState:
         pulumi.set(self, "private_key_pem", value)
 
     @property
+    @pulumi.getter
+    def profile(self) -> Optional[pulumi.Input[str]]:
+        """
+        The ACME profile to use when requesting the
+        certificate. This can be used to control generation parameters according to
+        the specific CA. The default is blank (no profile); forces a new resource
+        when changed.
+
+        > Let's Encrypt publishes details on their profiles at
+        <https://letsencrypt.org/docs/profiles/>.
+        """
+        return pulumi.get(self, "profile")
+
+    @profile.setter
+    def profile(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "profile", value)
+
+    @property
     @pulumi.getter(name="recursiveNameservers")
     def recursive_nameservers(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
@@ -1198,9 +1278,9 @@ class _CertificateState:
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> Optional[pulumi.Input[Sequence[pulumi.Input[str]]]]:
         """
-        The certificate's subject alternative names,
-        domains that this certificate will also be recognized for. Only valid when not
-        specifying a CSR. Forces a new resource when changed.
+        The certificate's subject alternative names;
+        domains that this certificate will also be recognized for. Forces a new
+        resource when changed.
         """
         return pulumi.get(self, "subject_alternative_names")
 
@@ -1248,6 +1328,7 @@ class Certificate(pulumi.CustomResource):
                  must_staple: Optional[pulumi.Input[bool]] = None,
                  pre_check_delay: Optional[pulumi.Input[int]] = None,
                  preferred_chain: Optional[pulumi.Input[str]] = None,
+                 profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
@@ -1271,12 +1352,18 @@ class Certificate(pulumi.CustomResource):
                empty string.
         :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
                from [`tls_cert_request`][tls-cert-request], or one from an external source,
-               in PEM format.  Either this, or the in-resource request options
-               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-               to be specified. Forces a new resource when changed.
+               in PEM format. Forces a new resource when changed.
+               
+               > One of `common_name`, `subject_alternative_names`, or
+               `certificate_request_pem` must be specified. `certificate_request_pem`
+               conflicts with `common_name` and `subject_alternative_names`; You cannot have
+               `certificate_request_pem` defined at the same time as `common_name` or
+               `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+               blank while `subject_alternative_names` is defined, and vice versa; in this
+               case with the `classic` Let's Encrypt profile, the first domain defined in
+               `subject_alternative_names` becomes the common name.
         :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
-               certificate will be recognized for. Required when not specifying a CSR. Forces
-               a new resource when changed.
+               certificate will be recognized for. Forces a new resource when changed.
         :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
@@ -1342,6 +1429,13 @@ class Certificate(pulumi.CustomResource):
                equivalent in the [staging
                environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
                Pretend Pear X1`.
+        :param pulumi.Input[str] profile: The ACME profile to use when requesting the
+               certificate. This can be used to control generation parameters according to
+               the specific CA. The default is blank (no profile); forces a new resource
+               when changed.
+               
+               > Let's Encrypt publishes details on their profiles at
+               <https://letsencrypt.org/docs/profiles/>.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -1361,9 +1455,9 @@ class Certificate(pulumi.CustomResource):
                * remove-from-crl
                * privilege-withdrawn
                * aa-compromise
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
-               domains that this certificate will also be recognized for. Only valid when not
-               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names;
+               domains that this certificate will also be recognized for. Forces a new
+               resource when changed.
         :param pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
@@ -1411,6 +1505,7 @@ class Certificate(pulumi.CustomResource):
                  must_staple: Optional[pulumi.Input[bool]] = None,
                  pre_check_delay: Optional[pulumi.Input[int]] = None,
                  preferred_chain: Optional[pulumi.Input[str]] = None,
+                 profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
@@ -1443,6 +1538,7 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["must_staple"] = must_staple
             __props__.__dict__["pre_check_delay"] = pre_check_delay
             __props__.__dict__["preferred_chain"] = preferred_chain
+            __props__.__dict__["profile"] = profile
             __props__.__dict__["recursive_nameservers"] = recursive_nameservers
             __props__.__dict__["revoke_certificate_on_destroy"] = revoke_certificate_on_destroy
             __props__.__dict__["revoke_certificate_reason"] = revoke_certificate_reason
@@ -1492,6 +1588,7 @@ class Certificate(pulumi.CustomResource):
             pre_check_delay: Optional[pulumi.Input[int]] = None,
             preferred_chain: Optional[pulumi.Input[str]] = None,
             private_key_pem: Optional[pulumi.Input[str]] = None,
+            profile: Optional[pulumi.Input[str]] = None,
             recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
             revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
             revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
@@ -1528,15 +1625,21 @@ class Certificate(pulumi.CustomResource):
                a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
         :param pulumi.Input[str] certificate_request_pem: A pre-created certificate request, such as one
                from [`tls_cert_request`][tls-cert-request], or one from an external source,
-               in PEM format.  Either this, or the in-resource request options
-               (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-               to be specified. Forces a new resource when changed.
+               in PEM format. Forces a new resource when changed.
+               
+               > One of `common_name`, `subject_alternative_names`, or
+               `certificate_request_pem` must be specified. `certificate_request_pem`
+               conflicts with `common_name` and `subject_alternative_names`; You cannot have
+               `certificate_request_pem` defined at the same time as `common_name` or
+               `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+               blank while `subject_alternative_names` is defined, and vice versa; in this
+               case with the `classic` Let's Encrypt profile, the first domain defined in
+               `subject_alternative_names` becomes the common name.
         :param pulumi.Input[str] certificate_serial: The serial number, in string format, as reported by
                the CA.
         :param pulumi.Input[str] certificate_url: The full URL of the certificate within the ACME CA.
         :param pulumi.Input[str] common_name: The certificate's common name, the primary domain that the
-               certificate will be recognized for. Required when not specifying a CSR. Forces
-               a new resource when changed.
+               certificate will be recognized for. Forces a new resource when changed.
         :param pulumi.Input[bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
@@ -1609,6 +1712,13 @@ class Certificate(pulumi.CustomResource):
                certificate was generated from scratch and not with
                `certificate_request_pem`.  If
                `certificate_request_pem` was used, this will be blank.
+        :param pulumi.Input[str] profile: The ACME profile to use when requesting the
+               certificate. This can be used to control generation parameters according to
+               the specific CA. The default is blank (no profile); forces a new resource
+               when changed.
+               
+               > Let's Encrypt publishes details on their profiles at
+               <https://letsencrypt.org/docs/profiles/>.
         :param pulumi.Input[Sequence[pulumi.Input[str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -1628,9 +1738,9 @@ class Certificate(pulumi.CustomResource):
                * remove-from-crl
                * privilege-withdrawn
                * aa-compromise
-        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names,
-               domains that this certificate will also be recognized for. Only valid when not
-               specifying a CSR. Forces a new resource when changed.
+        :param pulumi.Input[Sequence[pulumi.Input[str]]] subject_alternative_names: The certificate's subject alternative names;
+               domains that this certificate will also be recognized for. Forces a new
+               resource when changed.
         :param pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']] tls_challenge: Defines a TLS challenge to use in fulfilling the
                request.
                
@@ -1667,6 +1777,7 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["pre_check_delay"] = pre_check_delay
         __props__.__dict__["preferred_chain"] = preferred_chain
         __props__.__dict__["private_key_pem"] = private_key_pem
+        __props__.__dict__["profile"] = profile
         __props__.__dict__["recursive_nameservers"] = recursive_nameservers
         __props__.__dict__["revoke_certificate_on_destroy"] = revoke_certificate_on_destroy
         __props__.__dict__["revoke_certificate_reason"] = revoke_certificate_reason
@@ -1751,9 +1862,16 @@ class Certificate(pulumi.CustomResource):
         """
         A pre-created certificate request, such as one
         from [`tls_cert_request`][tls-cert-request], or one from an external source,
-        in PEM format.  Either this, or the in-resource request options
-        (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-        to be specified. Forces a new resource when changed.
+        in PEM format. Forces a new resource when changed.
+
+        > One of `common_name`, `subject_alternative_names`, or
+        `certificate_request_pem` must be specified. `certificate_request_pem`
+        conflicts with `common_name` and `subject_alternative_names`; You cannot have
+        `certificate_request_pem` defined at the same time as `common_name` or
+        `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+        blank while `subject_alternative_names` is defined, and vice versa; in this
+        case with the `classic` Let's Encrypt profile, the first domain defined in
+        `subject_alternative_names` becomes the common name.
         """
         return pulumi.get(self, "certificate_request_pem")
 
@@ -1779,8 +1897,7 @@ class Certificate(pulumi.CustomResource):
     def common_name(self) -> pulumi.Output[Optional[str]]:
         """
         The certificate's common name, the primary domain that the
-        certificate will be recognized for. Required when not specifying a CSR. Forces
-        a new resource when changed.
+        certificate will be recognized for. Forces a new resource when changed.
         """
         return pulumi.get(self, "common_name")
 
@@ -1948,6 +2065,20 @@ class Certificate(pulumi.CustomResource):
         return pulumi.get(self, "private_key_pem")
 
     @property
+    @pulumi.getter
+    def profile(self) -> pulumi.Output[Optional[str]]:
+        """
+        The ACME profile to use when requesting the
+        certificate. This can be used to control generation parameters according to
+        the specific CA. The default is blank (no profile); forces a new resource
+        when changed.
+
+        > Let's Encrypt publishes details on their profiles at
+        <https://letsencrypt.org/docs/profiles/>.
+        """
+        return pulumi.get(self, "profile")
+
+    @property
     @pulumi.getter(name="recursiveNameservers")
     def recursive_nameservers(self) -> pulumi.Output[Optional[Sequence[str]]]:
         """
@@ -1991,9 +2122,9 @@ class Certificate(pulumi.CustomResource):
     @pulumi.getter(name="subjectAlternativeNames")
     def subject_alternative_names(self) -> pulumi.Output[Optional[Sequence[str]]]:
         """
-        The certificate's subject alternative names,
-        domains that this certificate will also be recognized for. Only valid when not
-        specifying a CSR. Forces a new resource when changed.
+        The certificate's subject alternative names;
+        domains that this certificate will also be recognized for. Forces a new
+        resource when changed.
         """
         return pulumi.get(self, "subject_alternative_names")
 

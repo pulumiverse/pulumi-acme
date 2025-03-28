@@ -46,9 +46,16 @@ type Certificate struct {
 	CertificatePem pulumi.StringOutput `pulumi:"certificatePem"`
 	// A pre-created certificate request, such as one
 	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format.  Either this, or the in-resource request options
-	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-	// to be specified. Forces a new resource when changed.
+	// in PEM format. Forces a new resource when changed.
+	//
+	// > One of `commonName`, `subjectAlternativeNames`, or
+	// `certificateRequestPem` must be specified. `certificateRequestPem`
+	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+	// `certificateRequestPem` defined at the same time as `commonName` or
+	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
+	// case with the `classic` Let's Encrypt profile, the first domain defined in
+	// `subjectAlternativeNames` becomes the common name.
 	CertificateRequestPem pulumi.StringPtrOutput `pulumi:"certificateRequestPem"`
 	// The serial number, in string format, as reported by
 	// the CA.
@@ -56,8 +63,7 @@ type Certificate struct {
 	// The full URL of the certificate within the ACME CA.
 	CertificateUrl pulumi.StringOutput `pulumi:"certificateUrl"`
 	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Required when not specifying a CSR. Forces
-	// a new resource when changed.
+	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName pulumi.StringPtrOutput `pulumi:"commonName"`
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
@@ -144,6 +150,14 @@ type Certificate struct {
 	// `certificateRequestPem`.  If
 	// `certificateRequestPem` was used, this will be blank.
 	PrivateKeyPem pulumi.StringOutput `pulumi:"privateKeyPem"`
+	// The ACME profile to use when requesting the
+	// certificate. This can be used to control generation parameters according to
+	// the specific CA. The default is blank (no profile); forces a new resource
+	// when changed.
+	//
+	// > Let's Encrypt publishes details on their profiles at
+	// <https://letsencrypt.org/docs/profiles/>.
+	Profile pulumi.StringPtrOutput `pulumi:"profile"`
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -166,9 +180,9 @@ type Certificate struct {
 	// * privilege-withdrawn
 	// * aa-compromise
 	RevokeCertificateReason pulumi.StringPtrOutput `pulumi:"revokeCertificateReason"`
-	// The certificate's subject alternative names,
-	// domains that this certificate will also be recognized for. Only valid when not
-	// specifying a CSR. Forces a new resource when changed.
+	// The certificate's subject alternative names;
+	// domains that this certificate will also be recognized for. Forces a new
+	// resource when changed.
 	SubjectAlternativeNames pulumi.StringArrayOutput `pulumi:"subjectAlternativeNames"`
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
@@ -257,9 +271,16 @@ type certificateState struct {
 	CertificatePem *string `pulumi:"certificatePem"`
 	// A pre-created certificate request, such as one
 	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format.  Either this, or the in-resource request options
-	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-	// to be specified. Forces a new resource when changed.
+	// in PEM format. Forces a new resource when changed.
+	//
+	// > One of `commonName`, `subjectAlternativeNames`, or
+	// `certificateRequestPem` must be specified. `certificateRequestPem`
+	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+	// `certificateRequestPem` defined at the same time as `commonName` or
+	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
+	// case with the `classic` Let's Encrypt profile, the first domain defined in
+	// `subjectAlternativeNames` becomes the common name.
 	CertificateRequestPem *string `pulumi:"certificateRequestPem"`
 	// The serial number, in string format, as reported by
 	// the CA.
@@ -267,8 +288,7 @@ type certificateState struct {
 	// The full URL of the certificate within the ACME CA.
 	CertificateUrl *string `pulumi:"certificateUrl"`
 	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Required when not specifying a CSR. Forces
-	// a new resource when changed.
+	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName *string `pulumi:"commonName"`
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
@@ -355,6 +375,14 @@ type certificateState struct {
 	// `certificateRequestPem`.  If
 	// `certificateRequestPem` was used, this will be blank.
 	PrivateKeyPem *string `pulumi:"privateKeyPem"`
+	// The ACME profile to use when requesting the
+	// certificate. This can be used to control generation parameters according to
+	// the specific CA. The default is blank (no profile); forces a new resource
+	// when changed.
+	//
+	// > Let's Encrypt publishes details on their profiles at
+	// <https://letsencrypt.org/docs/profiles/>.
+	Profile *string `pulumi:"profile"`
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -377,9 +405,9 @@ type certificateState struct {
 	// * privilege-withdrawn
 	// * aa-compromise
 	RevokeCertificateReason *string `pulumi:"revokeCertificateReason"`
-	// The certificate's subject alternative names,
-	// domains that this certificate will also be recognized for. Only valid when not
-	// specifying a CSR. Forces a new resource when changed.
+	// The certificate's subject alternative names;
+	// domains that this certificate will also be recognized for. Forces a new
+	// resource when changed.
 	SubjectAlternativeNames []string `pulumi:"subjectAlternativeNames"`
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
@@ -423,9 +451,16 @@ type CertificateState struct {
 	CertificatePem pulumi.StringPtrInput
 	// A pre-created certificate request, such as one
 	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format.  Either this, or the in-resource request options
-	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-	// to be specified. Forces a new resource when changed.
+	// in PEM format. Forces a new resource when changed.
+	//
+	// > One of `commonName`, `subjectAlternativeNames`, or
+	// `certificateRequestPem` must be specified. `certificateRequestPem`
+	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+	// `certificateRequestPem` defined at the same time as `commonName` or
+	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
+	// case with the `classic` Let's Encrypt profile, the first domain defined in
+	// `subjectAlternativeNames` becomes the common name.
 	CertificateRequestPem pulumi.StringPtrInput
 	// The serial number, in string format, as reported by
 	// the CA.
@@ -433,8 +468,7 @@ type CertificateState struct {
 	// The full URL of the certificate within the ACME CA.
 	CertificateUrl pulumi.StringPtrInput
 	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Required when not specifying a CSR. Forces
-	// a new resource when changed.
+	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName pulumi.StringPtrInput
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
@@ -521,6 +555,14 @@ type CertificateState struct {
 	// `certificateRequestPem`.  If
 	// `certificateRequestPem` was used, this will be blank.
 	PrivateKeyPem pulumi.StringPtrInput
+	// The ACME profile to use when requesting the
+	// certificate. This can be used to control generation parameters according to
+	// the specific CA. The default is blank (no profile); forces a new resource
+	// when changed.
+	//
+	// > Let's Encrypt publishes details on their profiles at
+	// <https://letsencrypt.org/docs/profiles/>.
+	Profile pulumi.StringPtrInput
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -543,9 +585,9 @@ type CertificateState struct {
 	// * privilege-withdrawn
 	// * aa-compromise
 	RevokeCertificateReason pulumi.StringPtrInput
-	// The certificate's subject alternative names,
-	// domains that this certificate will also be recognized for. Only valid when not
-	// specifying a CSR. Forces a new resource when changed.
+	// The certificate's subject alternative names;
+	// domains that this certificate will also be recognized for. Forces a new
+	// resource when changed.
 	SubjectAlternativeNames pulumi.StringArrayInput
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
@@ -578,13 +620,19 @@ type certificateArgs struct {
 	CertificateP12Password *string `pulumi:"certificateP12Password"`
 	// A pre-created certificate request, such as one
 	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format.  Either this, or the in-resource request options
-	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-	// to be specified. Forces a new resource when changed.
+	// in PEM format. Forces a new resource when changed.
+	//
+	// > One of `commonName`, `subjectAlternativeNames`, or
+	// `certificateRequestPem` must be specified. `certificateRequestPem`
+	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+	// `certificateRequestPem` defined at the same time as `commonName` or
+	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
+	// case with the `classic` Let's Encrypt profile, the first domain defined in
+	// `subjectAlternativeNames` becomes the common name.
 	CertificateRequestPem *string `pulumi:"certificateRequestPem"`
 	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Required when not specifying a CSR. Forces
-	// a new resource when changed.
+	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName *string `pulumi:"commonName"`
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
@@ -662,6 +710,14 @@ type certificateArgs struct {
 	// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
 	// Pretend Pear X1`.
 	PreferredChain *string `pulumi:"preferredChain"`
+	// The ACME profile to use when requesting the
+	// certificate. This can be used to control generation parameters according to
+	// the specific CA. The default is blank (no profile); forces a new resource
+	// when changed.
+	//
+	// > Let's Encrypt publishes details on their profiles at
+	// <https://letsencrypt.org/docs/profiles/>.
+	Profile *string `pulumi:"profile"`
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -684,9 +740,9 @@ type certificateArgs struct {
 	// * privilege-withdrawn
 	// * aa-compromise
 	RevokeCertificateReason *string `pulumi:"revokeCertificateReason"`
-	// The certificate's subject alternative names,
-	// domains that this certificate will also be recognized for. Only valid when not
-	// specifying a CSR. Forces a new resource when changed.
+	// The certificate's subject alternative names;
+	// domains that this certificate will also be recognized for. Forces a new
+	// resource when changed.
 	SubjectAlternativeNames []string `pulumi:"subjectAlternativeNames"`
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
@@ -716,13 +772,19 @@ type CertificateArgs struct {
 	CertificateP12Password pulumi.StringPtrInput
 	// A pre-created certificate request, such as one
 	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format.  Either this, or the in-resource request options
-	// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-	// to be specified. Forces a new resource when changed.
+	// in PEM format. Forces a new resource when changed.
+	//
+	// > One of `commonName`, `subjectAlternativeNames`, or
+	// `certificateRequestPem` must be specified. `certificateRequestPem`
+	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+	// `certificateRequestPem` defined at the same time as `commonName` or
+	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
+	// case with the `classic` Let's Encrypt profile, the first domain defined in
+	// `subjectAlternativeNames` becomes the common name.
 	CertificateRequestPem pulumi.StringPtrInput
 	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Required when not specifying a CSR. Forces
-	// a new resource when changed.
+	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName pulumi.StringPtrInput
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
@@ -800,6 +862,14 @@ type CertificateArgs struct {
 	// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
 	// Pretend Pear X1`.
 	PreferredChain pulumi.StringPtrInput
+	// The ACME profile to use when requesting the
+	// certificate. This can be used to control generation parameters according to
+	// the specific CA. The default is blank (no profile); forces a new resource
+	// when changed.
+	//
+	// > Let's Encrypt publishes details on their profiles at
+	// <https://letsencrypt.org/docs/profiles/>.
+	Profile pulumi.StringPtrInput
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -822,9 +892,9 @@ type CertificateArgs struct {
 	// * privilege-withdrawn
 	// * aa-compromise
 	RevokeCertificateReason pulumi.StringPtrInput
-	// The certificate's subject alternative names,
-	// domains that this certificate will also be recognized for. Only valid when not
-	// specifying a CSR. Forces a new resource when changed.
+	// The certificate's subject alternative names;
+	// domains that this certificate will also be recognized for. Forces a new
+	// resource when changed.
 	SubjectAlternativeNames pulumi.StringArrayInput
 	// Defines a TLS challenge to use in fulfilling the
 	// request.
@@ -975,9 +1045,16 @@ func (o CertificateOutput) CertificatePem() pulumi.StringOutput {
 
 // A pre-created certificate request, such as one
 // from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-// in PEM format.  Either this, or the in-resource request options
-// (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-// to be specified. Forces a new resource when changed.
+// in PEM format. Forces a new resource when changed.
+//
+// > One of `commonName`, `subjectAlternativeNames`, or
+// `certificateRequestPem` must be specified. `certificateRequestPem`
+// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+// `certificateRequestPem` defined at the same time as `commonName` or
+// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+// blank while `subjectAlternativeNames` is defined, and vice versa; in this
+// case with the `classic` Let's Encrypt profile, the first domain defined in
+// `subjectAlternativeNames` becomes the common name.
 func (o CertificateOutput) CertificateRequestPem() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.CertificateRequestPem }).(pulumi.StringPtrOutput)
 }
@@ -994,8 +1071,7 @@ func (o CertificateOutput) CertificateUrl() pulumi.StringOutput {
 }
 
 // The certificate's common name, the primary domain that the
-// certificate will be recognized for. Required when not specifying a CSR. Forces
-// a new resource when changed.
+// certificate will be recognized for. Forces a new resource when changed.
 func (o CertificateOutput) CommonName() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.CommonName }).(pulumi.StringPtrOutput)
 }
@@ -1124,6 +1200,17 @@ func (o CertificateOutput) PrivateKeyPem() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.PrivateKeyPem }).(pulumi.StringOutput)
 }
 
+// The ACME profile to use when requesting the
+// certificate. This can be used to control generation parameters according to
+// the specific CA. The default is blank (no profile); forces a new resource
+// when changed.
+//
+// > Let's Encrypt publishes details on their profiles at
+// <https://letsencrypt.org/docs/profiles/>.
+func (o CertificateOutput) Profile() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.Profile }).(pulumi.StringPtrOutput)
+}
+
 // The recursive nameservers that will be
 // used to check for propagation of DNS challenge records, in addition to some
 // in-provider checks such as zone detection. Defaults to your system-configured
@@ -1155,9 +1242,9 @@ func (o CertificateOutput) RevokeCertificateReason() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.RevokeCertificateReason }).(pulumi.StringPtrOutput)
 }
 
-// The certificate's subject alternative names,
-// domains that this certificate will also be recognized for. Only valid when not
-// specifying a CSR. Forces a new resource when changed.
+// The certificate's subject alternative names;
+// domains that this certificate will also be recognized for. Forces a new
+// resource when changed.
 func (o CertificateOutput) SubjectAlternativeNames() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringArrayOutput { return v.SubjectAlternativeNames }).(pulumi.StringArrayOutput)
 }

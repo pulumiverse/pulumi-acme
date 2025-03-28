@@ -1,12 +1,12 @@
 module github.com/pulumiverse/pulumi-acme/provider
 
-go 1.23.0
+go 1.24.1
 
 replace github.com/hashicorp/terraform-plugin-sdk/v2 => github.com/pulumi/terraform-plugin-sdk/v2 v2.0.0-20250221232320-8d4cfd37a3cd
 
 require (
 	github.com/pulumi/pulumi-terraform-bridge/v3 v3.105.0
-	github.com/vancluever/terraform-provider-acme/v2 v2.30.3
+	github.com/vancluever/terraform-provider-acme/v2 v2.31.0
 )
 
 require (
@@ -323,7 +323,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
 	google.golang.org/grpc v1.71.0 // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/ns1/ns1-go.v2 v2.13.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
