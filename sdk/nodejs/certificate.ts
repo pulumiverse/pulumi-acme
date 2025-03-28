@@ -80,9 +80,16 @@ export class Certificate extends pulumi.CustomResource {
     /**
      * A pre-created certificate request, such as one
      * from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-     * in PEM format.  Either this, or the in-resource request options
-     * (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-     * to be specified. Forces a new resource when changed.
+     * in PEM format. Forces a new resource when changed.
+     *
+     * > One of `commonName`, `subjectAlternativeNames`, or
+     * `certificateRequestPem` must be specified. `certificateRequestPem`
+     * conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+     * `certificateRequestPem` defined at the same time as `commonName` or
+     * `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+     * blank while `subjectAlternativeNames` is defined, and vice versa; in this
+     * case with the `classic` Let's Encrypt profile, the first domain defined in
+     * `subjectAlternativeNames` becomes the common name.
      */
     public readonly certificateRequestPem!: pulumi.Output<string | undefined>;
     /**
@@ -96,8 +103,7 @@ export class Certificate extends pulumi.CustomResource {
     public /*out*/ readonly certificateUrl!: pulumi.Output<string>;
     /**
      * The certificate's common name, the primary domain that the
-     * certificate will be recognized for. Required when not specifying a CSR. Forces
-     * a new resource when changed.
+     * certificate will be recognized for. Forces a new resource when changed.
      */
     public readonly commonName!: pulumi.Output<string | undefined>;
     /**
@@ -212,6 +218,16 @@ export class Certificate extends pulumi.CustomResource {
      */
     public /*out*/ readonly privateKeyPem!: pulumi.Output<string>;
     /**
+     * The ACME profile to use when requesting the
+     * certificate. This can be used to control generation parameters according to
+     * the specific CA. The default is blank (no profile); forces a new resource
+     * when changed.
+     *
+     * > Let's Encrypt publishes details on their profiles at
+     * <https://letsencrypt.org/docs/profiles/>.
+     */
+    public readonly profile!: pulumi.Output<string | undefined>;
+    /**
      * The recursive nameservers that will be
      * used to check for propagation of DNS challenge records, in addition to some
      * in-provider checks such as zone detection. Defaults to your system-configured
@@ -240,9 +256,9 @@ export class Certificate extends pulumi.CustomResource {
      */
     public readonly revokeCertificateReason!: pulumi.Output<string | undefined>;
     /**
-     * The certificate's subject alternative names,
-     * domains that this certificate will also be recognized for. Only valid when not
-     * specifying a CSR. Forces a new resource when changed.
+     * The certificate's subject alternative names;
+     * domains that this certificate will also be recognized for. Forces a new
+     * resource when changed.
      */
     public readonly subjectAlternativeNames!: pulumi.Output<string[] | undefined>;
     /**
@@ -293,6 +309,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["preCheckDelay"] = state ? state.preCheckDelay : undefined;
             resourceInputs["preferredChain"] = state ? state.preferredChain : undefined;
             resourceInputs["privateKeyPem"] = state ? state.privateKeyPem : undefined;
+            resourceInputs["profile"] = state ? state.profile : undefined;
             resourceInputs["recursiveNameservers"] = state ? state.recursiveNameservers : undefined;
             resourceInputs["revokeCertificateOnDestroy"] = state ? state.revokeCertificateOnDestroy : undefined;
             resourceInputs["revokeCertificateReason"] = state ? state.revokeCertificateReason : undefined;
@@ -319,6 +336,7 @@ export class Certificate extends pulumi.CustomResource {
             resourceInputs["mustStaple"] = args ? args.mustStaple : undefined;
             resourceInputs["preCheckDelay"] = args ? args.preCheckDelay : undefined;
             resourceInputs["preferredChain"] = args ? args.preferredChain : undefined;
+            resourceInputs["profile"] = args ? args.profile : undefined;
             resourceInputs["recursiveNameservers"] = args ? args.recursiveNameservers : undefined;
             resourceInputs["revokeCertificateOnDestroy"] = args ? args.revokeCertificateOnDestroy : undefined;
             resourceInputs["revokeCertificateReason"] = args ? args.revokeCertificateReason : undefined;
@@ -390,9 +408,16 @@ export interface CertificateState {
     /**
      * A pre-created certificate request, such as one
      * from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-     * in PEM format.  Either this, or the in-resource request options
-     * (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-     * to be specified. Forces a new resource when changed.
+     * in PEM format. Forces a new resource when changed.
+     *
+     * > One of `commonName`, `subjectAlternativeNames`, or
+     * `certificateRequestPem` must be specified. `certificateRequestPem`
+     * conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+     * `certificateRequestPem` defined at the same time as `commonName` or
+     * `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+     * blank while `subjectAlternativeNames` is defined, and vice versa; in this
+     * case with the `classic` Let's Encrypt profile, the first domain defined in
+     * `subjectAlternativeNames` becomes the common name.
      */
     certificateRequestPem?: pulumi.Input<string>;
     /**
@@ -406,8 +431,7 @@ export interface CertificateState {
     certificateUrl?: pulumi.Input<string>;
     /**
      * The certificate's common name, the primary domain that the
-     * certificate will be recognized for. Required when not specifying a CSR. Forces
-     * a new resource when changed.
+     * certificate will be recognized for. Forces a new resource when changed.
      */
     commonName?: pulumi.Input<string>;
     /**
@@ -522,6 +546,16 @@ export interface CertificateState {
      */
     privateKeyPem?: pulumi.Input<string>;
     /**
+     * The ACME profile to use when requesting the
+     * certificate. This can be used to control generation parameters according to
+     * the specific CA. The default is blank (no profile); forces a new resource
+     * when changed.
+     *
+     * > Let's Encrypt publishes details on their profiles at
+     * <https://letsencrypt.org/docs/profiles/>.
+     */
+    profile?: pulumi.Input<string>;
+    /**
      * The recursive nameservers that will be
      * used to check for propagation of DNS challenge records, in addition to some
      * in-provider checks such as zone detection. Defaults to your system-configured
@@ -550,9 +584,9 @@ export interface CertificateState {
      */
     revokeCertificateReason?: pulumi.Input<string>;
     /**
-     * The certificate's subject alternative names,
-     * domains that this certificate will also be recognized for. Only valid when not
-     * specifying a CSR. Forces a new resource when changed.
+     * The certificate's subject alternative names;
+     * domains that this certificate will also be recognized for. Forces a new
+     * resource when changed.
      */
     subjectAlternativeNames?: pulumi.Input<pulumi.Input<string>[]>;
     /**
@@ -594,15 +628,21 @@ export interface CertificateArgs {
     /**
      * A pre-created certificate request, such as one
      * from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-     * in PEM format.  Either this, or the in-resource request options
-     * (`commonName`, `keyType`, and optionally `subjectAlternativeNames`) need
-     * to be specified. Forces a new resource when changed.
+     * in PEM format. Forces a new resource when changed.
+     *
+     * > One of `commonName`, `subjectAlternativeNames`, or
+     * `certificateRequestPem` must be specified. `certificateRequestPem`
+     * conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
+     * `certificateRequestPem` defined at the same time as `commonName` or
+     * `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
+     * blank while `subjectAlternativeNames` is defined, and vice versa; in this
+     * case with the `classic` Let's Encrypt profile, the first domain defined in
+     * `subjectAlternativeNames` becomes the common name.
      */
     certificateRequestPem?: pulumi.Input<string>;
     /**
      * The certificate's common name, the primary domain that the
-     * certificate will be recognized for. Required when not specifying a CSR. Forces
-     * a new resource when changed.
+     * certificate will be recognized for. Forces a new resource when changed.
      */
     commonName?: pulumi.Input<string>;
     /**
@@ -704,6 +744,16 @@ export interface CertificateArgs {
      */
     preferredChain?: pulumi.Input<string>;
     /**
+     * The ACME profile to use when requesting the
+     * certificate. This can be used to control generation parameters according to
+     * the specific CA. The default is blank (no profile); forces a new resource
+     * when changed.
+     *
+     * > Let's Encrypt publishes details on their profiles at
+     * <https://letsencrypt.org/docs/profiles/>.
+     */
+    profile?: pulumi.Input<string>;
+    /**
      * The recursive nameservers that will be
      * used to check for propagation of DNS challenge records, in addition to some
      * in-provider checks such as zone detection. Defaults to your system-configured
@@ -732,9 +782,9 @@ export interface CertificateArgs {
      */
     revokeCertificateReason?: pulumi.Input<string>;
     /**
-     * The certificate's subject alternative names,
-     * domains that this certificate will also be recognized for. Only valid when not
-     * specifying a CSR. Forces a new resource when changed.
+     * The certificate's subject alternative names;
+     * domains that this certificate will also be recognized for. Forces a new
+     * resource when changed.
      */
     subjectAlternativeNames?: pulumi.Input<pulumi.Input<string>[]>;
     /**

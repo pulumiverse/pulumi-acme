@@ -73,9 +73,16 @@ namespace Pulumiverse.Acme
         /// <summary>
         /// A pre-created certificate request, such as one
         /// from [`tls_cert_request`][tls-cert-request], or one from an external source,
-        /// in PEM format.  Either this, or the in-resource request options
-        /// (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-        /// to be specified. Forces a new resource when changed.
+        /// in PEM format. Forces a new resource when changed.
+        /// 
+        /// &gt; One of `common_name`, `subject_alternative_names`, or
+        /// `certificate_request_pem` must be specified. `certificate_request_pem`
+        /// conflicts with `common_name` and `subject_alternative_names`; You cannot have
+        /// `certificate_request_pem` defined at the same time as `common_name` or
+        /// `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+        /// blank while `subject_alternative_names` is defined, and vice versa; in this
+        /// case with the `classic` Let's Encrypt profile, the first domain defined in
+        /// `subject_alternative_names` becomes the common name.
         /// </summary>
         [Output("certificateRequestPem")]
         public Output<string?> CertificateRequestPem { get; private set; } = null!;
@@ -95,8 +102,7 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// The certificate's common name, the primary domain that the
-        /// certificate will be recognized for. Required when not specifying a CSR. Forces
-        /// a new resource when changed.
+        /// certificate will be recognized for. Forces a new resource when changed.
         /// </summary>
         [Output("commonName")]
         public Output<string?> CommonName { get; private set; } = null!;
@@ -239,6 +245,18 @@ namespace Pulumiverse.Acme
         public Output<string> PrivateKeyPem { get; private set; } = null!;
 
         /// <summary>
+        /// The ACME profile to use when requesting the
+        /// certificate. This can be used to control generation parameters according to
+        /// the specific CA. The default is blank (no profile); forces a new resource
+        /// when changed.
+        /// 
+        /// &gt; Let's Encrypt publishes details on their profiles at
+        /// &lt;https://letsencrypt.org/docs/profiles/&gt;.
+        /// </summary>
+        [Output("profile")]
+        public Output<string?> Profile { get; private set; } = null!;
+
+        /// <summary>
         /// The recursive nameservers that will be
         /// used to check for propagation of DNS challenge records, in addition to some
         /// in-provider checks such as zone detection. Defaults to your system-configured
@@ -273,9 +291,9 @@ namespace Pulumiverse.Acme
         public Output<string?> RevokeCertificateReason { get; private set; } = null!;
 
         /// <summary>
-        /// The certificate's subject alternative names,
-        /// domains that this certificate will also be recognized for. Only valid when not
-        /// specifying a CSR. Forces a new resource when changed.
+        /// The certificate's subject alternative names;
+        /// domains that this certificate will also be recognized for. Forces a new
+        /// resource when changed.
         /// </summary>
         [Output("subjectAlternativeNames")]
         public Output<ImmutableArray<string>> SubjectAlternativeNames { get; private set; } = null!;
@@ -395,17 +413,23 @@ namespace Pulumiverse.Acme
         /// <summary>
         /// A pre-created certificate request, such as one
         /// from [`tls_cert_request`][tls-cert-request], or one from an external source,
-        /// in PEM format.  Either this, or the in-resource request options
-        /// (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-        /// to be specified. Forces a new resource when changed.
+        /// in PEM format. Forces a new resource when changed.
+        /// 
+        /// &gt; One of `common_name`, `subject_alternative_names`, or
+        /// `certificate_request_pem` must be specified. `certificate_request_pem`
+        /// conflicts with `common_name` and `subject_alternative_names`; You cannot have
+        /// `certificate_request_pem` defined at the same time as `common_name` or
+        /// `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+        /// blank while `subject_alternative_names` is defined, and vice versa; in this
+        /// case with the `classic` Let's Encrypt profile, the first domain defined in
+        /// `subject_alternative_names` becomes the common name.
         /// </summary>
         [Input("certificateRequestPem")]
         public Input<string>? CertificateRequestPem { get; set; }
 
         /// <summary>
         /// The certificate's common name, the primary domain that the
-        /// certificate will be recognized for. Required when not specifying a CSR. Forces
-        /// a new resource when changed.
+        /// certificate will be recognized for. Forces a new resource when changed.
         /// </summary>
         [Input("commonName")]
         public Input<string>? CommonName { get; set; }
@@ -536,6 +560,18 @@ namespace Pulumiverse.Acme
         [Input("preferredChain")]
         public Input<string>? PreferredChain { get; set; }
 
+        /// <summary>
+        /// The ACME profile to use when requesting the
+        /// certificate. This can be used to control generation parameters according to
+        /// the specific CA. The default is blank (no profile); forces a new resource
+        /// when changed.
+        /// 
+        /// &gt; Let's Encrypt publishes details on their profiles at
+        /// &lt;https://letsencrypt.org/docs/profiles/&gt;.
+        /// </summary>
+        [Input("profile")]
+        public Input<string>? Profile { get; set; }
+
         [Input("recursiveNameservers")]
         private InputList<string>? _recursiveNameservers;
 
@@ -580,9 +616,9 @@ namespace Pulumiverse.Acme
         private InputList<string>? _subjectAlternativeNames;
 
         /// <summary>
-        /// The certificate's subject alternative names,
-        /// domains that this certificate will also be recognized for. Only valid when not
-        /// specifying a CSR. Forces a new resource when changed.
+        /// The certificate's subject alternative names;
+        /// domains that this certificate will also be recognized for. Forces a new
+        /// resource when changed.
         /// </summary>
         public InputList<string> SubjectAlternativeNames
         {
@@ -700,9 +736,16 @@ namespace Pulumiverse.Acme
         /// <summary>
         /// A pre-created certificate request, such as one
         /// from [`tls_cert_request`][tls-cert-request], or one from an external source,
-        /// in PEM format.  Either this, or the in-resource request options
-        /// (`common_name`, `key_type`, and optionally `subject_alternative_names`) need
-        /// to be specified. Forces a new resource when changed.
+        /// in PEM format. Forces a new resource when changed.
+        /// 
+        /// &gt; One of `common_name`, `subject_alternative_names`, or
+        /// `certificate_request_pem` must be specified. `certificate_request_pem`
+        /// conflicts with `common_name` and `subject_alternative_names`; You cannot have
+        /// `certificate_request_pem` defined at the same time as `common_name` or
+        /// `subject_alternative_names`, and vice versa. Finally, `common_name` can be
+        /// blank while `subject_alternative_names` is defined, and vice versa; in this
+        /// case with the `classic` Let's Encrypt profile, the first domain defined in
+        /// `subject_alternative_names` becomes the common name.
         /// </summary>
         [Input("certificateRequestPem")]
         public Input<string>? CertificateRequestPem { get; set; }
@@ -722,8 +765,7 @@ namespace Pulumiverse.Acme
 
         /// <summary>
         /// The certificate's common name, the primary domain that the
-        /// certificate will be recognized for. Required when not specifying a CSR. Forces
-        /// a new resource when changed.
+        /// certificate will be recognized for. Forces a new resource when changed.
         /// </summary>
         [Input("commonName")]
         public Input<string>? CommonName { get; set; }
@@ -881,6 +923,18 @@ namespace Pulumiverse.Acme
             }
         }
 
+        /// <summary>
+        /// The ACME profile to use when requesting the
+        /// certificate. This can be used to control generation parameters according to
+        /// the specific CA. The default is blank (no profile); forces a new resource
+        /// when changed.
+        /// 
+        /// &gt; Let's Encrypt publishes details on their profiles at
+        /// &lt;https://letsencrypt.org/docs/profiles/&gt;.
+        /// </summary>
+        [Input("profile")]
+        public Input<string>? Profile { get; set; }
+
         [Input("recursiveNameservers")]
         private InputList<string>? _recursiveNameservers;
 
@@ -925,9 +979,9 @@ namespace Pulumiverse.Acme
         private InputList<string>? _subjectAlternativeNames;
 
         /// <summary>
-        /// The certificate's subject alternative names,
-        /// domains that this certificate will also be recognized for. Only valid when not
-        /// specifying a CSR. Forces a new resource when changed.
+        /// The certificate's subject alternative names;
+        /// domains that this certificate will also be recognized for. Forces a new
+        /// resource when changed.
         /// </summary>
         public InputList<string> SubjectAlternativeNames
         {
