@@ -21,4 +21,6 @@ license:
   ignore:
     # Package is licensed under Apache 2.0 but license is not picked up correctly by the license detector
     - github.com/OpenDNS/vegadns2client
+    - github.com/alibabacloud-go/endpoint-util
+    - github.com/nrdcg/oci-go-sdk
 pulumiConvert: 1
