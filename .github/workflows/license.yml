@@ -45,6 +45,8 @@ jobs:
           module-path: provider
           ignore-modules: >-
             github.com/OpenDNS/vegadns2client,
+            github.com/alibabacloud-go/endpoint-util,
+            github.com/nrdcg/oci-go-sdk,
             github.com/aead/chacha20,
             github.com/apache/arrow/go/v12,
             github.com/apache/thrift/lib/go/thrift,
