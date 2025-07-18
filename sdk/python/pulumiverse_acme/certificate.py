@@ -39,10 +39,13 @@ class CertificateArgs:
                  preferred_chain: Optional[pulumi.Input[str]] = None,
                  profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
+                 renewal_info_ignore_retry_after: Optional[pulumi.Input[bool]] = None,
+                 renewal_info_max_sleep: Optional[pulumi.Input[int]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None):
+                 tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None,
+                 use_renewal_info: Optional[pulumi.Input[bool]] = None):
         """
         The set of arguments for constructing a Certificate resource.
         :param pulumi.Input[str] account_key_pem: The private key of the account that is
@@ -146,6 +149,17 @@ class CertificateArgs:
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
                DNS resolvers.
+        :param pulumi.Input[bool] renewal_info_ignore_retry_after: Ignores the retry interval
+               supplied by the ARI endpoint for re-fetching renewal window data. Should only
+               be used for testing. Default: `false`.
+        :param pulumi.Input[int] renewal_info_max_sleep: The maximum amount of time, in seconds,
+               that the resource is willing to sleep during apply to reach a selected
+               renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+               
+               > It's recommended to only use small values here (a few minutes maximum).
+               Using extremely high values increases the risk of resource timeouts. To prevent
+               hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+               minutes.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
@@ -171,6 +185,22 @@ class CertificateArgs:
                and `http_memcached_challenge` can be defined at once. See the section on
                Using HTTP and TLS challenges for more
                details on using these and `tls_challenge`.
+        :param pulumi.Input[bool] use_renewal_info: When enabled, use information available from
+               the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+               Default: `false`.
+               
+               > More detail on ARI can be found in [RFC
+               9773](https://datatracker.ietf.org/doc/rfc9773/).
+               
+               > Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+               selected time within an ARI renewal window value cannot be reached at plan time
+               (based on the current time plus the value of
+               `renewal_info_max_sleep`), or if the CA has no ARI
+               endpoint, renewal behavior will fall back to comparing the certificate expiry
+               time with the value in `min_days_remaining`. This means for short-lived
+               certificates, you may wish to turn this value down so that the settings do not
+               conflict; however, don't disable it altogether, as this may prevent the
+               certificate from being renewed!
         """
         pulumi.set(__self__, "account_key_pem", account_key_pem)
         if cert_timeout is not None:
@@ -207,6 +237,10 @@ class CertificateArgs:
             pulumi.set(__self__, "profile", profile)
         if recursive_nameservers is not None:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
+        if renewal_info_ignore_retry_after is not None:
+            pulumi.set(__self__, "renewal_info_ignore_retry_after", renewal_info_ignore_retry_after)
+        if renewal_info_max_sleep is not None:
+            pulumi.set(__self__, "renewal_info_max_sleep", renewal_info_max_sleep)
         if revoke_certificate_on_destroy is not None:
             pulumi.set(__self__, "revoke_certificate_on_destroy", revoke_certificate_on_destroy)
         if revoke_certificate_reason is not None:
@@ -215,6 +249,8 @@ class CertificateArgs:
             pulumi.set(__self__, "subject_alternative_names", subject_alternative_names)
         if tls_challenge is not None:
             pulumi.set(__self__, "tls_challenge", tls_challenge)
+        if use_renewal_info is not None:
+            pulumi.set(__self__, "use_renewal_info", use_renewal_info)
 
     @property
     @pulumi.getter(name="accountKeyPem")
@@ -516,6 +552,39 @@ class CertificateArgs:
         pulumi.set(self, "recursive_nameservers", value)
 
     @property
+    @pulumi.getter(name="renewalInfoIgnoreRetryAfter")
+    def renewal_info_ignore_retry_after(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Ignores the retry interval
+        supplied by the ARI endpoint for re-fetching renewal window data. Should only
+        be used for testing. Default: `false`.
+        """
+        return pulumi.get(self, "renewal_info_ignore_retry_after")
+
+    @renewal_info_ignore_retry_after.setter
+    def renewal_info_ignore_retry_after(self, value: Optional[pulumi.Input[bool]]):
+        pulumi.set(self, "renewal_info_ignore_retry_after", value)
+
+    @property
+    @pulumi.getter(name="renewalInfoMaxSleep")
+    def renewal_info_max_sleep(self) -> Optional[pulumi.Input[int]]:
+        """
+        The maximum amount of time, in seconds,
+        that the resource is willing to sleep during apply to reach a selected
+        renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+
+        > It's recommended to only use small values here (a few minutes maximum).
+        Using extremely high values increases the risk of resource timeouts. To prevent
+        hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+        minutes.
+        """
+        return pulumi.get(self, "renewal_info_max_sleep")
+
+    @renewal_info_max_sleep.setter
+    def renewal_info_max_sleep(self, value: Optional[pulumi.Input[int]]):
+        pulumi.set(self, "renewal_info_max_sleep", value)
+
+    @property
     @pulumi.getter(name="revokeCertificateOnDestroy")
     def revoke_certificate_on_destroy(self) -> Optional[pulumi.Input[bool]]:
         """
@@ -584,6 +653,33 @@ class CertificateArgs:
     def tls_challenge(self, value: Optional[pulumi.Input['CertificateTlsChallengeArgs']]):
         pulumi.set(self, "tls_challenge", value)
 
+    @property
+    @pulumi.getter(name="useRenewalInfo")
+    def use_renewal_info(self) -> Optional[pulumi.Input[bool]]:
+        """
+        When enabled, use information available from
+        the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+        Default: `false`.
+
+        > More detail on ARI can be found in [RFC
+        9773](https://datatracker.ietf.org/doc/rfc9773/).
+
+        > Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+        selected time within an ARI renewal window value cannot be reached at plan time
+        (based on the current time plus the value of
+        `renewal_info_max_sleep`), or if the CA has no ARI
+        endpoint, renewal behavior will fall back to comparing the certificate expiry
+        time with the value in `min_days_remaining`. This means for short-lived
+        certificates, you may wish to turn this value down so that the settings do not
+        conflict; however, don't disable it altogether, as this may prevent the
+        certificate from being renewed!
+        """
+        return pulumi.get(self, "use_renewal_info")
+
+    @use_renewal_info.setter
+    def use_renewal_info(self, value: Optional[pulumi.Input[bool]]):
+        pulumi.set(self, "use_renewal_info", value)
+
 
 @pulumi.input_type
 class _CertificateState:
@@ -614,10 +710,18 @@ class _CertificateState:
                  private_key_pem: Optional[pulumi.Input[str]] = None,
                  profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
+                 renewal_info_explanation_url: Optional[pulumi.Input[str]] = None,
+                 renewal_info_ignore_retry_after: Optional[pulumi.Input[bool]] = None,
+                 renewal_info_max_sleep: Optional[pulumi.Input[int]] = None,
+                 renewal_info_retry_after: Optional[pulumi.Input[str]] = None,
+                 renewal_info_window_end: Optional[pulumi.Input[str]] = None,
+                 renewal_info_window_selected: Optional[pulumi.Input[str]] = None,
+                 renewal_info_window_start: Optional[pulumi.Input[str]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-                 tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None):
+                 tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None,
+                 use_renewal_info: Optional[pulumi.Input[bool]] = None):
         """
         Input properties used for looking up and filtering Certificate resources.
         :param pulumi.Input[str] account_key_pem: The private key of the account that is
@@ -742,6 +846,29 @@ class _CertificateState:
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
                DNS resolvers.
+        :param pulumi.Input[str] renewal_info_explanation_url: A URL that can be optionally supplied by an
+               ARI endpoint explaining the renewal window policy (see
+               `use_renewal_info`).
+        :param pulumi.Input[bool] renewal_info_ignore_retry_after: Ignores the retry interval
+               supplied by the ARI endpoint for re-fetching renewal window data. Should only
+               be used for testing. Default: `false`.
+        :param pulumi.Input[int] renewal_info_max_sleep: The maximum amount of time, in seconds,
+               that the resource is willing to sleep during apply to reach a selected
+               renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+               
+               > It's recommended to only use small values here (a few minutes maximum).
+               Using extremely high values increases the risk of resource timeouts. To prevent
+               hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+               minutes.
+        :param pulumi.Input[str] renewal_info_retry_after: A timestamp describing when ARI details will be
+               refreshed if already fetched (see `use_renewal_info`).
+        :param pulumi.Input[str] renewal_info_window_end: The end of the discovered ARI renewal window (see
+               `use_renewal_info`).
+        :param pulumi.Input[str] renewal_info_window_selected: The selected time within the ARI renewal
+               window that a certificate will be renewed, if
+               `use_renewal_info` is enabled.
+        :param pulumi.Input[str] renewal_info_window_start: The start of the discovered ARI renewal window
+               (see `use_renewal_info`).
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
@@ -767,6 +894,22 @@ class _CertificateState:
                and `http_memcached_challenge` can be defined at once. See the section on
                Using HTTP and TLS challenges for more
                details on using these and `tls_challenge`.
+        :param pulumi.Input[bool] use_renewal_info: When enabled, use information available from
+               the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+               Default: `false`.
+               
+               > More detail on ARI can be found in [RFC
+               9773](https://datatracker.ietf.org/doc/rfc9773/).
+               
+               > Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+               selected time within an ARI renewal window value cannot be reached at plan time
+               (based on the current time plus the value of
+               `renewal_info_max_sleep`), or if the CA has no ARI
+               endpoint, renewal behavior will fall back to comparing the certificate expiry
+               time with the value in `min_days_remaining`. This means for short-lived
+               certificates, you may wish to turn this value down so that the settings do not
+               conflict; however, don't disable it altogether, as this may prevent the
+               certificate from being renewed!
         """
         if account_key_pem is not None:
             pulumi.set(__self__, "account_key_pem", account_key_pem)
@@ -820,6 +963,20 @@ class _CertificateState:
             pulumi.set(__self__, "profile", profile)
         if recursive_nameservers is not None:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
+        if renewal_info_explanation_url is not None:
+            pulumi.set(__self__, "renewal_info_explanation_url", renewal_info_explanation_url)
+        if renewal_info_ignore_retry_after is not None:
+            pulumi.set(__self__, "renewal_info_ignore_retry_after", renewal_info_ignore_retry_after)
+        if renewal_info_max_sleep is not None:
+            pulumi.set(__self__, "renewal_info_max_sleep", renewal_info_max_sleep)
+        if renewal_info_retry_after is not None:
+            pulumi.set(__self__, "renewal_info_retry_after", renewal_info_retry_after)
+        if renewal_info_window_end is not None:
+            pulumi.set(__self__, "renewal_info_window_end", renewal_info_window_end)
+        if renewal_info_window_selected is not None:
+            pulumi.set(__self__, "renewal_info_window_selected", renewal_info_window_selected)
+        if renewal_info_window_start is not None:
+            pulumi.set(__self__, "renewal_info_window_start", renewal_info_window_start)
         if revoke_certificate_on_destroy is not None:
             pulumi.set(__self__, "revoke_certificate_on_destroy", revoke_certificate_on_destroy)
         if revoke_certificate_reason is not None:
@@ -828,6 +985,8 @@ class _CertificateState:
             pulumi.set(__self__, "subject_alternative_names", subject_alternative_names)
         if tls_challenge is not None:
             pulumi.set(__self__, "tls_challenge", tls_challenge)
+        if use_renewal_info is not None:
+            pulumi.set(__self__, "use_renewal_info", use_renewal_info)
 
     @property
     @pulumi.getter(name="accountKeyPem")
@@ -1238,6 +1397,106 @@ class _CertificateState:
         pulumi.set(self, "recursive_nameservers", value)
 
     @property
+    @pulumi.getter(name="renewalInfoExplanationUrl")
+    def renewal_info_explanation_url(self) -> Optional[pulumi.Input[str]]:
+        """
+        A URL that can be optionally supplied by an
+        ARI endpoint explaining the renewal window policy (see
+        `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_explanation_url")
+
+    @renewal_info_explanation_url.setter
+    def renewal_info_explanation_url(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "renewal_info_explanation_url", value)
+
+    @property
+    @pulumi.getter(name="renewalInfoIgnoreRetryAfter")
+    def renewal_info_ignore_retry_after(self) -> Optional[pulumi.Input[bool]]:
+        """
+        Ignores the retry interval
+        supplied by the ARI endpoint for re-fetching renewal window data. Should only
+        be used for testing. Default: `false`.
+        """
+        return pulumi.get(self, "renewal_info_ignore_retry_after")
+
+    @renewal_info_ignore_retry_after.setter
+    def renewal_info_ignore_retry_after(self, value: Optional[pulumi.Input[bool]]):
+        pulumi.set(self, "renewal_info_ignore_retry_after", value)
+
+    @property
+    @pulumi.getter(name="renewalInfoMaxSleep")
+    def renewal_info_max_sleep(self) -> Optional[pulumi.Input[int]]:
+        """
+        The maximum amount of time, in seconds,
+        that the resource is willing to sleep during apply to reach a selected
+        renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+
+        > It's recommended to only use small values here (a few minutes maximum).
+        Using extremely high values increases the risk of resource timeouts. To prevent
+        hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+        minutes.
+        """
+        return pulumi.get(self, "renewal_info_max_sleep")
+
+    @renewal_info_max_sleep.setter
+    def renewal_info_max_sleep(self, value: Optional[pulumi.Input[int]]):
+        pulumi.set(self, "renewal_info_max_sleep", value)
+
+    @property
+    @pulumi.getter(name="renewalInfoRetryAfter")
+    def renewal_info_retry_after(self) -> Optional[pulumi.Input[str]]:
+        """
+        A timestamp describing when ARI details will be
+        refreshed if already fetched (see `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_retry_after")
+
+    @renewal_info_retry_after.setter
+    def renewal_info_retry_after(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "renewal_info_retry_after", value)
+
+    @property
+    @pulumi.getter(name="renewalInfoWindowEnd")
+    def renewal_info_window_end(self) -> Optional[pulumi.Input[str]]:
+        """
+        The end of the discovered ARI renewal window (see
+        `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_window_end")
+
+    @renewal_info_window_end.setter
+    def renewal_info_window_end(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "renewal_info_window_end", value)
+
+    @property
+    @pulumi.getter(name="renewalInfoWindowSelected")
+    def renewal_info_window_selected(self) -> Optional[pulumi.Input[str]]:
+        """
+        The selected time within the ARI renewal
+        window that a certificate will be renewed, if
+        `use_renewal_info` is enabled.
+        """
+        return pulumi.get(self, "renewal_info_window_selected")
+
+    @renewal_info_window_selected.setter
+    def renewal_info_window_selected(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "renewal_info_window_selected", value)
+
+    @property
+    @pulumi.getter(name="renewalInfoWindowStart")
+    def renewal_info_window_start(self) -> Optional[pulumi.Input[str]]:
+        """
+        The start of the discovered ARI renewal window
+        (see `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_window_start")
+
+    @renewal_info_window_start.setter
+    def renewal_info_window_start(self, value: Optional[pulumi.Input[str]]):
+        pulumi.set(self, "renewal_info_window_start", value)
+
+    @property
     @pulumi.getter(name="revokeCertificateOnDestroy")
     def revoke_certificate_on_destroy(self) -> Optional[pulumi.Input[bool]]:
         """
@@ -1306,6 +1565,33 @@ class _CertificateState:
     def tls_challenge(self, value: Optional[pulumi.Input['CertificateTlsChallengeArgs']]):
         pulumi.set(self, "tls_challenge", value)
 
+    @property
+    @pulumi.getter(name="useRenewalInfo")
+    def use_renewal_info(self) -> Optional[pulumi.Input[bool]]:
+        """
+        When enabled, use information available from
+        the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+        Default: `false`.
+
+        > More detail on ARI can be found in [RFC
+        9773](https://datatracker.ietf.org/doc/rfc9773/).
+
+        > Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+        selected time within an ARI renewal window value cannot be reached at plan time
+        (based on the current time plus the value of
+        `renewal_info_max_sleep`), or if the CA has no ARI
+        endpoint, renewal behavior will fall back to comparing the certificate expiry
+        time with the value in `min_days_remaining`. This means for short-lived
+        certificates, you may wish to turn this value down so that the settings do not
+        conflict; however, don't disable it altogether, as this may prevent the
+        certificate from being renewed!
+        """
+        return pulumi.get(self, "use_renewal_info")
+
+    @use_renewal_info.setter
+    def use_renewal_info(self, value: Optional[pulumi.Input[bool]]):
+        pulumi.set(self, "use_renewal_info", value)
+
 
 class Certificate(pulumi.CustomResource):
     @overload
@@ -1330,10 +1616,13 @@ class Certificate(pulumi.CustomResource):
                  preferred_chain: Optional[pulumi.Input[str]] = None,
                  profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
+                 renewal_info_ignore_retry_after: Optional[pulumi.Input[bool]] = None,
+                 renewal_info_max_sleep: Optional[pulumi.Input[int]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
+                 use_renewal_info: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
         """
         Create a Certificate resource with the given unique name, props, and options.
@@ -1440,6 +1729,17 @@ class Certificate(pulumi.CustomResource):
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
                DNS resolvers.
+        :param pulumi.Input[bool] renewal_info_ignore_retry_after: Ignores the retry interval
+               supplied by the ARI endpoint for re-fetching renewal window data. Should only
+               be used for testing. Default: `false`.
+        :param pulumi.Input[int] renewal_info_max_sleep: The maximum amount of time, in seconds,
+               that the resource is willing to sleep during apply to reach a selected
+               renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+               
+               > It's recommended to only use small values here (a few minutes maximum).
+               Using extremely high values increases the risk of resource timeouts. To prevent
+               hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+               minutes.
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
@@ -1465,6 +1765,22 @@ class Certificate(pulumi.CustomResource):
                and `http_memcached_challenge` can be defined at once. See the section on
                Using HTTP and TLS challenges for more
                details on using these and `tls_challenge`.
+        :param pulumi.Input[bool] use_renewal_info: When enabled, use information available from
+               the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+               Default: `false`.
+               
+               > More detail on ARI can be found in [RFC
+               9773](https://datatracker.ietf.org/doc/rfc9773/).
+               
+               > Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+               selected time within an ARI renewal window value cannot be reached at plan time
+               (based on the current time plus the value of
+               `renewal_info_max_sleep`), or if the CA has no ARI
+               endpoint, renewal behavior will fall back to comparing the certificate expiry
+               time with the value in `min_days_remaining`. This means for short-lived
+               certificates, you may wish to turn this value down so that the settings do not
+               conflict; however, don't disable it altogether, as this may prevent the
+               certificate from being renewed!
         """
         ...
     @overload
@@ -1507,10 +1823,13 @@ class Certificate(pulumi.CustomResource):
                  preferred_chain: Optional[pulumi.Input[str]] = None,
                  profile: Optional[pulumi.Input[str]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
+                 renewal_info_ignore_retry_after: Optional[pulumi.Input[bool]] = None,
+                 renewal_info_max_sleep: Optional[pulumi.Input[int]] = None,
                  revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
                  revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
                  tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
+                 use_renewal_info: Optional[pulumi.Input[bool]] = None,
                  __props__=None):
         opts = pulumi.ResourceOptions.merge(_utilities.get_resource_opts_defaults(), opts)
         if not isinstance(opts, pulumi.ResourceOptions):
@@ -1540,10 +1859,13 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["preferred_chain"] = preferred_chain
             __props__.__dict__["profile"] = profile
             __props__.__dict__["recursive_nameservers"] = recursive_nameservers
+            __props__.__dict__["renewal_info_ignore_retry_after"] = renewal_info_ignore_retry_after
+            __props__.__dict__["renewal_info_max_sleep"] = renewal_info_max_sleep
             __props__.__dict__["revoke_certificate_on_destroy"] = revoke_certificate_on_destroy
             __props__.__dict__["revoke_certificate_reason"] = revoke_certificate_reason
             __props__.__dict__["subject_alternative_names"] = subject_alternative_names
             __props__.__dict__["tls_challenge"] = tls_challenge
+            __props__.__dict__["use_renewal_info"] = use_renewal_info
             __props__.__dict__["certificate_domain"] = None
             __props__.__dict__["certificate_not_after"] = None
             __props__.__dict__["certificate_p12"] = None
@@ -1552,6 +1874,11 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["certificate_url"] = None
             __props__.__dict__["issuer_pem"] = None
             __props__.__dict__["private_key_pem"] = None
+            __props__.__dict__["renewal_info_explanation_url"] = None
+            __props__.__dict__["renewal_info_retry_after"] = None
+            __props__.__dict__["renewal_info_window_end"] = None
+            __props__.__dict__["renewal_info_window_selected"] = None
+            __props__.__dict__["renewal_info_window_start"] = None
         secret_opts = pulumi.ResourceOptions(additional_secret_outputs=["accountKeyPem", "certificateP12", "certificateP12Password", "privateKeyPem"])
         opts = pulumi.ResourceOptions.merge(opts, secret_opts)
         super(Certificate, __self__).__init__(
@@ -1590,10 +1917,18 @@ class Certificate(pulumi.CustomResource):
             private_key_pem: Optional[pulumi.Input[str]] = None,
             profile: Optional[pulumi.Input[str]] = None,
             recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
+            renewal_info_explanation_url: Optional[pulumi.Input[str]] = None,
+            renewal_info_ignore_retry_after: Optional[pulumi.Input[bool]] = None,
+            renewal_info_max_sleep: Optional[pulumi.Input[int]] = None,
+            renewal_info_retry_after: Optional[pulumi.Input[str]] = None,
+            renewal_info_window_end: Optional[pulumi.Input[str]] = None,
+            renewal_info_window_selected: Optional[pulumi.Input[str]] = None,
+            renewal_info_window_start: Optional[pulumi.Input[str]] = None,
             revoke_certificate_on_destroy: Optional[pulumi.Input[bool]] = None,
             revoke_certificate_reason: Optional[pulumi.Input[str]] = None,
             subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[str]]]] = None,
-            tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None) -> 'Certificate':
+            tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
+            use_renewal_info: Optional[pulumi.Input[bool]] = None) -> 'Certificate':
         """
         Get an existing Certificate resource's state with the given name, id, and optional extra
         properties used to qualify the lookup.
@@ -1723,6 +2058,29 @@ class Certificate(pulumi.CustomResource):
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
                DNS resolvers.
+        :param pulumi.Input[str] renewal_info_explanation_url: A URL that can be optionally supplied by an
+               ARI endpoint explaining the renewal window policy (see
+               `use_renewal_info`).
+        :param pulumi.Input[bool] renewal_info_ignore_retry_after: Ignores the retry interval
+               supplied by the ARI endpoint for re-fetching renewal window data. Should only
+               be used for testing. Default: `false`.
+        :param pulumi.Input[int] renewal_info_max_sleep: The maximum amount of time, in seconds,
+               that the resource is willing to sleep during apply to reach a selected
+               renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+               
+               > It's recommended to only use small values here (a few minutes maximum).
+               Using extremely high values increases the risk of resource timeouts. To prevent
+               hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+               minutes.
+        :param pulumi.Input[str] renewal_info_retry_after: A timestamp describing when ARI details will be
+               refreshed if already fetched (see `use_renewal_info`).
+        :param pulumi.Input[str] renewal_info_window_end: The end of the discovered ARI renewal window (see
+               `use_renewal_info`).
+        :param pulumi.Input[str] renewal_info_window_selected: The selected time within the ARI renewal
+               window that a certificate will be renewed, if
+               `use_renewal_info` is enabled.
+        :param pulumi.Input[str] renewal_info_window_start: The start of the discovered ARI renewal window
+               (see `use_renewal_info`).
         :param pulumi.Input[bool] revoke_certificate_on_destroy: Enables revocation of a certificate upon destroy,
                which includes when a resource is re-created. Default is `true`.
         :param pulumi.Input[str] revoke_certificate_reason: Some CA's require a reason for revocation to be provided.
@@ -1748,6 +2106,22 @@ class Certificate(pulumi.CustomResource):
                and `http_memcached_challenge` can be defined at once. See the section on
                Using HTTP and TLS challenges for more
                details on using these and `tls_challenge`.
+        :param pulumi.Input[bool] use_renewal_info: When enabled, use information available from
+               the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+               Default: `false`.
+               
+               > More detail on ARI can be found in [RFC
+               9773](https://datatracker.ietf.org/doc/rfc9773/).
+               
+               > Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+               selected time within an ARI renewal window value cannot be reached at plan time
+               (based on the current time plus the value of
+               `renewal_info_max_sleep`), or if the CA has no ARI
+               endpoint, renewal behavior will fall back to comparing the certificate expiry
+               time with the value in `min_days_remaining`. This means for short-lived
+               certificates, you may wish to turn this value down so that the settings do not
+               conflict; however, don't disable it altogether, as this may prevent the
+               certificate from being renewed!
         """
         opts = pulumi.ResourceOptions.merge(opts, pulumi.ResourceOptions(id=id))
 
@@ -1779,10 +2153,18 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["private_key_pem"] = private_key_pem
         __props__.__dict__["profile"] = profile
         __props__.__dict__["recursive_nameservers"] = recursive_nameservers
+        __props__.__dict__["renewal_info_explanation_url"] = renewal_info_explanation_url
+        __props__.__dict__["renewal_info_ignore_retry_after"] = renewal_info_ignore_retry_after
+        __props__.__dict__["renewal_info_max_sleep"] = renewal_info_max_sleep
+        __props__.__dict__["renewal_info_retry_after"] = renewal_info_retry_after
+        __props__.__dict__["renewal_info_window_end"] = renewal_info_window_end
+        __props__.__dict__["renewal_info_window_selected"] = renewal_info_window_selected
+        __props__.__dict__["renewal_info_window_start"] = renewal_info_window_start
         __props__.__dict__["revoke_certificate_on_destroy"] = revoke_certificate_on_destroy
         __props__.__dict__["revoke_certificate_reason"] = revoke_certificate_reason
         __props__.__dict__["subject_alternative_names"] = subject_alternative_names
         __props__.__dict__["tls_challenge"] = tls_challenge
+        __props__.__dict__["use_renewal_info"] = use_renewal_info
         return Certificate(resource_name, opts=opts, __props__=__props__)
 
     @property
@@ -2090,6 +2472,78 @@ class Certificate(pulumi.CustomResource):
         return pulumi.get(self, "recursive_nameservers")
 
     @property
+    @pulumi.getter(name="renewalInfoExplanationUrl")
+    def renewal_info_explanation_url(self) -> pulumi.Output[str]:
+        """
+        A URL that can be optionally supplied by an
+        ARI endpoint explaining the renewal window policy (see
+        `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_explanation_url")
+
+    @property
+    @pulumi.getter(name="renewalInfoIgnoreRetryAfter")
+    def renewal_info_ignore_retry_after(self) -> pulumi.Output[Optional[bool]]:
+        """
+        Ignores the retry interval
+        supplied by the ARI endpoint for re-fetching renewal window data. Should only
+        be used for testing. Default: `false`.
+        """
+        return pulumi.get(self, "renewal_info_ignore_retry_after")
+
+    @property
+    @pulumi.getter(name="renewalInfoMaxSleep")
+    def renewal_info_max_sleep(self) -> pulumi.Output[Optional[int]]:
+        """
+        The maximum amount of time, in seconds,
+        that the resource is willing to sleep during apply to reach a selected
+        renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+
+        > It's recommended to only use small values here (a few minutes maximum).
+        Using extremely high values increases the risk of resource timeouts. To prevent
+        hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+        minutes.
+        """
+        return pulumi.get(self, "renewal_info_max_sleep")
+
+    @property
+    @pulumi.getter(name="renewalInfoRetryAfter")
+    def renewal_info_retry_after(self) -> pulumi.Output[str]:
+        """
+        A timestamp describing when ARI details will be
+        refreshed if already fetched (see `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_retry_after")
+
+    @property
+    @pulumi.getter(name="renewalInfoWindowEnd")
+    def renewal_info_window_end(self) -> pulumi.Output[str]:
+        """
+        The end of the discovered ARI renewal window (see
+        `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_window_end")
+
+    @property
+    @pulumi.getter(name="renewalInfoWindowSelected")
+    def renewal_info_window_selected(self) -> pulumi.Output[str]:
+        """
+        The selected time within the ARI renewal
+        window that a certificate will be renewed, if
+        `use_renewal_info` is enabled.
+        """
+        return pulumi.get(self, "renewal_info_window_selected")
+
+    @property
+    @pulumi.getter(name="renewalInfoWindowStart")
+    def renewal_info_window_start(self) -> pulumi.Output[str]:
+        """
+        The start of the discovered ARI renewal window
+        (see `use_renewal_info`).
+        """
+        return pulumi.get(self, "renewal_info_window_start")
+
+    @property
     @pulumi.getter(name="revokeCertificateOnDestroy")
     def revoke_certificate_on_destroy(self) -> pulumi.Output[Optional[bool]]:
         """
@@ -2141,4 +2595,27 @@ class Certificate(pulumi.CustomResource):
         details on using these and `tls_challenge`.
         """
         return pulumi.get(self, "tls_challenge")
+
+    @property
+    @pulumi.getter(name="useRenewalInfo")
+    def use_renewal_info(self) -> pulumi.Output[Optional[bool]]:
+        """
+        When enabled, use information available from
+        the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+        Default: `false`.
+
+        > More detail on ARI can be found in [RFC
+        9773](https://datatracker.ietf.org/doc/rfc9773/).
+
+        > Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+        selected time within an ARI renewal window value cannot be reached at plan time
+        (based on the current time plus the value of
+        `renewal_info_max_sleep`), or if the CA has no ARI
+        endpoint, renewal behavior will fall back to comparing the certificate expiry
+        time with the value in `min_days_remaining`. This means for short-lived
+        certificates, you may wish to turn this value down so that the settings do not
+        conflict; however, don't disable it altogether, as this may prevent the
+        certificate from being renewed!
+        """
+        return pulumi.get(self, "use_renewal_info")
 

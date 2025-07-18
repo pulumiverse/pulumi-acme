@@ -163,6 +163,36 @@ type Certificate struct {
 	// in-provider checks such as zone detection. Defaults to your system-configured
 	// DNS resolvers.
 	RecursiveNameservers pulumi.StringArrayOutput `pulumi:"recursiveNameservers"`
+	// A URL that can be optionally supplied by an
+	// ARI endpoint explaining the renewal window policy (see
+	// `useRenewalInfo`).
+	RenewalInfoExplanationUrl pulumi.StringOutput `pulumi:"renewalInfoExplanationUrl"`
+	// Ignores the retry interval
+	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+	// be used for testing. Default: `false`.
+	RenewalInfoIgnoreRetryAfter pulumi.BoolPtrOutput `pulumi:"renewalInfoIgnoreRetryAfter"`
+	// The maximum amount of time, in seconds,
+	// that the resource is willing to sleep during apply to reach a selected
+	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
+	//
+	// > It's recommended to only use small values here (a few minutes maximum).
+	// Using extremely high values increases the risk of resource timeouts. To prevent
+	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+	// minutes.
+	RenewalInfoMaxSleep pulumi.IntPtrOutput `pulumi:"renewalInfoMaxSleep"`
+	// A timestamp describing when ARI details will be
+	// refreshed if already fetched (see `useRenewalInfo`).
+	RenewalInfoRetryAfter pulumi.StringOutput `pulumi:"renewalInfoRetryAfter"`
+	// The end of the discovered ARI renewal window (see
+	// `useRenewalInfo`).
+	RenewalInfoWindowEnd pulumi.StringOutput `pulumi:"renewalInfoWindowEnd"`
+	// The selected time within the ARI renewal
+	// window that a certificate will be renewed, if
+	// `useRenewalInfo` is enabled.
+	RenewalInfoWindowSelected pulumi.StringOutput `pulumi:"renewalInfoWindowSelected"`
+	// The start of the discovered ARI renewal window
+	// (see `useRenewalInfo`).
+	RenewalInfoWindowStart pulumi.StringOutput `pulumi:"renewalInfoWindowStart"`
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy pulumi.BoolPtrOutput `pulumi:"revokeCertificateOnDestroy"`
@@ -192,6 +222,23 @@ type Certificate struct {
 	// Using HTTP and TLS challenges for more
 	// details on using these and `tlsChallenge`.
 	TlsChallenge CertificateTlsChallengePtrOutput `pulumi:"tlsChallenge"`
+	// When enabled, use information available from
+	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+	// Default: `false`.
+	//
+	// > More detail on ARI can be found in [RFC
+	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+	//
+	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
+	// selected time within an ARI renewal window value cannot be reached at plan time
+	// (based on the current time plus the value of
+	// `renewalInfoMaxSleep`), or if the CA has no ARI
+	// endpoint, renewal behavior will fall back to comparing the certificate expiry
+	// time with the value in `minDaysRemaining`. This means for short-lived
+	// certificates, you may wish to turn this value down so that the settings do not
+	// conflict; however, don't disable it altogether, as this may prevent the
+	// certificate from being renewed!
+	UseRenewalInfo pulumi.BoolPtrOutput `pulumi:"useRenewalInfo"`
 }
 
 // NewCertificate registers a new resource with the given unique name, arguments, and options.
@@ -388,6 +435,36 @@ type certificateState struct {
 	// in-provider checks such as zone detection. Defaults to your system-configured
 	// DNS resolvers.
 	RecursiveNameservers []string `pulumi:"recursiveNameservers"`
+	// A URL that can be optionally supplied by an
+	// ARI endpoint explaining the renewal window policy (see
+	// `useRenewalInfo`).
+	RenewalInfoExplanationUrl *string `pulumi:"renewalInfoExplanationUrl"`
+	// Ignores the retry interval
+	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+	// be used for testing. Default: `false`.
+	RenewalInfoIgnoreRetryAfter *bool `pulumi:"renewalInfoIgnoreRetryAfter"`
+	// The maximum amount of time, in seconds,
+	// that the resource is willing to sleep during apply to reach a selected
+	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
+	//
+	// > It's recommended to only use small values here (a few minutes maximum).
+	// Using extremely high values increases the risk of resource timeouts. To prevent
+	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+	// minutes.
+	RenewalInfoMaxSleep *int `pulumi:"renewalInfoMaxSleep"`
+	// A timestamp describing when ARI details will be
+	// refreshed if already fetched (see `useRenewalInfo`).
+	RenewalInfoRetryAfter *string `pulumi:"renewalInfoRetryAfter"`
+	// The end of the discovered ARI renewal window (see
+	// `useRenewalInfo`).
+	RenewalInfoWindowEnd *string `pulumi:"renewalInfoWindowEnd"`
+	// The selected time within the ARI renewal
+	// window that a certificate will be renewed, if
+	// `useRenewalInfo` is enabled.
+	RenewalInfoWindowSelected *string `pulumi:"renewalInfoWindowSelected"`
+	// The start of the discovered ARI renewal window
+	// (see `useRenewalInfo`).
+	RenewalInfoWindowStart *string `pulumi:"renewalInfoWindowStart"`
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy *bool `pulumi:"revokeCertificateOnDestroy"`
@@ -417,6 +494,23 @@ type certificateState struct {
 	// Using HTTP and TLS challenges for more
 	// details on using these and `tlsChallenge`.
 	TlsChallenge *CertificateTlsChallenge `pulumi:"tlsChallenge"`
+	// When enabled, use information available from
+	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+	// Default: `false`.
+	//
+	// > More detail on ARI can be found in [RFC
+	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+	//
+	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
+	// selected time within an ARI renewal window value cannot be reached at plan time
+	// (based on the current time plus the value of
+	// `renewalInfoMaxSleep`), or if the CA has no ARI
+	// endpoint, renewal behavior will fall back to comparing the certificate expiry
+	// time with the value in `minDaysRemaining`. This means for short-lived
+	// certificates, you may wish to turn this value down so that the settings do not
+	// conflict; however, don't disable it altogether, as this may prevent the
+	// certificate from being renewed!
+	UseRenewalInfo *bool `pulumi:"useRenewalInfo"`
 }
 
 type CertificateState struct {
@@ -568,6 +662,36 @@ type CertificateState struct {
 	// in-provider checks such as zone detection. Defaults to your system-configured
 	// DNS resolvers.
 	RecursiveNameservers pulumi.StringArrayInput
+	// A URL that can be optionally supplied by an
+	// ARI endpoint explaining the renewal window policy (see
+	// `useRenewalInfo`).
+	RenewalInfoExplanationUrl pulumi.StringPtrInput
+	// Ignores the retry interval
+	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+	// be used for testing. Default: `false`.
+	RenewalInfoIgnoreRetryAfter pulumi.BoolPtrInput
+	// The maximum amount of time, in seconds,
+	// that the resource is willing to sleep during apply to reach a selected
+	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
+	//
+	// > It's recommended to only use small values here (a few minutes maximum).
+	// Using extremely high values increases the risk of resource timeouts. To prevent
+	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+	// minutes.
+	RenewalInfoMaxSleep pulumi.IntPtrInput
+	// A timestamp describing when ARI details will be
+	// refreshed if already fetched (see `useRenewalInfo`).
+	RenewalInfoRetryAfter pulumi.StringPtrInput
+	// The end of the discovered ARI renewal window (see
+	// `useRenewalInfo`).
+	RenewalInfoWindowEnd pulumi.StringPtrInput
+	// The selected time within the ARI renewal
+	// window that a certificate will be renewed, if
+	// `useRenewalInfo` is enabled.
+	RenewalInfoWindowSelected pulumi.StringPtrInput
+	// The start of the discovered ARI renewal window
+	// (see `useRenewalInfo`).
+	RenewalInfoWindowStart pulumi.StringPtrInput
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy pulumi.BoolPtrInput
@@ -597,6 +721,23 @@ type CertificateState struct {
 	// Using HTTP and TLS challenges for more
 	// details on using these and `tlsChallenge`.
 	TlsChallenge CertificateTlsChallengePtrInput
+	// When enabled, use information available from
+	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+	// Default: `false`.
+	//
+	// > More detail on ARI can be found in [RFC
+	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+	//
+	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
+	// selected time within an ARI renewal window value cannot be reached at plan time
+	// (based on the current time plus the value of
+	// `renewalInfoMaxSleep`), or if the CA has no ARI
+	// endpoint, renewal behavior will fall back to comparing the certificate expiry
+	// time with the value in `minDaysRemaining`. This means for short-lived
+	// certificates, you may wish to turn this value down so that the settings do not
+	// conflict; however, don't disable it altogether, as this may prevent the
+	// certificate from being renewed!
+	UseRenewalInfo pulumi.BoolPtrInput
 }
 
 func (CertificateState) ElementType() reflect.Type {
@@ -723,6 +864,19 @@ type certificateArgs struct {
 	// in-provider checks such as zone detection. Defaults to your system-configured
 	// DNS resolvers.
 	RecursiveNameservers []string `pulumi:"recursiveNameservers"`
+	// Ignores the retry interval
+	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+	// be used for testing. Default: `false`.
+	RenewalInfoIgnoreRetryAfter *bool `pulumi:"renewalInfoIgnoreRetryAfter"`
+	// The maximum amount of time, in seconds,
+	// that the resource is willing to sleep during apply to reach a selected
+	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
+	//
+	// > It's recommended to only use small values here (a few minutes maximum).
+	// Using extremely high values increases the risk of resource timeouts. To prevent
+	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+	// minutes.
+	RenewalInfoMaxSleep *int `pulumi:"renewalInfoMaxSleep"`
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy *bool `pulumi:"revokeCertificateOnDestroy"`
@@ -752,6 +906,23 @@ type certificateArgs struct {
 	// Using HTTP and TLS challenges for more
 	// details on using these and `tlsChallenge`.
 	TlsChallenge *CertificateTlsChallenge `pulumi:"tlsChallenge"`
+	// When enabled, use information available from
+	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+	// Default: `false`.
+	//
+	// > More detail on ARI can be found in [RFC
+	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+	//
+	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
+	// selected time within an ARI renewal window value cannot be reached at plan time
+	// (based on the current time plus the value of
+	// `renewalInfoMaxSleep`), or if the CA has no ARI
+	// endpoint, renewal behavior will fall back to comparing the certificate expiry
+	// time with the value in `minDaysRemaining`. This means for short-lived
+	// certificates, you may wish to turn this value down so that the settings do not
+	// conflict; however, don't disable it altogether, as this may prevent the
+	// certificate from being renewed!
+	UseRenewalInfo *bool `pulumi:"useRenewalInfo"`
 }
 
 // The set of arguments for constructing a Certificate resource.
@@ -875,6 +1046,19 @@ type CertificateArgs struct {
 	// in-provider checks such as zone detection. Defaults to your system-configured
 	// DNS resolvers.
 	RecursiveNameservers pulumi.StringArrayInput
+	// Ignores the retry interval
+	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+	// be used for testing. Default: `false`.
+	RenewalInfoIgnoreRetryAfter pulumi.BoolPtrInput
+	// The maximum amount of time, in seconds,
+	// that the resource is willing to sleep during apply to reach a selected
+	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
+	//
+	// > It's recommended to only use small values here (a few minutes maximum).
+	// Using extremely high values increases the risk of resource timeouts. To prevent
+	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+	// minutes.
+	RenewalInfoMaxSleep pulumi.IntPtrInput
 	// Enables revocation of a certificate upon destroy,
 	// which includes when a resource is re-created. Default is `true`.
 	RevokeCertificateOnDestroy pulumi.BoolPtrInput
@@ -904,6 +1088,23 @@ type CertificateArgs struct {
 	// Using HTTP and TLS challenges for more
 	// details on using these and `tlsChallenge`.
 	TlsChallenge CertificateTlsChallengePtrInput
+	// When enabled, use information available from
+	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+	// Default: `false`.
+	//
+	// > More detail on ARI can be found in [RFC
+	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+	//
+	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
+	// selected time within an ARI renewal window value cannot be reached at plan time
+	// (based on the current time plus the value of
+	// `renewalInfoMaxSleep`), or if the CA has no ARI
+	// endpoint, renewal behavior will fall back to comparing the certificate expiry
+	// time with the value in `minDaysRemaining`. This means for short-lived
+	// certificates, you may wish to turn this value down so that the settings do not
+	// conflict; however, don't disable it altogether, as this may prevent the
+	// certificate from being renewed!
+	UseRenewalInfo pulumi.BoolPtrInput
 }
 
 func (CertificateArgs) ElementType() reflect.Type {
@@ -1219,6 +1420,57 @@ func (o CertificateOutput) RecursiveNameservers() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringArrayOutput { return v.RecursiveNameservers }).(pulumi.StringArrayOutput)
 }
 
+// A URL that can be optionally supplied by an
+// ARI endpoint explaining the renewal window policy (see
+// `useRenewalInfo`).
+func (o CertificateOutput) RenewalInfoExplanationUrl() pulumi.StringOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoExplanationUrl }).(pulumi.StringOutput)
+}
+
+// Ignores the retry interval
+// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+// be used for testing. Default: `false`.
+func (o CertificateOutput) RenewalInfoIgnoreRetryAfter() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.RenewalInfoIgnoreRetryAfter }).(pulumi.BoolPtrOutput)
+}
+
+// The maximum amount of time, in seconds,
+// that the resource is willing to sleep during apply to reach a selected
+// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
+//
+// > It's recommended to only use small values here (a few minutes maximum).
+// Using extremely high values increases the risk of resource timeouts. To prevent
+// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+// minutes.
+func (o CertificateOutput) RenewalInfoMaxSleep() pulumi.IntPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.RenewalInfoMaxSleep }).(pulumi.IntPtrOutput)
+}
+
+// A timestamp describing when ARI details will be
+// refreshed if already fetched (see `useRenewalInfo`).
+func (o CertificateOutput) RenewalInfoRetryAfter() pulumi.StringOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoRetryAfter }).(pulumi.StringOutput)
+}
+
+// The end of the discovered ARI renewal window (see
+// `useRenewalInfo`).
+func (o CertificateOutput) RenewalInfoWindowEnd() pulumi.StringOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoWindowEnd }).(pulumi.StringOutput)
+}
+
+// The selected time within the ARI renewal
+// window that a certificate will be renewed, if
+// `useRenewalInfo` is enabled.
+func (o CertificateOutput) RenewalInfoWindowSelected() pulumi.StringOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoWindowSelected }).(pulumi.StringOutput)
+}
+
+// The start of the discovered ARI renewal window
+// (see `useRenewalInfo`).
+func (o CertificateOutput) RenewalInfoWindowStart() pulumi.StringOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoWindowStart }).(pulumi.StringOutput)
+}
+
 // Enables revocation of a certificate upon destroy,
 // which includes when a resource is re-created. Default is `true`.
 func (o CertificateOutput) RevokeCertificateOnDestroy() pulumi.BoolPtrOutput {
@@ -1258,6 +1510,26 @@ func (o CertificateOutput) SubjectAlternativeNames() pulumi.StringArrayOutput {
 // details on using these and `tlsChallenge`.
 func (o CertificateOutput) TlsChallenge() CertificateTlsChallengePtrOutput {
 	return o.ApplyT(func(v *Certificate) CertificateTlsChallengePtrOutput { return v.TlsChallenge }).(CertificateTlsChallengePtrOutput)
+}
+
+// When enabled, use information available from
+// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+// Default: `false`.
+//
+// > More detail on ARI can be found in [RFC
+// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+//
+// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
+// selected time within an ARI renewal window value cannot be reached at plan time
+// (based on the current time plus the value of
+// `renewalInfoMaxSleep`), or if the CA has no ARI
+// endpoint, renewal behavior will fall back to comparing the certificate expiry
+// time with the value in `minDaysRemaining`. This means for short-lived
+// certificates, you may wish to turn this value down so that the settings do not
+// conflict; however, don't disable it altogether, as this may prevent the
+// certificate from being renewed!
+func (o CertificateOutput) UseRenewalInfo() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.UseRenewalInfo }).(pulumi.BoolPtrOutput)
 }
 
 type CertificateArrayOutput struct{ *pulumi.OutputState }
