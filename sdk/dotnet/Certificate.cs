@@ -266,6 +266,64 @@ namespace Pulumiverse.Acme
         public Output<ImmutableArray<string>> RecursiveNameservers { get; private set; } = null!;
 
         /// <summary>
+        /// A URL that can be optionally supplied by an
+        /// ARI endpoint explaining the renewal window policy (see
+        /// `use_renewal_info`).
+        /// </summary>
+        [Output("renewalInfoExplanationUrl")]
+        public Output<string> RenewalInfoExplanationUrl { get; private set; } = null!;
+
+        /// <summary>
+        /// Ignores the retry interval
+        /// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+        /// be used for testing. Default: `false`.
+        /// </summary>
+        [Output("renewalInfoIgnoreRetryAfter")]
+        public Output<bool?> RenewalInfoIgnoreRetryAfter { get; private set; } = null!;
+
+        /// <summary>
+        /// The maximum amount of time, in seconds,
+        /// that the resource is willing to sleep during apply to reach a selected
+        /// renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+        /// 
+        /// &gt; It's recommended to only use small values here (a few minutes maximum).
+        /// Using extremely high values increases the risk of resource timeouts. To prevent
+        /// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+        /// minutes.
+        /// </summary>
+        [Output("renewalInfoMaxSleep")]
+        public Output<int?> RenewalInfoMaxSleep { get; private set; } = null!;
+
+        /// <summary>
+        /// A timestamp describing when ARI details will be
+        /// refreshed if already fetched (see `use_renewal_info`).
+        /// </summary>
+        [Output("renewalInfoRetryAfter")]
+        public Output<string> RenewalInfoRetryAfter { get; private set; } = null!;
+
+        /// <summary>
+        /// The end of the discovered ARI renewal window (see
+        /// `use_renewal_info`).
+        /// </summary>
+        [Output("renewalInfoWindowEnd")]
+        public Output<string> RenewalInfoWindowEnd { get; private set; } = null!;
+
+        /// <summary>
+        /// The selected time within the ARI renewal
+        /// window that a certificate will be renewed, if
+        /// `use_renewal_info` is enabled.
+        /// </summary>
+        [Output("renewalInfoWindowSelected")]
+        public Output<string> RenewalInfoWindowSelected { get; private set; } = null!;
+
+        /// <summary>
+        /// The start of the discovered ARI renewal window
+        /// (see `use_renewal_info`).
+        /// </summary>
+        [Output("renewalInfoWindowStart")]
+        public Output<string> RenewalInfoWindowStart { get; private set; } = null!;
+
+        /// <summary>
         /// Enables revocation of a certificate upon destroy,
         /// which includes when a resource is re-created. Default is `true`.
         /// </summary>
@@ -309,6 +367,27 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Output("tlsChallenge")]
         public Output<Outputs.CertificateTlsChallenge?> TlsChallenge { get; private set; } = null!;
+
+        /// <summary>
+        /// When enabled, use information available from
+        /// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+        /// Default: `false`.
+        /// 
+        /// &gt; More detail on ARI can be found in [RFC
+        /// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+        /// 
+        /// &gt; Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+        /// selected time within an ARI renewal window value cannot be reached at plan time
+        /// (based on the current time plus the value of
+        /// `renewal_info_max_sleep`), or if the CA has no ARI
+        /// endpoint, renewal behavior will fall back to comparing the certificate expiry
+        /// time with the value in `min_days_remaining`. This means for short-lived
+        /// certificates, you may wish to turn this value down so that the settings do not
+        /// conflict; however, don't disable it altogether, as this may prevent the
+        /// certificate from being renewed!
+        /// </summary>
+        [Output("useRenewalInfo")]
+        public Output<bool?> UseRenewalInfo { get; private set; } = null!;
 
 
         /// <summary>
@@ -588,6 +667,27 @@ namespace Pulumiverse.Acme
         }
 
         /// <summary>
+        /// Ignores the retry interval
+        /// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+        /// be used for testing. Default: `false`.
+        /// </summary>
+        [Input("renewalInfoIgnoreRetryAfter")]
+        public Input<bool>? RenewalInfoIgnoreRetryAfter { get; set; }
+
+        /// <summary>
+        /// The maximum amount of time, in seconds,
+        /// that the resource is willing to sleep during apply to reach a selected
+        /// renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+        /// 
+        /// &gt; It's recommended to only use small values here (a few minutes maximum).
+        /// Using extremely high values increases the risk of resource timeouts. To prevent
+        /// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+        /// minutes.
+        /// </summary>
+        [Input("renewalInfoMaxSleep")]
+        public Input<int>? RenewalInfoMaxSleep { get; set; }
+
+        /// <summary>
         /// Enables revocation of a certificate upon destroy,
         /// which includes when a resource is re-created. Default is `true`.
         /// </summary>
@@ -637,6 +737,27 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("tlsChallenge")]
         public Input<Inputs.CertificateTlsChallengeArgs>? TlsChallenge { get; set; }
+
+        /// <summary>
+        /// When enabled, use information available from
+        /// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+        /// Default: `false`.
+        /// 
+        /// &gt; More detail on ARI can be found in [RFC
+        /// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+        /// 
+        /// &gt; Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+        /// selected time within an ARI renewal window value cannot be reached at plan time
+        /// (based on the current time plus the value of
+        /// `renewal_info_max_sleep`), or if the CA has no ARI
+        /// endpoint, renewal behavior will fall back to comparing the certificate expiry
+        /// time with the value in `min_days_remaining`. This means for short-lived
+        /// certificates, you may wish to turn this value down so that the settings do not
+        /// conflict; however, don't disable it altogether, as this may prevent the
+        /// certificate from being renewed!
+        /// </summary>
+        [Input("useRenewalInfo")]
+        public Input<bool>? UseRenewalInfo { get; set; }
 
         public CertificateArgs()
         {
@@ -951,6 +1072,64 @@ namespace Pulumiverse.Acme
         }
 
         /// <summary>
+        /// A URL that can be optionally supplied by an
+        /// ARI endpoint explaining the renewal window policy (see
+        /// `use_renewal_info`).
+        /// </summary>
+        [Input("renewalInfoExplanationUrl")]
+        public Input<string>? RenewalInfoExplanationUrl { get; set; }
+
+        /// <summary>
+        /// Ignores the retry interval
+        /// supplied by the ARI endpoint for re-fetching renewal window data. Should only
+        /// be used for testing. Default: `false`.
+        /// </summary>
+        [Input("renewalInfoIgnoreRetryAfter")]
+        public Input<bool>? RenewalInfoIgnoreRetryAfter { get; set; }
+
+        /// <summary>
+        /// The maximum amount of time, in seconds,
+        /// that the resource is willing to sleep during apply to reach a selected
+        /// renewal window time when `use_renewal_info` is set to `true`. Default: `0`.
+        /// 
+        /// &gt; It's recommended to only use small values here (a few minutes maximum).
+        /// Using extremely high values increases the risk of resource timeouts. To prevent
+        /// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
+        /// minutes.
+        /// </summary>
+        [Input("renewalInfoMaxSleep")]
+        public Input<int>? RenewalInfoMaxSleep { get; set; }
+
+        /// <summary>
+        /// A timestamp describing when ARI details will be
+        /// refreshed if already fetched (see `use_renewal_info`).
+        /// </summary>
+        [Input("renewalInfoRetryAfter")]
+        public Input<string>? RenewalInfoRetryAfter { get; set; }
+
+        /// <summary>
+        /// The end of the discovered ARI renewal window (see
+        /// `use_renewal_info`).
+        /// </summary>
+        [Input("renewalInfoWindowEnd")]
+        public Input<string>? RenewalInfoWindowEnd { get; set; }
+
+        /// <summary>
+        /// The selected time within the ARI renewal
+        /// window that a certificate will be renewed, if
+        /// `use_renewal_info` is enabled.
+        /// </summary>
+        [Input("renewalInfoWindowSelected")]
+        public Input<string>? RenewalInfoWindowSelected { get; set; }
+
+        /// <summary>
+        /// The start of the discovered ARI renewal window
+        /// (see `use_renewal_info`).
+        /// </summary>
+        [Input("renewalInfoWindowStart")]
+        public Input<string>? RenewalInfoWindowStart { get; set; }
+
+        /// <summary>
         /// Enables revocation of a certificate upon destroy,
         /// which includes when a resource is re-created. Default is `true`.
         /// </summary>
@@ -1000,6 +1179,27 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("tlsChallenge")]
         public Input<Inputs.CertificateTlsChallengeGetArgs>? TlsChallenge { get; set; }
+
+        /// <summary>
+        /// When enabled, use information available from
+        /// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
+        /// Default: `false`.
+        /// 
+        /// &gt; More detail on ARI can be found in [RFC
+        /// 9773](https://datatracker.ietf.org/doc/rfc9773/).
+        /// 
+        /// &gt; Note that `use_renewal_info` does not disable `min_days_remaining`! If the
+        /// selected time within an ARI renewal window value cannot be reached at plan time
+        /// (based on the current time plus the value of
+        /// `renewal_info_max_sleep`), or if the CA has no ARI
+        /// endpoint, renewal behavior will fall back to comparing the certificate expiry
+        /// time with the value in `min_days_remaining`. This means for short-lived
+        /// certificates, you may wish to turn this value down so that the settings do not
+        /// conflict; however, don't disable it altogether, as this may prevent the
+        /// certificate from being renewed!
+        /// </summary>
+        [Input("useRenewalInfo")]
+        public Input<bool>? UseRenewalInfo { get; set; }
 
         public CertificateState()
         {
