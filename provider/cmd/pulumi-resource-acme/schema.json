@@ -304,6 +304,34 @@
                     },
                     "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records, in addition to some\nin-provider checks such as zone detection. Defaults to your system-configured\nDNS resolvers.\n"
                 },
+                "renewalInfoExplanationUrl": {
+                    "type": "string",
+                    "description": "A URL that can be optionally supplied by an\nARI endpoint explaining the renewal window policy (see\n`use_renewal_info`).\n"
+                },
+                "renewalInfoIgnoreRetryAfter": {
+                    "type": "boolean",
+                    "description": "Ignores the retry interval\nsupplied by the ARI endpoint for re-fetching renewal window data. Should only\nbe used for testing. Default: `false`.\n"
+                },
+                "renewalInfoMaxSleep": {
+                    "type": "integer",
+                    "description": "The maximum amount of time, in seconds,\nthat the resource is willing to sleep during apply to reach a selected\nrenewal window time when `use_renewal_info` is set to `true`. Default: `0`.\n\n\u003e It's recommended to only use small values here (a few minutes maximum).\nUsing extremely high values increases the risk of resource timeouts. To prevent\nhard resource timeouts, the maximum value allowed here is 900 seconds, or 15\nminutes.\n"
+                },
+                "renewalInfoRetryAfter": {
+                    "type": "string",
+                    "description": "A timestamp describing when ARI details will be\nrefreshed if already fetched (see `use_renewal_info`).\n"
+                },
+                "renewalInfoWindowEnd": {
+                    "type": "string",
+                    "description": "The end of the discovered ARI renewal window (see\n`use_renewal_info`).\n"
+                },
+                "renewalInfoWindowSelected": {
+                    "type": "string",
+                    "description": "The selected time within the ARI renewal\nwindow that a certificate will be renewed, if\n`use_renewal_info` is enabled.\n"
+                },
+                "renewalInfoWindowStart": {
+                    "type": "string",
+                    "description": "The start of the discovered ARI renewal window\n(see `use_renewal_info`).\n"
+                },
                 "revokeCertificateOnDestroy": {
                     "type": "boolean",
                     "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
@@ -322,6 +350,10 @@
                 "tlsChallenge": {
                     "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
                     "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`\nand `http_memcached_challenge` can be defined at once. See the section on\nUsing HTTP and TLS challenges for more\ndetails on using these and `tls_challenge`.\n"
+                },
+                "useRenewalInfo": {
+                    "type": "boolean",
+                    "description": "When enabled, use information available from\nthe CA's ACME Renewal Information (ARI) endpoint for renewing certificates.\nDefault: `false`.\n\n\u003e More detail on ARI can be found in [RFC\n9773](https://datatracker.ietf.org/doc/rfc9773/).\n\n\u003e Note that `use_renewal_info` does not disable `min_days_remaining`! If the\nselected time within an ARI renewal window value cannot be reached at plan time\n(based on the current time plus the value of\n`renewal_info_max_sleep`), or if the CA has no ARI\nendpoint, renewal behavior will fall back to comparing the certificate expiry\ntime with the value in `min_days_remaining`. This means for short-lived\ncertificates, you may wish to turn this value down so that the settings do not\nconflict; however, don't disable it altogether, as this may prevent the\ncertificate from being renewed!\n"
                 }
             },
             "required": [
@@ -333,7 +365,12 @@
                 "certificateSerial",
                 "certificateUrl",
                 "issuerPem",
-                "privateKeyPem"
+                "privateKeyPem",
+                "renewalInfoExplanationUrl",
+                "renewalInfoRetryAfter",
+                "renewalInfoWindowEnd",
+                "renewalInfoWindowSelected",
+                "renewalInfoWindowStart"
             ],
             "inputProperties": {
                 "accountKeyPem": {
@@ -423,6 +460,14 @@
                     },
                     "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records, in addition to some\nin-provider checks such as zone detection. Defaults to your system-configured\nDNS resolvers.\n"
                 },
+                "renewalInfoIgnoreRetryAfter": {
+                    "type": "boolean",
+                    "description": "Ignores the retry interval\nsupplied by the ARI endpoint for re-fetching renewal window data. Should only\nbe used for testing. Default: `false`.\n"
+                },
+                "renewalInfoMaxSleep": {
+                    "type": "integer",
+                    "description": "The maximum amount of time, in seconds,\nthat the resource is willing to sleep during apply to reach a selected\nrenewal window time when `use_renewal_info` is set to `true`. Default: `0`.\n\n\u003e It's recommended to only use small values here (a few minutes maximum).\nUsing extremely high values increases the risk of resource timeouts. To prevent\nhard resource timeouts, the maximum value allowed here is 900 seconds, or 15\nminutes.\n"
+                },
                 "revokeCertificateOnDestroy": {
                     "type": "boolean",
                     "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
@@ -442,6 +487,10 @@
                 "tlsChallenge": {
                     "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
                     "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`\nand `http_memcached_challenge` can be defined at once. See the section on\nUsing HTTP and TLS challenges for more\ndetails on using these and `tls_challenge`.\n"
+                },
+                "useRenewalInfo": {
+                    "type": "boolean",
+                    "description": "When enabled, use information available from\nthe CA's ACME Renewal Information (ARI) endpoint for renewing certificates.\nDefault: `false`.\n\n\u003e More detail on ARI can be found in [RFC\n9773](https://datatracker.ietf.org/doc/rfc9773/).\n\n\u003e Note that `use_renewal_info` does not disable `min_days_remaining`! If the\nselected time within an ARI renewal window value cannot be reached at plan time\n(based on the current time plus the value of\n`renewal_info_max_sleep`), or if the CA has no ARI\nendpoint, renewal behavior will fall back to comparing the certificate expiry\ntime with the value in `min_days_remaining`. This means for short-lived\ncertificates, you may wish to turn this value down so that the settings do not\nconflict; however, don't disable it altogether, as this may prevent the\ncertificate from being renewed!\n"
                 }
             },
             "requiredInputs": [
@@ -571,6 +620,34 @@
                         },
                         "description": "The recursive nameservers that will be\nused to check for propagation of DNS challenge records, in addition to some\nin-provider checks such as zone detection. Defaults to your system-configured\nDNS resolvers.\n"
                     },
+                    "renewalInfoExplanationUrl": {
+                        "type": "string",
+                        "description": "A URL that can be optionally supplied by an\nARI endpoint explaining the renewal window policy (see\n`use_renewal_info`).\n"
+                    },
+                    "renewalInfoIgnoreRetryAfter": {
+                        "type": "boolean",
+                        "description": "Ignores the retry interval\nsupplied by the ARI endpoint for re-fetching renewal window data. Should only\nbe used for testing. Default: `false`.\n"
+                    },
+                    "renewalInfoMaxSleep": {
+                        "type": "integer",
+                        "description": "The maximum amount of time, in seconds,\nthat the resource is willing to sleep during apply to reach a selected\nrenewal window time when `use_renewal_info` is set to `true`. Default: `0`.\n\n\u003e It's recommended to only use small values here (a few minutes maximum).\nUsing extremely high values increases the risk of resource timeouts. To prevent\nhard resource timeouts, the maximum value allowed here is 900 seconds, or 15\nminutes.\n"
+                    },
+                    "renewalInfoRetryAfter": {
+                        "type": "string",
+                        "description": "A timestamp describing when ARI details will be\nrefreshed if already fetched (see `use_renewal_info`).\n"
+                    },
+                    "renewalInfoWindowEnd": {
+                        "type": "string",
+                        "description": "The end of the discovered ARI renewal window (see\n`use_renewal_info`).\n"
+                    },
+                    "renewalInfoWindowSelected": {
+                        "type": "string",
+                        "description": "The selected time within the ARI renewal\nwindow that a certificate will be renewed, if\n`use_renewal_info` is enabled.\n"
+                    },
+                    "renewalInfoWindowStart": {
+                        "type": "string",
+                        "description": "The start of the discovered ARI renewal window\n(see `use_renewal_info`).\n"
+                    },
                     "revokeCertificateOnDestroy": {
                         "type": "boolean",
                         "description": "Enables revocation of a certificate upon destroy,\nwhich includes when a resource is re-created. Default is `true`.\n"
@@ -590,6 +667,10 @@
                     "tlsChallenge": {
                         "$ref": "#/types/acme:index/CertificateTlsChallenge:CertificateTlsChallenge",
                         "description": "Defines a TLS challenge to use in fulfilling the\nrequest.\n\n\u003e Only one of `http_challenge`, `http_webroot_challenge`, `http_s3_challenge`\nand `http_memcached_challenge` can be defined at once. See the section on\nUsing HTTP and TLS challenges for more\ndetails on using these and `tls_challenge`.\n"
+                    },
+                    "useRenewalInfo": {
+                        "type": "boolean",
+                        "description": "When enabled, use information available from\nthe CA's ACME Renewal Information (ARI) endpoint for renewing certificates.\nDefault: `false`.\n\n\u003e More detail on ARI can be found in [RFC\n9773](https://datatracker.ietf.org/doc/rfc9773/).\n\n\u003e Note that `use_renewal_info` does not disable `min_days_remaining`! If the\nselected time within an ARI renewal window value cannot be reached at plan time\n(based on the current time plus the value of\n`renewal_info_max_sleep`), or if the CA has no ARI\nendpoint, renewal behavior will fall back to comparing the certificate expiry\ntime with the value in `min_days_remaining`. This means for short-lived\ncertificates, you may wish to turn this value down so that the settings do not\nconflict; however, don't disable it altogether, as this may prevent the\ncertificate from being renewed!\n"
                     }
                 },
                 "type": "object"
