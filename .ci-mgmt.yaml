@@ -23,4 +23,7 @@ license:
     - github.com/OpenDNS/vegadns2client
     - github.com/alibabacloud-go/endpoint-util
     - github.com/nrdcg/oci-go-sdk
+    - github.com/cespare/xxhash
+    - github.com/envoyproxy/protoc-gen-validate
+    - github.com/go-acme/tencentclouddnspod
 pulumiConvert: 1
