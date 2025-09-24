@@ -26,4 +26,5 @@ license:
     - github.com/cespare/xxhash
     - github.com/envoyproxy/protoc-gen-validate
     - github.com/go-acme/tencentclouddnspod
+    - github.com/go-acme/tencentedgdeone
 pulumiConvert: 1

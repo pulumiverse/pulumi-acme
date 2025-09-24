@@ -40,6 +40,7 @@ jobs:
             github.com/cespare/xxhash,
             github.com/envoyproxy/protoc-gen-validate,
             github.com/go-acme/tencentclouddnspod,
+            github.com/go-acme/tencentedgdeone,
             github.com/aead/chacha20,
             github.com/apache/arrow/go/v12,
             github.com/apache/thrift/lib/go/thrift,
