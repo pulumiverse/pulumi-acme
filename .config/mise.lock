@@ -1,0 +1,45 @@
+[[tools.dotnet]]
+version = "8.0.414"
+backend = "asdf:dotnet"
+
+[[tools."github:pulumi/pulumictl"]]
+version = "0.0.50"
+backend = "github:pulumi/pulumictl"
+
+[[tools."github:pulumi/schema-tools"]]
+version = "0.6.0"
+backend = "github:pulumi/schema-tools"
+
+[[tools.go]]
+version = "1.24.1"
+backend = "core:go"
+
+[tools.go.platforms.macos-arm64]
+checksum = "sha256:295581b5619acc92f5106e5bcb05c51869337eb19742fdfa6c8346c18e78ff88"
+size = 76229329
+url = "https://dl.google.com/go/go1.24.1.darwin-arm64.tar.gz"
+
+[[tools.gradle]]
+version = "7.6.6"
+backend = "aqua:gradle/gradle"
+
+[[tools.java]]
+version = "corretto-11.0.28.6.1"
+backend = "core:java"
+
+[[tools.node]]
+version = "20.19.5"
+backend = "core:node"
+
+[[tools.pulumi]]
+version = "3.156.0"
+backend = "aqua:pulumi/pulumi"
+
+[tools.pulumi.platforms.macos-arm64]
+checksum = "sha512:1cc1ab07a4ae574e8a4707048f9dfa3e309b781243e515d3f8260946e9cb4a3ad63b612bac1c877fa6c87b00197cb13613cda69b650156987abf9b28697534ff"
+size = 82676777
+url = "https://github.com/pulumi/pulumi/releases/download/v3.156.0/pulumi-v3.156.0-darwin-arm64.tar.gz"
+
+[[tools.python]]
+version = "3.11.8"
+backend = "core:python"
