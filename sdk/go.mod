@@ -1,8 +1,6 @@
 module github.com/pulumiverse/pulumi-acme/sdk
 
-go 1.22
-
-toolchain go1.23.6
+go 1.25
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
