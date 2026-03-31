@@ -26,6 +26,7 @@ class CertificateArgs:
                  certificate_p12_password: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_request_pem: Optional[pulumi.Input[_builtins.str]] = None,
                  common_name: Optional[pulumi.Input[_builtins.str]] = None,
+                 deactivate_authorizations: Optional[pulumi.Input[_builtins.bool]] = None,
                  disable_complete_propagation: Optional[pulumi.Input[_builtins.bool]] = None,
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]]] = None,
                  http_challenge: Optional[pulumi.Input['CertificateHttpChallengeArgs']] = None,
@@ -33,11 +34,13 @@ class CertificateArgs:
                  http_s3_challenge: Optional[pulumi.Input['CertificateHttpS3ChallengeArgs']] = None,
                  http_webroot_challenge: Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']] = None,
                  key_type: Optional[pulumi.Input[_builtins.str]] = None,
+                 min_days_dynamic: Optional[pulumi.Input[_builtins.bool]] = None,
                  min_days_remaining: Optional[pulumi.Input[_builtins.int]] = None,
                  must_staple: Optional[pulumi.Input[_builtins.bool]] = None,
                  pre_check_delay: Optional[pulumi.Input[_builtins.int]] = None,
                  preferred_chain: Optional[pulumi.Input[_builtins.str]] = None,
                  profile: Optional[pulumi.Input[_builtins.str]] = None,
+                 propagation_wait: Optional[pulumi.Input[_builtins.int]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  renewal_info_ignore_retry_after: Optional[pulumi.Input[_builtins.bool]] = None,
                  renewal_info_max_sleep: Optional[pulumi.Input[_builtins.int]] = None,
@@ -45,7 +48,8 @@ class CertificateArgs:
                  revoke_certificate_reason: Optional[pulumi.Input[_builtins.str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None,
-                 use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None):
+                 use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None,
+                 validity_days: Optional[pulumi.Input[_builtins.int]] = None):
         """
         The set of arguments for constructing a Certificate resource.
 
@@ -74,12 +78,16 @@ class CertificateArgs:
                `subject_alternative_names` becomes the common name.
         :param pulumi.Input[_builtins.str] common_name: The certificate's common name, the primary domain that the
                certificate will be recognized for. Forces a new resource when changed.
+        :param pulumi.Input[_builtins.bool] deactivate_authorizations: Controls if authorizations are explicitly
+               deactivated after a certificate has been obtained, preventing their re-use.
+               Default: `true`.
         :param pulumi.Input[_builtins.bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
                
                > See About DNS propagation checks for details
-               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+               on the `recursive_nameservers`, `disable_complete_propagation`, and
+               `propagation_wait` settings.
         :param pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]] dns_challenges: The DNS challenges to
                use in fulfilling the request.
         :param pulumi.Input['CertificateHttpChallengeArgs'] http_challenge: Defines an HTTP challenge to use in fulfilling
@@ -98,10 +106,19 @@ class CertificateArgs:
                `8192` (for RSA keys of respective length). Required when not specifying a
                CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
                changed.
+        :param pulumi.Input[_builtins.bool] min_days_dynamic: Derive the renewal threshold from the
+               certificate lifetime instead of a static value. When set, the threshold is
+               set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+               or less. Default: `false.`
+               
+               > `min_days_dynamic` conflicts with `min_days_remaining` - only one may be set
+               at once.
         :param pulumi.Input[_builtins.int] min_days_remaining: The minimum amount of days remaining on the
                expiration of a certificate before a renewal is attempted. The default is
                `30`. A value of less than `0` means that the certificate will never be
                renewed.
+               
+               > `min_days_remaining` must be lower than `validity_days` (if defined).
         :param pulumi.Input[_builtins.bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
                TLS Security Policy extension. Certificates with this extension must include a
                valid OCSP Staple in the TLS handshake for the connection to succeed.
@@ -146,6 +163,13 @@ class CertificateArgs:
                
                > Let's Encrypt publishes details on their profiles at
                <https://letsencrypt.org/docs/profiles/>.
+        :param pulumi.Input[_builtins.int] propagation_wait: Disable DNS propagation checks and wait the
+               specified number of seconds before validation proceeds. Defaults to 0 (no
+               wait).
+               
+               > The wait is applied _per-domain_. When `propagation_wait` is set, propagation
+               checks are skipped and `recursive_nameservers` / `disable_complete_propagation`
+               have no effect. `propagation_wait` conflicts with `pre_check_delay`.
         :param pulumi.Input[Sequence[pulumi.Input[_builtins.str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -200,8 +224,15 @@ class CertificateArgs:
                endpoint, renewal behavior will fall back to comparing the certificate expiry
                time with the value in `min_days_remaining`. This means for short-lived
                certificates, you may wish to turn this value down so that the settings do not
-               conflict; however, don't disable it altogether, as this may prevent the
-               certificate from being renewed!
+               conflict, or consider using `min_days_dynamic` instead.
+        :param pulumi.Input[_builtins.int] validity_days: The desired validity duration for the
+               certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+               value triggers a certificate renewal.
+               
+               > Note that not all ACME CAs support user-set certificate durations; most
+               famously, [Let's Encrypt does
+               not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+               Check with your CA to ensure this feature is supported before using it.
         """
         pulumi.set(__self__, "account_key_pem", account_key_pem)
         if cert_timeout is not None:
@@ -212,6 +243,8 @@ class CertificateArgs:
             pulumi.set(__self__, "certificate_request_pem", certificate_request_pem)
         if common_name is not None:
             pulumi.set(__self__, "common_name", common_name)
+        if deactivate_authorizations is not None:
+            pulumi.set(__self__, "deactivate_authorizations", deactivate_authorizations)
         if disable_complete_propagation is not None:
             pulumi.set(__self__, "disable_complete_propagation", disable_complete_propagation)
         if dns_challenges is not None:
@@ -226,6 +259,8 @@ class CertificateArgs:
             pulumi.set(__self__, "http_webroot_challenge", http_webroot_challenge)
         if key_type is not None:
             pulumi.set(__self__, "key_type", key_type)
+        if min_days_dynamic is not None:
+            pulumi.set(__self__, "min_days_dynamic", min_days_dynamic)
         if min_days_remaining is not None:
             pulumi.set(__self__, "min_days_remaining", min_days_remaining)
         if must_staple is not None:
@@ -236,6 +271,8 @@ class CertificateArgs:
             pulumi.set(__self__, "preferred_chain", preferred_chain)
         if profile is not None:
             pulumi.set(__self__, "profile", profile)
+        if propagation_wait is not None:
+            pulumi.set(__self__, "propagation_wait", propagation_wait)
         if recursive_nameservers is not None:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
         if renewal_info_ignore_retry_after is not None:
@@ -252,6 +289,8 @@ class CertificateArgs:
             pulumi.set(__self__, "tls_challenge", tls_challenge)
         if use_renewal_info is not None:
             pulumi.set(__self__, "use_renewal_info", use_renewal_info)
+        if validity_days is not None:
+            pulumi.set(__self__, "validity_days", validity_days)
 
     @_builtins.property
     @pulumi.getter(name="accountKeyPem")
@@ -334,6 +373,20 @@ class CertificateArgs:
         pulumi.set(self, "common_name", value)
 
     @_builtins.property
+    @pulumi.getter(name="deactivateAuthorizations")
+    def deactivate_authorizations(self) -> Optional[pulumi.Input[_builtins.bool]]:
+        """
+        Controls if authorizations are explicitly
+        deactivated after a certificate has been obtained, preventing their re-use.
+        Default: `true`.
+        """
+        return pulumi.get(self, "deactivate_authorizations")
+
+    @deactivate_authorizations.setter
+    def deactivate_authorizations(self, value: Optional[pulumi.Input[_builtins.bool]]):
+        pulumi.set(self, "deactivate_authorizations", value)
+
+    @_builtins.property
     @pulumi.getter(name="disableCompletePropagation")
     def disable_complete_propagation(self) -> Optional[pulumi.Input[_builtins.bool]]:
         """
@@ -342,7 +395,8 @@ class CertificateArgs:
         Defaults to `false`.
 
         > See About DNS propagation checks for details
-        on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        on the `recursive_nameservers`, `disable_complete_propagation`, and
+        `propagation_wait` settings.
         """
         return pulumi.get(self, "disable_complete_propagation")
 
@@ -435,6 +489,24 @@ class CertificateArgs:
         pulumi.set(self, "key_type", value)
 
     @_builtins.property
+    @pulumi.getter(name="minDaysDynamic")
+    def min_days_dynamic(self) -> Optional[pulumi.Input[_builtins.bool]]:
+        """
+        Derive the renewal threshold from the
+        certificate lifetime instead of a static value. When set, the threshold is
+        set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+        or less. Default: `false.`
+
+        > `min_days_dynamic` conflicts with `min_days_remaining` - only one may be set
+        at once.
+        """
+        return pulumi.get(self, "min_days_dynamic")
+
+    @min_days_dynamic.setter
+    def min_days_dynamic(self, value: Optional[pulumi.Input[_builtins.bool]]):
+        pulumi.set(self, "min_days_dynamic", value)
+
+    @_builtins.property
     @pulumi.getter(name="minDaysRemaining")
     def min_days_remaining(self) -> Optional[pulumi.Input[_builtins.int]]:
         """
@@ -442,6 +514,8 @@ class CertificateArgs:
         expiration of a certificate before a renewal is attempted. The default is
         `30`. A value of less than `0` means that the certificate will never be
         renewed.
+
+        > `min_days_remaining` must be lower than `validity_days` (if defined).
         """
         return pulumi.get(self, "min_days_remaining")
 
@@ -536,6 +610,24 @@ class CertificateArgs:
     @profile.setter
     def profile(self, value: Optional[pulumi.Input[_builtins.str]]):
         pulumi.set(self, "profile", value)
+
+    @_builtins.property
+    @pulumi.getter(name="propagationWait")
+    def propagation_wait(self) -> Optional[pulumi.Input[_builtins.int]]:
+        """
+        Disable DNS propagation checks and wait the
+        specified number of seconds before validation proceeds. Defaults to 0 (no
+        wait).
+
+        > The wait is applied _per-domain_. When `propagation_wait` is set, propagation
+        checks are skipped and `recursive_nameservers` / `disable_complete_propagation`
+        have no effect. `propagation_wait` conflicts with `pre_check_delay`.
+        """
+        return pulumi.get(self, "propagation_wait")
+
+    @propagation_wait.setter
+    def propagation_wait(self, value: Optional[pulumi.Input[_builtins.int]]):
+        pulumi.set(self, "propagation_wait", value)
 
     @_builtins.property
     @pulumi.getter(name="recursiveNameservers")
@@ -672,14 +764,32 @@ class CertificateArgs:
         endpoint, renewal behavior will fall back to comparing the certificate expiry
         time with the value in `min_days_remaining`. This means for short-lived
         certificates, you may wish to turn this value down so that the settings do not
-        conflict; however, don't disable it altogether, as this may prevent the
-        certificate from being renewed!
+        conflict, or consider using `min_days_dynamic` instead.
         """
         return pulumi.get(self, "use_renewal_info")
 
     @use_renewal_info.setter
     def use_renewal_info(self, value: Optional[pulumi.Input[_builtins.bool]]):
         pulumi.set(self, "use_renewal_info", value)
+
+    @_builtins.property
+    @pulumi.getter(name="validityDays")
+    def validity_days(self) -> Optional[pulumi.Input[_builtins.int]]:
+        """
+        The desired validity duration for the
+        certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+        value triggers a certificate renewal.
+
+        > Note that not all ACME CAs support user-set certificate durations; most
+        famously, [Let's Encrypt does
+        not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+        Check with your CA to ensure this feature is supported before using it.
+        """
+        return pulumi.get(self, "validity_days")
+
+    @validity_days.setter
+    def validity_days(self, value: Optional[pulumi.Input[_builtins.int]]):
+        pulumi.set(self, "validity_days", value)
 
 
 @pulumi.input_type
@@ -689,6 +799,7 @@ class _CertificateState:
                  cert_timeout: Optional[pulumi.Input[_builtins.int]] = None,
                  certificate_domain: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_not_after: Optional[pulumi.Input[_builtins.str]] = None,
+                 certificate_not_before: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_p12: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_p12_password: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_pem: Optional[pulumi.Input[_builtins.str]] = None,
@@ -696,6 +807,7 @@ class _CertificateState:
                  certificate_serial: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_url: Optional[pulumi.Input[_builtins.str]] = None,
                  common_name: Optional[pulumi.Input[_builtins.str]] = None,
+                 deactivate_authorizations: Optional[pulumi.Input[_builtins.bool]] = None,
                  disable_complete_propagation: Optional[pulumi.Input[_builtins.bool]] = None,
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]]] = None,
                  http_challenge: Optional[pulumi.Input['CertificateHttpChallengeArgs']] = None,
@@ -704,12 +816,14 @@ class _CertificateState:
                  http_webroot_challenge: Optional[pulumi.Input['CertificateHttpWebrootChallengeArgs']] = None,
                  issuer_pem: Optional[pulumi.Input[_builtins.str]] = None,
                  key_type: Optional[pulumi.Input[_builtins.str]] = None,
+                 min_days_dynamic: Optional[pulumi.Input[_builtins.bool]] = None,
                  min_days_remaining: Optional[pulumi.Input[_builtins.int]] = None,
                  must_staple: Optional[pulumi.Input[_builtins.bool]] = None,
                  pre_check_delay: Optional[pulumi.Input[_builtins.int]] = None,
                  preferred_chain: Optional[pulumi.Input[_builtins.str]] = None,
                  private_key_pem: Optional[pulumi.Input[_builtins.str]] = None,
                  profile: Optional[pulumi.Input[_builtins.str]] = None,
+                 propagation_wait: Optional[pulumi.Input[_builtins.int]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  renewal_info_explanation_url: Optional[pulumi.Input[_builtins.str]] = None,
                  renewal_info_ignore_retry_after: Optional[pulumi.Input[_builtins.bool]] = None,
@@ -722,7 +836,8 @@ class _CertificateState:
                  revoke_certificate_reason: Optional[pulumi.Input[_builtins.str]] = None,
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  tls_challenge: Optional[pulumi.Input['CertificateTlsChallengeArgs']] = None,
-                 use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None):
+                 use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None,
+                 validity_days: Optional[pulumi.Input[_builtins.int]] = None):
         """
         Input properties used for looking up and filtering Certificate resources.
 
@@ -765,12 +880,16 @@ class _CertificateState:
         :param pulumi.Input[_builtins.str] certificate_url: The full URL of the certificate within the ACME CA.
         :param pulumi.Input[_builtins.str] common_name: The certificate's common name, the primary domain that the
                certificate will be recognized for. Forces a new resource when changed.
+        :param pulumi.Input[_builtins.bool] deactivate_authorizations: Controls if authorizations are explicitly
+               deactivated after a certificate has been obtained, preventing their re-use.
+               Default: `true`.
         :param pulumi.Input[_builtins.bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
                
                > See About DNS propagation checks for details
-               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+               on the `recursive_nameservers`, `disable_complete_propagation`, and
+               `propagation_wait` settings.
         :param pulumi.Input[Sequence[pulumi.Input['CertificateDnsChallengeArgs']]] dns_challenges: The DNS challenges to
                use in fulfilling the request.
         :param pulumi.Input['CertificateHttpChallengeArgs'] http_challenge: Defines an HTTP challenge to use in fulfilling
@@ -792,10 +911,19 @@ class _CertificateState:
                `8192` (for RSA keys of respective length). Required when not specifying a
                CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
                changed.
+        :param pulumi.Input[_builtins.bool] min_days_dynamic: Derive the renewal threshold from the
+               certificate lifetime instead of a static value. When set, the threshold is
+               set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+               or less. Default: `false.`
+               
+               > `min_days_dynamic` conflicts with `min_days_remaining` - only one may be set
+               at once.
         :param pulumi.Input[_builtins.int] min_days_remaining: The minimum amount of days remaining on the
                expiration of a certificate before a renewal is attempted. The default is
                `30`. A value of less than `0` means that the certificate will never be
                renewed.
+               
+               > `min_days_remaining` must be lower than `validity_days` (if defined).
         :param pulumi.Input[_builtins.bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
                TLS Security Policy extension. Certificates with this extension must include a
                valid OCSP Staple in the TLS handshake for the connection to succeed.
@@ -844,6 +972,13 @@ class _CertificateState:
                
                > Let's Encrypt publishes details on their profiles at
                <https://letsencrypt.org/docs/profiles/>.
+        :param pulumi.Input[_builtins.int] propagation_wait: Disable DNS propagation checks and wait the
+               specified number of seconds before validation proceeds. Defaults to 0 (no
+               wait).
+               
+               > The wait is applied _per-domain_. When `propagation_wait` is set, propagation
+               checks are skipped and `recursive_nameservers` / `disable_complete_propagation`
+               have no effect. `propagation_wait` conflicts with `pre_check_delay`.
         :param pulumi.Input[Sequence[pulumi.Input[_builtins.str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -910,8 +1045,15 @@ class _CertificateState:
                endpoint, renewal behavior will fall back to comparing the certificate expiry
                time with the value in `min_days_remaining`. This means for short-lived
                certificates, you may wish to turn this value down so that the settings do not
-               conflict; however, don't disable it altogether, as this may prevent the
-               certificate from being renewed!
+               conflict, or consider using `min_days_dynamic` instead.
+        :param pulumi.Input[_builtins.int] validity_days: The desired validity duration for the
+               certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+               value triggers a certificate renewal.
+               
+               > Note that not all ACME CAs support user-set certificate durations; most
+               famously, [Let's Encrypt does
+               not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+               Check with your CA to ensure this feature is supported before using it.
         """
         if account_key_pem is not None:
             pulumi.set(__self__, "account_key_pem", account_key_pem)
@@ -921,6 +1063,8 @@ class _CertificateState:
             pulumi.set(__self__, "certificate_domain", certificate_domain)
         if certificate_not_after is not None:
             pulumi.set(__self__, "certificate_not_after", certificate_not_after)
+        if certificate_not_before is not None:
+            pulumi.set(__self__, "certificate_not_before", certificate_not_before)
         if certificate_p12 is not None:
             pulumi.set(__self__, "certificate_p12", certificate_p12)
         if certificate_p12_password is not None:
@@ -935,6 +1079,8 @@ class _CertificateState:
             pulumi.set(__self__, "certificate_url", certificate_url)
         if common_name is not None:
             pulumi.set(__self__, "common_name", common_name)
+        if deactivate_authorizations is not None:
+            pulumi.set(__self__, "deactivate_authorizations", deactivate_authorizations)
         if disable_complete_propagation is not None:
             pulumi.set(__self__, "disable_complete_propagation", disable_complete_propagation)
         if dns_challenges is not None:
@@ -951,6 +1097,8 @@ class _CertificateState:
             pulumi.set(__self__, "issuer_pem", issuer_pem)
         if key_type is not None:
             pulumi.set(__self__, "key_type", key_type)
+        if min_days_dynamic is not None:
+            pulumi.set(__self__, "min_days_dynamic", min_days_dynamic)
         if min_days_remaining is not None:
             pulumi.set(__self__, "min_days_remaining", min_days_remaining)
         if must_staple is not None:
@@ -963,6 +1111,8 @@ class _CertificateState:
             pulumi.set(__self__, "private_key_pem", private_key_pem)
         if profile is not None:
             pulumi.set(__self__, "profile", profile)
+        if propagation_wait is not None:
+            pulumi.set(__self__, "propagation_wait", propagation_wait)
         if recursive_nameservers is not None:
             pulumi.set(__self__, "recursive_nameservers", recursive_nameservers)
         if renewal_info_explanation_url is not None:
@@ -989,6 +1139,8 @@ class _CertificateState:
             pulumi.set(__self__, "tls_challenge", tls_challenge)
         if use_renewal_info is not None:
             pulumi.set(__self__, "use_renewal_info", use_renewal_info)
+        if validity_days is not None:
+            pulumi.set(__self__, "validity_days", validity_days)
 
     @_builtins.property
     @pulumi.getter(name="accountKeyPem")
@@ -1044,6 +1196,15 @@ class _CertificateState:
     @certificate_not_after.setter
     def certificate_not_after(self, value: Optional[pulumi.Input[_builtins.str]]):
         pulumi.set(self, "certificate_not_after", value)
+
+    @_builtins.property
+    @pulumi.getter(name="certificateNotBefore")
+    def certificate_not_before(self) -> Optional[pulumi.Input[_builtins.str]]:
+        return pulumi.get(self, "certificate_not_before")
+
+    @certificate_not_before.setter
+    def certificate_not_before(self, value: Optional[pulumi.Input[_builtins.str]]):
+        pulumi.set(self, "certificate_not_before", value)
 
     @_builtins.property
     @pulumi.getter(name="certificateP12")
@@ -1151,6 +1312,20 @@ class _CertificateState:
         pulumi.set(self, "common_name", value)
 
     @_builtins.property
+    @pulumi.getter(name="deactivateAuthorizations")
+    def deactivate_authorizations(self) -> Optional[pulumi.Input[_builtins.bool]]:
+        """
+        Controls if authorizations are explicitly
+        deactivated after a certificate has been obtained, preventing their re-use.
+        Default: `true`.
+        """
+        return pulumi.get(self, "deactivate_authorizations")
+
+    @deactivate_authorizations.setter
+    def deactivate_authorizations(self, value: Optional[pulumi.Input[_builtins.bool]]):
+        pulumi.set(self, "deactivate_authorizations", value)
+
+    @_builtins.property
     @pulumi.getter(name="disableCompletePropagation")
     def disable_complete_propagation(self) -> Optional[pulumi.Input[_builtins.bool]]:
         """
@@ -1159,7 +1334,8 @@ class _CertificateState:
         Defaults to `false`.
 
         > See About DNS propagation checks for details
-        on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        on the `recursive_nameservers`, `disable_complete_propagation`, and
+        `propagation_wait` settings.
         """
         return pulumi.get(self, "disable_complete_propagation")
 
@@ -1266,6 +1442,24 @@ class _CertificateState:
         pulumi.set(self, "key_type", value)
 
     @_builtins.property
+    @pulumi.getter(name="minDaysDynamic")
+    def min_days_dynamic(self) -> Optional[pulumi.Input[_builtins.bool]]:
+        """
+        Derive the renewal threshold from the
+        certificate lifetime instead of a static value. When set, the threshold is
+        set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+        or less. Default: `false.`
+
+        > `min_days_dynamic` conflicts with `min_days_remaining` - only one may be set
+        at once.
+        """
+        return pulumi.get(self, "min_days_dynamic")
+
+    @min_days_dynamic.setter
+    def min_days_dynamic(self, value: Optional[pulumi.Input[_builtins.bool]]):
+        pulumi.set(self, "min_days_dynamic", value)
+
+    @_builtins.property
     @pulumi.getter(name="minDaysRemaining")
     def min_days_remaining(self) -> Optional[pulumi.Input[_builtins.int]]:
         """
@@ -1273,6 +1467,8 @@ class _CertificateState:
         expiration of a certificate before a renewal is attempted. The default is
         `30`. A value of less than `0` means that the certificate will never be
         renewed.
+
+        > `min_days_remaining` must be lower than `validity_days` (if defined).
         """
         return pulumi.get(self, "min_days_remaining")
 
@@ -1382,6 +1578,24 @@ class _CertificateState:
     @profile.setter
     def profile(self, value: Optional[pulumi.Input[_builtins.str]]):
         pulumi.set(self, "profile", value)
+
+    @_builtins.property
+    @pulumi.getter(name="propagationWait")
+    def propagation_wait(self) -> Optional[pulumi.Input[_builtins.int]]:
+        """
+        Disable DNS propagation checks and wait the
+        specified number of seconds before validation proceeds. Defaults to 0 (no
+        wait).
+
+        > The wait is applied _per-domain_. When `propagation_wait` is set, propagation
+        checks are skipped and `recursive_nameservers` / `disable_complete_propagation`
+        have no effect. `propagation_wait` conflicts with `pre_check_delay`.
+        """
+        return pulumi.get(self, "propagation_wait")
+
+    @propagation_wait.setter
+    def propagation_wait(self, value: Optional[pulumi.Input[_builtins.int]]):
+        pulumi.set(self, "propagation_wait", value)
 
     @_builtins.property
     @pulumi.getter(name="recursiveNameservers")
@@ -1585,14 +1799,32 @@ class _CertificateState:
         endpoint, renewal behavior will fall back to comparing the certificate expiry
         time with the value in `min_days_remaining`. This means for short-lived
         certificates, you may wish to turn this value down so that the settings do not
-        conflict; however, don't disable it altogether, as this may prevent the
-        certificate from being renewed!
+        conflict, or consider using `min_days_dynamic` instead.
         """
         return pulumi.get(self, "use_renewal_info")
 
     @use_renewal_info.setter
     def use_renewal_info(self, value: Optional[pulumi.Input[_builtins.bool]]):
         pulumi.set(self, "use_renewal_info", value)
+
+    @_builtins.property
+    @pulumi.getter(name="validityDays")
+    def validity_days(self) -> Optional[pulumi.Input[_builtins.int]]:
+        """
+        The desired validity duration for the
+        certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+        value triggers a certificate renewal.
+
+        > Note that not all ACME CAs support user-set certificate durations; most
+        famously, [Let's Encrypt does
+        not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+        Check with your CA to ensure this feature is supported before using it.
+        """
+        return pulumi.get(self, "validity_days")
+
+    @validity_days.setter
+    def validity_days(self, value: Optional[pulumi.Input[_builtins.int]]):
+        pulumi.set(self, "validity_days", value)
 
 
 @pulumi.type_token("acme:index/certificate:Certificate")
@@ -1606,6 +1838,7 @@ class Certificate(pulumi.CustomResource):
                  certificate_p12_password: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_request_pem: Optional[pulumi.Input[_builtins.str]] = None,
                  common_name: Optional[pulumi.Input[_builtins.str]] = None,
+                 deactivate_authorizations: Optional[pulumi.Input[_builtins.bool]] = None,
                  disable_complete_propagation: Optional[pulumi.Input[_builtins.bool]] = None,
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]]] = None,
                  http_challenge: Optional[pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']]] = None,
@@ -1613,11 +1846,13 @@ class Certificate(pulumi.CustomResource):
                  http_s3_challenge: Optional[pulumi.Input[Union['CertificateHttpS3ChallengeArgs', 'CertificateHttpS3ChallengeArgsDict']]] = None,
                  http_webroot_challenge: Optional[pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']]] = None,
                  key_type: Optional[pulumi.Input[_builtins.str]] = None,
+                 min_days_dynamic: Optional[pulumi.Input[_builtins.bool]] = None,
                  min_days_remaining: Optional[pulumi.Input[_builtins.int]] = None,
                  must_staple: Optional[pulumi.Input[_builtins.bool]] = None,
                  pre_check_delay: Optional[pulumi.Input[_builtins.int]] = None,
                  preferred_chain: Optional[pulumi.Input[_builtins.str]] = None,
                  profile: Optional[pulumi.Input[_builtins.str]] = None,
+                 propagation_wait: Optional[pulumi.Input[_builtins.int]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  renewal_info_ignore_retry_after: Optional[pulumi.Input[_builtins.bool]] = None,
                  renewal_info_max_sleep: Optional[pulumi.Input[_builtins.int]] = None,
@@ -1626,6 +1861,7 @@ class Certificate(pulumi.CustomResource):
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
                  use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None,
+                 validity_days: Optional[pulumi.Input[_builtins.int]] = None,
                  __props__=None):
         """
         ## # Certificate
@@ -1718,6 +1954,15 @@ class Certificate(pulumi.CustomResource):
         Note that a value less than `0` supplied to `min_days_remaining` will cause
         renewal checks to be bypassed, and the certificate will never renew.
 
+        ### Dynamic renewal
+
+        When working with short certificate lifetimes (possibly set using
+        `validity_days`, or via short-lifetime ACME profiles), or
+        utilizing ARI using `use_renewal_info`, you may find it
+        easier to use `min_days_dynamic` instead. When using this
+        over `min_days_remaining`, the certificate renewal threshold is automatically
+        set to 1/3 of its lifetime, or 1/2 if the lifetime is 10 days or less.
+
 
         :param str resource_name: The name of the resource.
         :param pulumi.ResourceOptions opts: Options for the resource.
@@ -1746,12 +1991,16 @@ class Certificate(pulumi.CustomResource):
                `subject_alternative_names` becomes the common name.
         :param pulumi.Input[_builtins.str] common_name: The certificate's common name, the primary domain that the
                certificate will be recognized for. Forces a new resource when changed.
+        :param pulumi.Input[_builtins.bool] deactivate_authorizations: Controls if authorizations are explicitly
+               deactivated after a certificate has been obtained, preventing their re-use.
+               Default: `true`.
         :param pulumi.Input[_builtins.bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
                
                > See About DNS propagation checks for details
-               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+               on the `recursive_nameservers`, `disable_complete_propagation`, and
+               `propagation_wait` settings.
         :param pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]] dns_challenges: The DNS challenges to
                use in fulfilling the request.
         :param pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']] http_challenge: Defines an HTTP challenge to use in fulfilling
@@ -1770,10 +2019,19 @@ class Certificate(pulumi.CustomResource):
                `8192` (for RSA keys of respective length). Required when not specifying a
                CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
                changed.
+        :param pulumi.Input[_builtins.bool] min_days_dynamic: Derive the renewal threshold from the
+               certificate lifetime instead of a static value. When set, the threshold is
+               set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+               or less. Default: `false.`
+               
+               > `min_days_dynamic` conflicts with `min_days_remaining` - only one may be set
+               at once.
         :param pulumi.Input[_builtins.int] min_days_remaining: The minimum amount of days remaining on the
                expiration of a certificate before a renewal is attempted. The default is
                `30`. A value of less than `0` means that the certificate will never be
                renewed.
+               
+               > `min_days_remaining` must be lower than `validity_days` (if defined).
         :param pulumi.Input[_builtins.bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
                TLS Security Policy extension. Certificates with this extension must include a
                valid OCSP Staple in the TLS handshake for the connection to succeed.
@@ -1818,6 +2076,13 @@ class Certificate(pulumi.CustomResource):
                
                > Let's Encrypt publishes details on their profiles at
                <https://letsencrypt.org/docs/profiles/>.
+        :param pulumi.Input[_builtins.int] propagation_wait: Disable DNS propagation checks and wait the
+               specified number of seconds before validation proceeds. Defaults to 0 (no
+               wait).
+               
+               > The wait is applied _per-domain_. When `propagation_wait` is set, propagation
+               checks are skipped and `recursive_nameservers` / `disable_complete_propagation`
+               have no effect. `propagation_wait` conflicts with `pre_check_delay`.
         :param pulumi.Input[Sequence[pulumi.Input[_builtins.str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -1872,8 +2137,15 @@ class Certificate(pulumi.CustomResource):
                endpoint, renewal behavior will fall back to comparing the certificate expiry
                time with the value in `min_days_remaining`. This means for short-lived
                certificates, you may wish to turn this value down so that the settings do not
-               conflict; however, don't disable it altogether, as this may prevent the
-               certificate from being renewed!
+               conflict, or consider using `min_days_dynamic` instead.
+        :param pulumi.Input[_builtins.int] validity_days: The desired validity duration for the
+               certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+               value triggers a certificate renewal.
+               
+               > Note that not all ACME CAs support user-set certificate durations; most
+               famously, [Let's Encrypt does
+               not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+               Check with your CA to ensure this feature is supported before using it.
         """
         ...
     @overload
@@ -1972,6 +2244,15 @@ class Certificate(pulumi.CustomResource):
         Note that a value less than `0` supplied to `min_days_remaining` will cause
         renewal checks to be bypassed, and the certificate will never renew.
 
+        ### Dynamic renewal
+
+        When working with short certificate lifetimes (possibly set using
+        `validity_days`, or via short-lifetime ACME profiles), or
+        utilizing ARI using `use_renewal_info`, you may find it
+        easier to use `min_days_dynamic` instead. When using this
+        over `min_days_remaining`, the certificate renewal threshold is automatically
+        set to 1/3 of its lifetime, or 1/2 if the lifetime is 10 days or less.
+
 
         :param str resource_name: The name of the resource.
         :param CertificateArgs args: The arguments to use to populate this resource's properties.
@@ -1993,6 +2274,7 @@ class Certificate(pulumi.CustomResource):
                  certificate_p12_password: Optional[pulumi.Input[_builtins.str]] = None,
                  certificate_request_pem: Optional[pulumi.Input[_builtins.str]] = None,
                  common_name: Optional[pulumi.Input[_builtins.str]] = None,
+                 deactivate_authorizations: Optional[pulumi.Input[_builtins.bool]] = None,
                  disable_complete_propagation: Optional[pulumi.Input[_builtins.bool]] = None,
                  dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]]] = None,
                  http_challenge: Optional[pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']]] = None,
@@ -2000,11 +2282,13 @@ class Certificate(pulumi.CustomResource):
                  http_s3_challenge: Optional[pulumi.Input[Union['CertificateHttpS3ChallengeArgs', 'CertificateHttpS3ChallengeArgsDict']]] = None,
                  http_webroot_challenge: Optional[pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']]] = None,
                  key_type: Optional[pulumi.Input[_builtins.str]] = None,
+                 min_days_dynamic: Optional[pulumi.Input[_builtins.bool]] = None,
                  min_days_remaining: Optional[pulumi.Input[_builtins.int]] = None,
                  must_staple: Optional[pulumi.Input[_builtins.bool]] = None,
                  pre_check_delay: Optional[pulumi.Input[_builtins.int]] = None,
                  preferred_chain: Optional[pulumi.Input[_builtins.str]] = None,
                  profile: Optional[pulumi.Input[_builtins.str]] = None,
+                 propagation_wait: Optional[pulumi.Input[_builtins.int]] = None,
                  recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  renewal_info_ignore_retry_after: Optional[pulumi.Input[_builtins.bool]] = None,
                  renewal_info_max_sleep: Optional[pulumi.Input[_builtins.int]] = None,
@@ -2013,6 +2297,7 @@ class Certificate(pulumi.CustomResource):
                  subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
                  tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
                  use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None,
+                 validity_days: Optional[pulumi.Input[_builtins.int]] = None,
                  __props__=None):
         opts = pulumi.ResourceOptions.merge(_utilities.get_resource_opts_defaults(), opts)
         if not isinstance(opts, pulumi.ResourceOptions):
@@ -2029,6 +2314,7 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["certificate_p12_password"] = None if certificate_p12_password is None else pulumi.Output.secret(certificate_p12_password)
             __props__.__dict__["certificate_request_pem"] = certificate_request_pem
             __props__.__dict__["common_name"] = common_name
+            __props__.__dict__["deactivate_authorizations"] = deactivate_authorizations
             __props__.__dict__["disable_complete_propagation"] = disable_complete_propagation
             __props__.__dict__["dns_challenges"] = dns_challenges
             __props__.__dict__["http_challenge"] = http_challenge
@@ -2036,11 +2322,13 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["http_s3_challenge"] = http_s3_challenge
             __props__.__dict__["http_webroot_challenge"] = http_webroot_challenge
             __props__.__dict__["key_type"] = key_type
+            __props__.__dict__["min_days_dynamic"] = min_days_dynamic
             __props__.__dict__["min_days_remaining"] = min_days_remaining
             __props__.__dict__["must_staple"] = must_staple
             __props__.__dict__["pre_check_delay"] = pre_check_delay
             __props__.__dict__["preferred_chain"] = preferred_chain
             __props__.__dict__["profile"] = profile
+            __props__.__dict__["propagation_wait"] = propagation_wait
             __props__.__dict__["recursive_nameservers"] = recursive_nameservers
             __props__.__dict__["renewal_info_ignore_retry_after"] = renewal_info_ignore_retry_after
             __props__.__dict__["renewal_info_max_sleep"] = renewal_info_max_sleep
@@ -2049,8 +2337,10 @@ class Certificate(pulumi.CustomResource):
             __props__.__dict__["subject_alternative_names"] = subject_alternative_names
             __props__.__dict__["tls_challenge"] = tls_challenge
             __props__.__dict__["use_renewal_info"] = use_renewal_info
+            __props__.__dict__["validity_days"] = validity_days
             __props__.__dict__["certificate_domain"] = None
             __props__.__dict__["certificate_not_after"] = None
+            __props__.__dict__["certificate_not_before"] = None
             __props__.__dict__["certificate_p12"] = None
             __props__.__dict__["certificate_pem"] = None
             __props__.__dict__["certificate_serial"] = None
@@ -2078,6 +2368,7 @@ class Certificate(pulumi.CustomResource):
             cert_timeout: Optional[pulumi.Input[_builtins.int]] = None,
             certificate_domain: Optional[pulumi.Input[_builtins.str]] = None,
             certificate_not_after: Optional[pulumi.Input[_builtins.str]] = None,
+            certificate_not_before: Optional[pulumi.Input[_builtins.str]] = None,
             certificate_p12: Optional[pulumi.Input[_builtins.str]] = None,
             certificate_p12_password: Optional[pulumi.Input[_builtins.str]] = None,
             certificate_pem: Optional[pulumi.Input[_builtins.str]] = None,
@@ -2085,6 +2376,7 @@ class Certificate(pulumi.CustomResource):
             certificate_serial: Optional[pulumi.Input[_builtins.str]] = None,
             certificate_url: Optional[pulumi.Input[_builtins.str]] = None,
             common_name: Optional[pulumi.Input[_builtins.str]] = None,
+            deactivate_authorizations: Optional[pulumi.Input[_builtins.bool]] = None,
             disable_complete_propagation: Optional[pulumi.Input[_builtins.bool]] = None,
             dns_challenges: Optional[pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]]] = None,
             http_challenge: Optional[pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']]] = None,
@@ -2093,12 +2385,14 @@ class Certificate(pulumi.CustomResource):
             http_webroot_challenge: Optional[pulumi.Input[Union['CertificateHttpWebrootChallengeArgs', 'CertificateHttpWebrootChallengeArgsDict']]] = None,
             issuer_pem: Optional[pulumi.Input[_builtins.str]] = None,
             key_type: Optional[pulumi.Input[_builtins.str]] = None,
+            min_days_dynamic: Optional[pulumi.Input[_builtins.bool]] = None,
             min_days_remaining: Optional[pulumi.Input[_builtins.int]] = None,
             must_staple: Optional[pulumi.Input[_builtins.bool]] = None,
             pre_check_delay: Optional[pulumi.Input[_builtins.int]] = None,
             preferred_chain: Optional[pulumi.Input[_builtins.str]] = None,
             private_key_pem: Optional[pulumi.Input[_builtins.str]] = None,
             profile: Optional[pulumi.Input[_builtins.str]] = None,
+            propagation_wait: Optional[pulumi.Input[_builtins.int]] = None,
             recursive_nameservers: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
             renewal_info_explanation_url: Optional[pulumi.Input[_builtins.str]] = None,
             renewal_info_ignore_retry_after: Optional[pulumi.Input[_builtins.bool]] = None,
@@ -2111,7 +2405,8 @@ class Certificate(pulumi.CustomResource):
             revoke_certificate_reason: Optional[pulumi.Input[_builtins.str]] = None,
             subject_alternative_names: Optional[pulumi.Input[Sequence[pulumi.Input[_builtins.str]]]] = None,
             tls_challenge: Optional[pulumi.Input[Union['CertificateTlsChallengeArgs', 'CertificateTlsChallengeArgsDict']]] = None,
-            use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None) -> 'Certificate':
+            use_renewal_info: Optional[pulumi.Input[_builtins.bool]] = None,
+            validity_days: Optional[pulumi.Input[_builtins.int]] = None) -> 'Certificate':
         """
         Get an existing Certificate resource's state with the given name, id, and optional extra
         properties used to qualify the lookup.
@@ -2158,12 +2453,16 @@ class Certificate(pulumi.CustomResource):
         :param pulumi.Input[_builtins.str] certificate_url: The full URL of the certificate within the ACME CA.
         :param pulumi.Input[_builtins.str] common_name: The certificate's common name, the primary domain that the
                certificate will be recognized for. Forces a new resource when changed.
+        :param pulumi.Input[_builtins.bool] deactivate_authorizations: Controls if authorizations are explicitly
+               deactivated after a certificate has been obtained, preventing their re-use.
+               Default: `true`.
         :param pulumi.Input[_builtins.bool] disable_complete_propagation: Disable the requirement for full
                propagation of the TXT challenge records before proceeding with validation.
                Defaults to `false`.
                
                > See About DNS propagation checks for details
-               on the `recursive_nameservers` and `disable_complete_propagation` settings.
+               on the `recursive_nameservers`, `disable_complete_propagation`, and
+               `propagation_wait` settings.
         :param pulumi.Input[Sequence[pulumi.Input[Union['CertificateDnsChallengeArgs', 'CertificateDnsChallengeArgsDict']]]] dns_challenges: The DNS challenges to
                use in fulfilling the request.
         :param pulumi.Input[Union['CertificateHttpChallengeArgs', 'CertificateHttpChallengeArgsDict']] http_challenge: Defines an HTTP challenge to use in fulfilling
@@ -2185,10 +2484,19 @@ class Certificate(pulumi.CustomResource):
                `8192` (for RSA keys of respective length). Required when not specifying a
                CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
                changed.
+        :param pulumi.Input[_builtins.bool] min_days_dynamic: Derive the renewal threshold from the
+               certificate lifetime instead of a static value. When set, the threshold is
+               set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+               or less. Default: `false.`
+               
+               > `min_days_dynamic` conflicts with `min_days_remaining` - only one may be set
+               at once.
         :param pulumi.Input[_builtins.int] min_days_remaining: The minimum amount of days remaining on the
                expiration of a certificate before a renewal is attempted. The default is
                `30`. A value of less than `0` means that the certificate will never be
                renewed.
+               
+               > `min_days_remaining` must be lower than `validity_days` (if defined).
         :param pulumi.Input[_builtins.bool] must_staple: Enables the [OCSP Stapling Required][ocsp-stapling]
                TLS Security Policy extension. Certificates with this extension must include a
                valid OCSP Staple in the TLS handshake for the connection to succeed.
@@ -2237,6 +2545,13 @@ class Certificate(pulumi.CustomResource):
                
                > Let's Encrypt publishes details on their profiles at
                <https://letsencrypt.org/docs/profiles/>.
+        :param pulumi.Input[_builtins.int] propagation_wait: Disable DNS propagation checks and wait the
+               specified number of seconds before validation proceeds. Defaults to 0 (no
+               wait).
+               
+               > The wait is applied _per-domain_. When `propagation_wait` is set, propagation
+               checks are skipped and `recursive_nameservers` / `disable_complete_propagation`
+               have no effect. `propagation_wait` conflicts with `pre_check_delay`.
         :param pulumi.Input[Sequence[pulumi.Input[_builtins.str]]] recursive_nameservers: The recursive nameservers that will be
                used to check for propagation of DNS challenge records, in addition to some
                in-provider checks such as zone detection. Defaults to your system-configured
@@ -2303,8 +2618,15 @@ class Certificate(pulumi.CustomResource):
                endpoint, renewal behavior will fall back to comparing the certificate expiry
                time with the value in `min_days_remaining`. This means for short-lived
                certificates, you may wish to turn this value down so that the settings do not
-               conflict; however, don't disable it altogether, as this may prevent the
-               certificate from being renewed!
+               conflict, or consider using `min_days_dynamic` instead.
+        :param pulumi.Input[_builtins.int] validity_days: The desired validity duration for the
+               certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+               value triggers a certificate renewal.
+               
+               > Note that not all ACME CAs support user-set certificate durations; most
+               famously, [Let's Encrypt does
+               not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+               Check with your CA to ensure this feature is supported before using it.
         """
         opts = pulumi.ResourceOptions.merge(opts, pulumi.ResourceOptions(id=id))
 
@@ -2314,6 +2636,7 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["cert_timeout"] = cert_timeout
         __props__.__dict__["certificate_domain"] = certificate_domain
         __props__.__dict__["certificate_not_after"] = certificate_not_after
+        __props__.__dict__["certificate_not_before"] = certificate_not_before
         __props__.__dict__["certificate_p12"] = certificate_p12
         __props__.__dict__["certificate_p12_password"] = certificate_p12_password
         __props__.__dict__["certificate_pem"] = certificate_pem
@@ -2321,6 +2644,7 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["certificate_serial"] = certificate_serial
         __props__.__dict__["certificate_url"] = certificate_url
         __props__.__dict__["common_name"] = common_name
+        __props__.__dict__["deactivate_authorizations"] = deactivate_authorizations
         __props__.__dict__["disable_complete_propagation"] = disable_complete_propagation
         __props__.__dict__["dns_challenges"] = dns_challenges
         __props__.__dict__["http_challenge"] = http_challenge
@@ -2329,12 +2653,14 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["http_webroot_challenge"] = http_webroot_challenge
         __props__.__dict__["issuer_pem"] = issuer_pem
         __props__.__dict__["key_type"] = key_type
+        __props__.__dict__["min_days_dynamic"] = min_days_dynamic
         __props__.__dict__["min_days_remaining"] = min_days_remaining
         __props__.__dict__["must_staple"] = must_staple
         __props__.__dict__["pre_check_delay"] = pre_check_delay
         __props__.__dict__["preferred_chain"] = preferred_chain
         __props__.__dict__["private_key_pem"] = private_key_pem
         __props__.__dict__["profile"] = profile
+        __props__.__dict__["propagation_wait"] = propagation_wait
         __props__.__dict__["recursive_nameservers"] = recursive_nameservers
         __props__.__dict__["renewal_info_explanation_url"] = renewal_info_explanation_url
         __props__.__dict__["renewal_info_ignore_retry_after"] = renewal_info_ignore_retry_after
@@ -2348,6 +2674,7 @@ class Certificate(pulumi.CustomResource):
         __props__.__dict__["subject_alternative_names"] = subject_alternative_names
         __props__.__dict__["tls_challenge"] = tls_challenge
         __props__.__dict__["use_renewal_info"] = use_renewal_info
+        __props__.__dict__["validity_days"] = validity_days
         return Certificate(resource_name, opts=opts, __props__=__props__)
 
     @_builtins.property
@@ -2388,6 +2715,11 @@ class Certificate(pulumi.CustomResource):
         RFC3339 format (`2006-01-02T15:04:05Z07:00`).
         """
         return pulumi.get(self, "certificate_not_after")
+
+    @_builtins.property
+    @pulumi.getter(name="certificateNotBefore")
+    def certificate_not_before(self) -> pulumi.Output[_builtins.str]:
+        return pulumi.get(self, "certificate_not_before")
 
     @_builtins.property
     @pulumi.getter(name="certificateP12")
@@ -2467,6 +2799,16 @@ class Certificate(pulumi.CustomResource):
         return pulumi.get(self, "common_name")
 
     @_builtins.property
+    @pulumi.getter(name="deactivateAuthorizations")
+    def deactivate_authorizations(self) -> pulumi.Output[Optional[_builtins.bool]]:
+        """
+        Controls if authorizations are explicitly
+        deactivated after a certificate has been obtained, preventing their re-use.
+        Default: `true`.
+        """
+        return pulumi.get(self, "deactivate_authorizations")
+
+    @_builtins.property
     @pulumi.getter(name="disableCompletePropagation")
     def disable_complete_propagation(self) -> pulumi.Output[Optional[_builtins.bool]]:
         """
@@ -2475,7 +2817,8 @@ class Certificate(pulumi.CustomResource):
         Defaults to `false`.
 
         > See About DNS propagation checks for details
-        on the `recursive_nameservers` and `disable_complete_propagation` settings.
+        on the `recursive_nameservers`, `disable_complete_propagation`, and
+        `propagation_wait` settings.
         """
         return pulumi.get(self, "disable_complete_propagation")
 
@@ -2550,6 +2893,20 @@ class Certificate(pulumi.CustomResource):
         return pulumi.get(self, "key_type")
 
     @_builtins.property
+    @pulumi.getter(name="minDaysDynamic")
+    def min_days_dynamic(self) -> pulumi.Output[Optional[_builtins.bool]]:
+        """
+        Derive the renewal threshold from the
+        certificate lifetime instead of a static value. When set, the threshold is
+        set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+        or less. Default: `false.`
+
+        > `min_days_dynamic` conflicts with `min_days_remaining` - only one may be set
+        at once.
+        """
+        return pulumi.get(self, "min_days_dynamic")
+
+    @_builtins.property
     @pulumi.getter(name="minDaysRemaining")
     def min_days_remaining(self) -> pulumi.Output[Optional[_builtins.int]]:
         """
@@ -2557,6 +2914,8 @@ class Certificate(pulumi.CustomResource):
         expiration of a certificate before a renewal is attempted. The default is
         `30`. A value of less than `0` means that the certificate will never be
         renewed.
+
+        > `min_days_remaining` must be lower than `validity_days` (if defined).
         """
         return pulumi.get(self, "min_days_remaining")
 
@@ -2642,6 +3001,20 @@ class Certificate(pulumi.CustomResource):
         <https://letsencrypt.org/docs/profiles/>.
         """
         return pulumi.get(self, "profile")
+
+    @_builtins.property
+    @pulumi.getter(name="propagationWait")
+    def propagation_wait(self) -> pulumi.Output[Optional[_builtins.int]]:
+        """
+        Disable DNS propagation checks and wait the
+        specified number of seconds before validation proceeds. Defaults to 0 (no
+        wait).
+
+        > The wait is applied _per-domain_. When `propagation_wait` is set, propagation
+        checks are skipped and `recursive_nameservers` / `disable_complete_propagation`
+        have no effect. `propagation_wait` conflicts with `pre_check_delay`.
+        """
+        return pulumi.get(self, "propagation_wait")
 
     @_builtins.property
     @pulumi.getter(name="recursiveNameservers")
@@ -2797,8 +3170,22 @@ class Certificate(pulumi.CustomResource):
         endpoint, renewal behavior will fall back to comparing the certificate expiry
         time with the value in `min_days_remaining`. This means for short-lived
         certificates, you may wish to turn this value down so that the settings do not
-        conflict; however, don't disable it altogether, as this may prevent the
-        certificate from being renewed!
+        conflict, or consider using `min_days_dynamic` instead.
         """
         return pulumi.get(self, "use_renewal_info")
+
+    @_builtins.property
+    @pulumi.getter(name="validityDays")
+    def validity_days(self) -> pulumi.Output[Optional[_builtins.int]]:
+        """
+        The desired validity duration for the
+        certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+        value triggers a certificate renewal.
+
+        > Note that not all ACME CAs support user-set certificate durations; most
+        famously, [Let's Encrypt does
+        not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+        Check with your CA to ensure this feature is supported before using it.
+        """
+        return pulumi.get(self, "validity_days")
 

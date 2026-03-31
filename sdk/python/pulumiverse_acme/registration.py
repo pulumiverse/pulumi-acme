@@ -21,16 +21,15 @@ __all__ = ['RegistrationArgs', 'Registration']
 @pulumi.input_type
 class RegistrationArgs:
     def __init__(__self__, *,
-                 email_address: pulumi.Input[_builtins.str],
                  account_key_algorithm: Optional[pulumi.Input[_builtins.str]] = None,
                  account_key_ecdsa_curve: Optional[pulumi.Input[_builtins.str]] = None,
                  account_key_pem: Optional[pulumi.Input[_builtins.str]] = None,
                  account_key_rsa_bits: Optional[pulumi.Input[_builtins.int]] = None,
+                 email_address: Optional[pulumi.Input[_builtins.str]] = None,
                  external_account_binding: Optional[pulumi.Input['RegistrationExternalAccountBindingArgs']] = None):
         """
         The set of arguments for constructing a Registration resource.
         """
-        pulumi.set(__self__, "email_address", email_address)
         if account_key_algorithm is not None:
             pulumi.set(__self__, "account_key_algorithm", account_key_algorithm)
         if account_key_ecdsa_curve is not None:
@@ -39,17 +38,10 @@ class RegistrationArgs:
             pulumi.set(__self__, "account_key_pem", account_key_pem)
         if account_key_rsa_bits is not None:
             pulumi.set(__self__, "account_key_rsa_bits", account_key_rsa_bits)
+        if email_address is not None:
+            pulumi.set(__self__, "email_address", email_address)
         if external_account_binding is not None:
             pulumi.set(__self__, "external_account_binding", external_account_binding)
-
-    @_builtins.property
-    @pulumi.getter(name="emailAddress")
-    def email_address(self) -> pulumi.Input[_builtins.str]:
-        return pulumi.get(self, "email_address")
-
-    @email_address.setter
-    def email_address(self, value: pulumi.Input[_builtins.str]):
-        pulumi.set(self, "email_address", value)
 
     @_builtins.property
     @pulumi.getter(name="accountKeyAlgorithm")
@@ -86,6 +78,15 @@ class RegistrationArgs:
     @account_key_rsa_bits.setter
     def account_key_rsa_bits(self, value: Optional[pulumi.Input[_builtins.int]]):
         pulumi.set(self, "account_key_rsa_bits", value)
+
+    @_builtins.property
+    @pulumi.getter(name="emailAddress")
+    def email_address(self) -> Optional[pulumi.Input[_builtins.str]]:
+        return pulumi.get(self, "email_address")
+
+    @email_address.setter
+    def email_address(self, value: Optional[pulumi.Input[_builtins.str]]):
+        pulumi.set(self, "email_address", value)
 
     @_builtins.property
     @pulumi.getter(name="externalAccountBinding")
@@ -228,14 +229,14 @@ class Registration(pulumi.CustomResource):
 
         ### Basic Example
 
-        The following is the most basic example, supplying only a contact email address
-        to the resource.
+        The following is the most basic example. In this case, the account private key
+        is managed for you.
 
         ```python
         import pulumi
         import pulumiverse_acme as acme
 
-        reg = acme.Registration("reg", email_address="nobody@example.com")
+        reg = acme.Registration("reg")
         ```
 
         ### Using a Pre-Existing Private Key
@@ -251,9 +252,7 @@ class Registration(pulumi.CustomResource):
         import pulumiverse_acme as acme
 
         private_key = tls.index.PrivateKey("private_key", algorithm=RSA)
-        reg = acme.Registration("reg",
-            account_key_pem=private_key["privateKeyPem"],
-            email_address="nobody@example.com")
+        reg = acme.Registration("reg", account_key_pem=private_key["privateKeyPem"])
         ```
 
         #### Argument Reference
@@ -274,7 +273,15 @@ class Registration(pulumi.CustomResource):
           types. Supported settings: `P256` and `P384`. Default: `P384`.
         * `account_key_rsa_bits` (Optional) - The key length to use for RSA key types.
           Supported settings: `2048`, `3072`, and `4096`. Default: `4096`.
-        * `email_address` (Required) - The contact email address for the account.
+        * `email_address` (Optional) - The contact email address for the account.
+
+        > Note that Let's Encrypt no longer sends expiry emails, and only uses this
+        field for possible email list onboarding (see
+        <https://letsencrypt.org/2025/06/26/expiration-notification-service-has-ended>).
+        As such, it is not recommended to set this field when using Let's Encrypt.
+        Other CAs may or may not require this field - consult the documentation of the
+        CA you are using in this case.
+
         * `external_account_binding` (Optional) - An external account binding for the
           registration, usually used to link the registration with an account in a
           commercial CA. Sub-options are:
@@ -302,7 +309,7 @@ class Registration(pulumi.CustomResource):
     @overload
     def __init__(__self__,
                  resource_name: str,
-                 args: RegistrationArgs,
+                 args: Optional[RegistrationArgs] = None,
                  opts: Optional[pulumi.ResourceOptions] = None):
         """
         ## # Registration
@@ -330,14 +337,14 @@ class Registration(pulumi.CustomResource):
 
         ### Basic Example
 
-        The following is the most basic example, supplying only a contact email address
-        to the resource.
+        The following is the most basic example. In this case, the account private key
+        is managed for you.
 
         ```python
         import pulumi
         import pulumiverse_acme as acme
 
-        reg = acme.Registration("reg", email_address="nobody@example.com")
+        reg = acme.Registration("reg")
         ```
 
         ### Using a Pre-Existing Private Key
@@ -353,9 +360,7 @@ class Registration(pulumi.CustomResource):
         import pulumiverse_acme as acme
 
         private_key = tls.index.PrivateKey("private_key", algorithm=RSA)
-        reg = acme.Registration("reg",
-            account_key_pem=private_key["privateKeyPem"],
-            email_address="nobody@example.com")
+        reg = acme.Registration("reg", account_key_pem=private_key["privateKeyPem"])
         ```
 
         #### Argument Reference
@@ -376,7 +381,15 @@ class Registration(pulumi.CustomResource):
           types. Supported settings: `P256` and `P384`. Default: `P384`.
         * `account_key_rsa_bits` (Optional) - The key length to use for RSA key types.
           Supported settings: `2048`, `3072`, and `4096`. Default: `4096`.
-        * `email_address` (Required) - The contact email address for the account.
+        * `email_address` (Optional) - The contact email address for the account.
+
+        > Note that Let's Encrypt no longer sends expiry emails, and only uses this
+        field for possible email list onboarding (see
+        <https://letsencrypt.org/2025/06/26/expiration-notification-service-has-ended>).
+        As such, it is not recommended to set this field when using Let's Encrypt.
+        Other CAs may or may not require this field - consult the documentation of the
+        CA you are using in this case.
+
         * `external_account_binding` (Optional) - An external account binding for the
           registration, usually used to link the registration with an account in a
           commercial CA. Sub-options are:
@@ -431,8 +444,6 @@ class Registration(pulumi.CustomResource):
             __props__.__dict__["account_key_ecdsa_curve"] = account_key_ecdsa_curve
             __props__.__dict__["account_key_pem"] = None if account_key_pem is None else pulumi.Output.secret(account_key_pem)
             __props__.__dict__["account_key_rsa_bits"] = account_key_rsa_bits
-            if email_address is None and not opts.urn:
-                raise TypeError("Missing required property 'email_address'")
             __props__.__dict__["email_address"] = email_address
             __props__.__dict__["external_account_binding"] = external_account_binding
             __props__.__dict__["registration_url"] = None
@@ -498,7 +509,7 @@ class Registration(pulumi.CustomResource):
 
     @_builtins.property
     @pulumi.getter(name="emailAddress")
-    def email_address(self) -> pulumi.Output[_builtins.str]:
+    def email_address(self) -> pulumi.Output[Optional[_builtins.str]]:
         return pulumi.get(self, "email_address")
 
     @_builtins.property
