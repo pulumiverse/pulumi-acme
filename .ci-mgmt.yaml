@@ -23,6 +23,7 @@ license:
         - github.com/envoyproxy/protoc-gen-validate
         - github.com/go-acme/tencentclouddnspod
         - github.com/go-acme/tencentedgdeone
+        - github.com/nrdcg/vegadns
 pulumiConvert: 1
 github-app:
     enabled: false

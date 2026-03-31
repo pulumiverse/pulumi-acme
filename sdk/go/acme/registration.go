@@ -7,7 +7,6 @@ import (
 	"context"
 	"reflect"
 
-	"errors"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"github.com/pulumiverse/pulumi-acme/sdk/go/acme/internal"
 )
@@ -37,8 +36,8 @@ import (
 //
 // ### Basic Example
 //
-// The following is the most basic example, supplying only a contact email address
-// to the resource.
+// The following is the most basic example. In this case, the account private key
+// is managed for you.
 //
 // ```go
 // package main
@@ -52,9 +51,7 @@ import (
 //
 //	func main() {
 //		pulumi.Run(func(ctx *pulumi.Context) error {
-//			_, err := acme.NewRegistration(ctx, "reg", &acme.RegistrationArgs{
-//				EmailAddress: pulumi.String("nobody@example.com"),
-//			})
+//			_, err := acme.NewRegistration(ctx, "reg", nil)
 //			if err != nil {
 //				return err
 //			}
@@ -90,7 +87,6 @@ import (
 //			}
 //			_, err = acme.NewRegistration(ctx, "reg", &acme.RegistrationArgs{
 //				AccountKeyPem: privateKey.PrivateKeyPem,
-//				EmailAddress:  pulumi.String("nobody@example.com"),
 //			})
 //			if err != nil {
 //				return err
@@ -119,7 +115,15 @@ import (
 //     types. Supported settings: `P256` and `P384`. Default: `P384`.
 //   - `accountKeyRsaBits` (Optional) - The key length to use for RSA key types.
 //     Supported settings: `2048`, `3072`, and `4096`. Default: `4096`.
-//   - `emailAddress` (Required) - The contact email address for the account.
+//   - `emailAddress` (Optional) - The contact email address for the account.
+//
+// > Note that Let's Encrypt no longer sends expiry emails, and only uses this
+// field for possible email list onboarding (see
+// <https://letsencrypt.org/2025/06/26/expiration-notification-service-has-ended>).
+// As such, it is not recommended to set this field when using Let's Encrypt.
+// Other CAs may or may not require this field - consult the documentation of the
+// CA you are using in this case.
+//
 //   - `externalAccountBinding` (Optional) - An external account binding for the
 //     registration, usually used to link the registration with an account in a
 //     commercial CA. Sub-options are:
@@ -147,7 +151,7 @@ type Registration struct {
 	AccountKeyEcdsaCurve   pulumi.StringPtrOutput                      `pulumi:"accountKeyEcdsaCurve"`
 	AccountKeyPem          pulumi.StringOutput                         `pulumi:"accountKeyPem"`
 	AccountKeyRsaBits      pulumi.IntPtrOutput                         `pulumi:"accountKeyRsaBits"`
-	EmailAddress           pulumi.StringOutput                         `pulumi:"emailAddress"`
+	EmailAddress           pulumi.StringPtrOutput                      `pulumi:"emailAddress"`
 	ExternalAccountBinding RegistrationExternalAccountBindingPtrOutput `pulumi:"externalAccountBinding"`
 	RegistrationUrl        pulumi.StringOutput                         `pulumi:"registrationUrl"`
 }
@@ -156,12 +160,9 @@ type Registration struct {
 func NewRegistration(ctx *pulumi.Context,
 	name string, args *RegistrationArgs, opts ...pulumi.ResourceOption) (*Registration, error) {
 	if args == nil {
-		return nil, errors.New("missing one or more required arguments")
+		args = &RegistrationArgs{}
 	}
 
-	if args.EmailAddress == nil {
-		return nil, errors.New("invalid value for required argument 'EmailAddress'")
-	}
 	if args.AccountKeyPem != nil {
 		args.AccountKeyPem = pulumi.ToSecret(args.AccountKeyPem).(pulumi.StringPtrInput)
 	}
@@ -220,7 +221,7 @@ type registrationArgs struct {
 	AccountKeyEcdsaCurve   *string                             `pulumi:"accountKeyEcdsaCurve"`
 	AccountKeyPem          *string                             `pulumi:"accountKeyPem"`
 	AccountKeyRsaBits      *int                                `pulumi:"accountKeyRsaBits"`
-	EmailAddress           string                              `pulumi:"emailAddress"`
+	EmailAddress           *string                             `pulumi:"emailAddress"`
 	ExternalAccountBinding *RegistrationExternalAccountBinding `pulumi:"externalAccountBinding"`
 }
 
@@ -230,7 +231,7 @@ type RegistrationArgs struct {
 	AccountKeyEcdsaCurve   pulumi.StringPtrInput
 	AccountKeyPem          pulumi.StringPtrInput
 	AccountKeyRsaBits      pulumi.IntPtrInput
-	EmailAddress           pulumi.StringInput
+	EmailAddress           pulumi.StringPtrInput
 	ExternalAccountBinding RegistrationExternalAccountBindingPtrInput
 }
 
@@ -337,8 +338,8 @@ func (o RegistrationOutput) AccountKeyRsaBits() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Registration) pulumi.IntPtrOutput { return v.AccountKeyRsaBits }).(pulumi.IntPtrOutput)
 }
 
-func (o RegistrationOutput) EmailAddress() pulumi.StringOutput {
-	return o.ApplyT(func(v *Registration) pulumi.StringOutput { return v.EmailAddress }).(pulumi.StringOutput)
+func (o RegistrationOutput) EmailAddress() pulumi.StringPtrOutput {
+	return o.ApplyT(func(v *Registration) pulumi.StringPtrOutput { return v.EmailAddress }).(pulumi.StringPtrOutput)
 }
 
 func (o RegistrationOutput) ExternalAccountBinding() RegistrationExternalAccountBindingPtrOutput {

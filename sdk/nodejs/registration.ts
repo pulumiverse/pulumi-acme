@@ -32,14 +32,14 @@ import * as utilities from "./utilities";
  *
  * ### Basic Example
  *
- * The following is the most basic example, supplying only a contact email address
- * to the resource.
+ * The following is the most basic example. In this case, the account private key
+ * is managed for you.
  *
  * ```typescript
  * import * as pulumi from "@pulumi/pulumi";
  * import * as acme from "@pulumiverse/acme";
  *
- * const reg = new acme.Registration("reg", {emailAddress: "nobody@example.com"});
+ * const reg = new acme.Registration("reg", {});
  * ```
  *
  * ### Using a Pre-Existing Private Key
@@ -55,10 +55,7 @@ import * as utilities from "./utilities";
  * import * as tls from "@pulumi/tls";
  *
  * const privateKey = new tls.index.PrivateKey("private_key", {algorithm: "RSA"});
- * const reg = new acme.Registration("reg", {
- *     accountKeyPem: privateKey.privateKeyPem,
- *     emailAddress: "nobody@example.com",
- * });
+ * const reg = new acme.Registration("reg", {accountKeyPem: privateKey.privateKeyPem});
  * ```
  *
  * #### Argument Reference
@@ -79,7 +76,15 @@ import * as utilities from "./utilities";
  *   types. Supported settings: `P256` and `P384`. Default: `P384`.
  * * `accountKeyRsaBits` (Optional) - The key length to use for RSA key types.
  *   Supported settings: `2048`, `3072`, and `4096`. Default: `4096`.
- * * `emailAddress` (Required) - The contact email address for the account.
+ * * `emailAddress` (Optional) - The contact email address for the account.
+ *
+ * > Note that Let's Encrypt no longer sends expiry emails, and only uses this
+ * field for possible email list onboarding (see
+ * <https://letsencrypt.org/2025/06/26/expiration-notification-service-has-ended>).
+ * As such, it is not recommended to set this field when using Let's Encrypt.
+ * Other CAs may or may not require this field - consult the documentation of the
+ * CA you are using in this case.
+ *
  * * `externalAccountBinding` (Optional) - An external account binding for the
  *   registration, usually used to link the registration with an account in a
  *   commercial CA. Sub-options are:
@@ -131,7 +136,7 @@ export class Registration extends pulumi.CustomResource {
     declare public readonly accountKeyEcdsaCurve: pulumi.Output<string | undefined>;
     declare public readonly accountKeyPem: pulumi.Output<string>;
     declare public readonly accountKeyRsaBits: pulumi.Output<number | undefined>;
-    declare public readonly emailAddress: pulumi.Output<string>;
+    declare public readonly emailAddress: pulumi.Output<string | undefined>;
     declare public readonly externalAccountBinding: pulumi.Output<outputs.RegistrationExternalAccountBinding | undefined>;
     declare public /*out*/ readonly registrationUrl: pulumi.Output<string>;
 
@@ -142,7 +147,7 @@ export class Registration extends pulumi.CustomResource {
      * @param args The arguments to use to populate this resource's properties.
      * @param opts A bag of options that control this resource's behavior.
      */
-    constructor(name: string, args: RegistrationArgs, opts?: pulumi.CustomResourceOptions)
+    constructor(name: string, args?: RegistrationArgs, opts?: pulumi.CustomResourceOptions)
     constructor(name: string, argsOrState?: RegistrationArgs | RegistrationState, opts?: pulumi.CustomResourceOptions) {
         let resourceInputs: pulumi.Inputs = {};
         opts = opts || {};
@@ -157,9 +162,6 @@ export class Registration extends pulumi.CustomResource {
             resourceInputs["registrationUrl"] = state?.registrationUrl;
         } else {
             const args = argsOrState as RegistrationArgs | undefined;
-            if (args?.emailAddress === undefined && !opts.urn) {
-                throw new Error("Missing required property 'emailAddress'");
-            }
             resourceInputs["accountKeyAlgorithm"] = args?.accountKeyAlgorithm;
             resourceInputs["accountKeyEcdsaCurve"] = args?.accountKeyEcdsaCurve;
             resourceInputs["accountKeyPem"] = args?.accountKeyPem ? pulumi.secret(args.accountKeyPem) : undefined;
@@ -196,6 +198,6 @@ export interface RegistrationArgs {
     accountKeyEcdsaCurve?: pulumi.Input<string>;
     accountKeyPem?: pulumi.Input<string>;
     accountKeyRsaBits?: pulumi.Input<number>;
-    emailAddress: pulumi.Input<string>;
+    emailAddress?: pulumi.Input<string>;
     externalAccountBinding?: pulumi.Input<inputs.RegistrationExternalAccountBinding>;
 }

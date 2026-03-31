@@ -159,6 +159,15 @@ import (
 // Note that a value less than `0` supplied to `minDaysRemaining` will cause
 // renewal checks to be bypassed, and the certificate will never renew.
 //
+// ### Dynamic renewal
+//
+// When working with short certificate lifetimes (possibly set using
+// `validityDays`, or via short-lifetime ACME profiles), or
+// utilizing ARI using `useRenewalInfo`, you may find it
+// easier to use `minDaysDynamic` instead. When using this
+// over `minDaysRemaining`, the certificate renewal threshold is automatically
+// set to 1/3 of its lifetime, or 1/2 if the lifetime is 10 days or less.
+//
 // [tls-cert-request]: https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/cert_request
 type Certificate struct {
 	pulumi.CustomResourceState
@@ -177,7 +186,8 @@ type Certificate struct {
 	CertificateDomain pulumi.StringOutput `pulumi:"certificateDomain"`
 	// The expiry date of the certificate, laid out in
 	// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
-	CertificateNotAfter pulumi.StringOutput `pulumi:"certificateNotAfter"`
+	CertificateNotAfter  pulumi.StringOutput `pulumi:"certificateNotAfter"`
+	CertificateNotBefore pulumi.StringOutput `pulumi:"certificateNotBefore"`
 	// The certificate, any intermediates, and the private key
 	// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
 	// The data is base64 encoded (including padding), and its password is
@@ -213,12 +223,17 @@ type Certificate struct {
 	// The certificate's common name, the primary domain that the
 	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName pulumi.StringPtrOutput `pulumi:"commonName"`
+	// Controls if authorizations are explicitly
+	// deactivated after a certificate has been obtained, preventing their re-use.
+	// Default: `true`.
+	DeactivateAuthorizations pulumi.BoolPtrOutput `pulumi:"deactivateAuthorizations"`
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
 	// Defaults to `false`.
 	//
 	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers` and `disableCompletePropagation` settings.
+	// on the `recursiveNameservers`, `disableCompletePropagation`, and
+	// `propagationWait` settings.
 	DisableCompletePropagation pulumi.BoolPtrOutput `pulumi:"disableCompletePropagation"`
 	// The DNS challenges to
 	// use in fulfilling the request.
@@ -248,10 +263,20 @@ type Certificate struct {
 	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
 	// changed.
 	KeyType pulumi.StringPtrOutput `pulumi:"keyType"`
+	// Derive the renewal threshold from the
+	// certificate lifetime instead of a static value. When set, the threshold is
+	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+	// or less. Default: `false.`
+	//
+	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
+	// at once.
+	MinDaysDynamic pulumi.BoolPtrOutput `pulumi:"minDaysDynamic"`
 	// The minimum amount of days remaining on the
 	// expiration of a certificate before a renewal is attempted. The default is
 	// `30`. A value of less than `0` means that the certificate will never be
 	// renewed.
+	//
+	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
 	MinDaysRemaining pulumi.IntPtrOutput `pulumi:"minDaysRemaining"`
 	// Enables the [OCSP Stapling Required][ocsp-stapling]
 	// TLS Security Policy extension. Certificates with this extension must include a
@@ -306,6 +331,14 @@ type Certificate struct {
 	// > Let's Encrypt publishes details on their profiles at
 	// <https://letsencrypt.org/docs/profiles/>.
 	Profile pulumi.StringPtrOutput `pulumi:"profile"`
+	// Disable DNS propagation checks and wait the
+	// specified number of seconds before validation proceeds. Defaults to 0 (no
+	// wait).
+	//
+	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
+	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
+	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
+	PropagationWait pulumi.IntPtrOutput `pulumi:"propagationWait"`
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -384,9 +417,17 @@ type Certificate struct {
 	// endpoint, renewal behavior will fall back to comparing the certificate expiry
 	// time with the value in `minDaysRemaining`. This means for short-lived
 	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict; however, don't disable it altogether, as this may prevent the
-	// certificate from being renewed!
+	// conflict, or consider using `minDaysDynamic` instead.
 	UseRenewalInfo pulumi.BoolPtrOutput `pulumi:"useRenewalInfo"`
+	// The desired validity duration for the
+	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+	// value triggers a certificate renewal.
+	//
+	// > Note that not all ACME CAs support user-set certificate durations; most
+	// famously, [Let's Encrypt does
+	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+	// Check with your CA to ensure this feature is supported before using it.
+	ValidityDays pulumi.IntPtrOutput `pulumi:"validityDays"`
 }
 
 // NewCertificate registers a new resource with the given unique name, arguments, and options.
@@ -449,7 +490,8 @@ type certificateState struct {
 	CertificateDomain *string `pulumi:"certificateDomain"`
 	// The expiry date of the certificate, laid out in
 	// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
-	CertificateNotAfter *string `pulumi:"certificateNotAfter"`
+	CertificateNotAfter  *string `pulumi:"certificateNotAfter"`
+	CertificateNotBefore *string `pulumi:"certificateNotBefore"`
 	// The certificate, any intermediates, and the private key
 	// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
 	// The data is base64 encoded (including padding), and its password is
@@ -485,12 +527,17 @@ type certificateState struct {
 	// The certificate's common name, the primary domain that the
 	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName *string `pulumi:"commonName"`
+	// Controls if authorizations are explicitly
+	// deactivated after a certificate has been obtained, preventing their re-use.
+	// Default: `true`.
+	DeactivateAuthorizations *bool `pulumi:"deactivateAuthorizations"`
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
 	// Defaults to `false`.
 	//
 	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers` and `disableCompletePropagation` settings.
+	// on the `recursiveNameservers`, `disableCompletePropagation`, and
+	// `propagationWait` settings.
 	DisableCompletePropagation *bool `pulumi:"disableCompletePropagation"`
 	// The DNS challenges to
 	// use in fulfilling the request.
@@ -520,10 +567,20 @@ type certificateState struct {
 	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
 	// changed.
 	KeyType *string `pulumi:"keyType"`
+	// Derive the renewal threshold from the
+	// certificate lifetime instead of a static value. When set, the threshold is
+	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+	// or less. Default: `false.`
+	//
+	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
+	// at once.
+	MinDaysDynamic *bool `pulumi:"minDaysDynamic"`
 	// The minimum amount of days remaining on the
 	// expiration of a certificate before a renewal is attempted. The default is
 	// `30`. A value of less than `0` means that the certificate will never be
 	// renewed.
+	//
+	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
 	MinDaysRemaining *int `pulumi:"minDaysRemaining"`
 	// Enables the [OCSP Stapling Required][ocsp-stapling]
 	// TLS Security Policy extension. Certificates with this extension must include a
@@ -578,6 +635,14 @@ type certificateState struct {
 	// > Let's Encrypt publishes details on their profiles at
 	// <https://letsencrypt.org/docs/profiles/>.
 	Profile *string `pulumi:"profile"`
+	// Disable DNS propagation checks and wait the
+	// specified number of seconds before validation proceeds. Defaults to 0 (no
+	// wait).
+	//
+	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
+	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
+	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
+	PropagationWait *int `pulumi:"propagationWait"`
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -656,9 +721,17 @@ type certificateState struct {
 	// endpoint, renewal behavior will fall back to comparing the certificate expiry
 	// time with the value in `minDaysRemaining`. This means for short-lived
 	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict; however, don't disable it altogether, as this may prevent the
-	// certificate from being renewed!
+	// conflict, or consider using `minDaysDynamic` instead.
 	UseRenewalInfo *bool `pulumi:"useRenewalInfo"`
+	// The desired validity duration for the
+	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+	// value triggers a certificate renewal.
+	//
+	// > Note that not all ACME CAs support user-set certificate durations; most
+	// famously, [Let's Encrypt does
+	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+	// Check with your CA to ensure this feature is supported before using it.
+	ValidityDays *int `pulumi:"validityDays"`
 }
 
 type CertificateState struct {
@@ -676,7 +749,8 @@ type CertificateState struct {
 	CertificateDomain pulumi.StringPtrInput
 	// The expiry date of the certificate, laid out in
 	// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
-	CertificateNotAfter pulumi.StringPtrInput
+	CertificateNotAfter  pulumi.StringPtrInput
+	CertificateNotBefore pulumi.StringPtrInput
 	// The certificate, any intermediates, and the private key
 	// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
 	// The data is base64 encoded (including padding), and its password is
@@ -712,12 +786,17 @@ type CertificateState struct {
 	// The certificate's common name, the primary domain that the
 	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName pulumi.StringPtrInput
+	// Controls if authorizations are explicitly
+	// deactivated after a certificate has been obtained, preventing their re-use.
+	// Default: `true`.
+	DeactivateAuthorizations pulumi.BoolPtrInput
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
 	// Defaults to `false`.
 	//
 	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers` and `disableCompletePropagation` settings.
+	// on the `recursiveNameservers`, `disableCompletePropagation`, and
+	// `propagationWait` settings.
 	DisableCompletePropagation pulumi.BoolPtrInput
 	// The DNS challenges to
 	// use in fulfilling the request.
@@ -747,10 +826,20 @@ type CertificateState struct {
 	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
 	// changed.
 	KeyType pulumi.StringPtrInput
+	// Derive the renewal threshold from the
+	// certificate lifetime instead of a static value. When set, the threshold is
+	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+	// or less. Default: `false.`
+	//
+	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
+	// at once.
+	MinDaysDynamic pulumi.BoolPtrInput
 	// The minimum amount of days remaining on the
 	// expiration of a certificate before a renewal is attempted. The default is
 	// `30`. A value of less than `0` means that the certificate will never be
 	// renewed.
+	//
+	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
 	MinDaysRemaining pulumi.IntPtrInput
 	// Enables the [OCSP Stapling Required][ocsp-stapling]
 	// TLS Security Policy extension. Certificates with this extension must include a
@@ -805,6 +894,14 @@ type CertificateState struct {
 	// > Let's Encrypt publishes details on their profiles at
 	// <https://letsencrypt.org/docs/profiles/>.
 	Profile pulumi.StringPtrInput
+	// Disable DNS propagation checks and wait the
+	// specified number of seconds before validation proceeds. Defaults to 0 (no
+	// wait).
+	//
+	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
+	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
+	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
+	PropagationWait pulumi.IntPtrInput
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -883,9 +980,17 @@ type CertificateState struct {
 	// endpoint, renewal behavior will fall back to comparing the certificate expiry
 	// time with the value in `minDaysRemaining`. This means for short-lived
 	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict; however, don't disable it altogether, as this may prevent the
-	// certificate from being renewed!
+	// conflict, or consider using `minDaysDynamic` instead.
 	UseRenewalInfo pulumi.BoolPtrInput
+	// The desired validity duration for the
+	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+	// value triggers a certificate renewal.
+	//
+	// > Note that not all ACME CAs support user-set certificate durations; most
+	// famously, [Let's Encrypt does
+	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+	// Check with your CA to ensure this feature is supported before using it.
+	ValidityDays pulumi.IntPtrInput
 }
 
 func (CertificateState) ElementType() reflect.Type {
@@ -923,12 +1028,17 @@ type certificateArgs struct {
 	// The certificate's common name, the primary domain that the
 	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName *string `pulumi:"commonName"`
+	// Controls if authorizations are explicitly
+	// deactivated after a certificate has been obtained, preventing their re-use.
+	// Default: `true`.
+	DeactivateAuthorizations *bool `pulumi:"deactivateAuthorizations"`
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
 	// Defaults to `false`.
 	//
 	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers` and `disableCompletePropagation` settings.
+	// on the `recursiveNameservers`, `disableCompletePropagation`, and
+	// `propagationWait` settings.
 	DisableCompletePropagation *bool `pulumi:"disableCompletePropagation"`
 	// The DNS challenges to
 	// use in fulfilling the request.
@@ -954,10 +1064,20 @@ type certificateArgs struct {
 	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
 	// changed.
 	KeyType *string `pulumi:"keyType"`
+	// Derive the renewal threshold from the
+	// certificate lifetime instead of a static value. When set, the threshold is
+	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+	// or less. Default: `false.`
+	//
+	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
+	// at once.
+	MinDaysDynamic *bool `pulumi:"minDaysDynamic"`
 	// The minimum amount of days remaining on the
 	// expiration of a certificate before a renewal is attempted. The default is
 	// `30`. A value of less than `0` means that the certificate will never be
 	// renewed.
+	//
+	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
 	MinDaysRemaining *int `pulumi:"minDaysRemaining"`
 	// Enables the [OCSP Stapling Required][ocsp-stapling]
 	// TLS Security Policy extension. Certificates with this extension must include a
@@ -1007,6 +1127,14 @@ type certificateArgs struct {
 	// > Let's Encrypt publishes details on their profiles at
 	// <https://letsencrypt.org/docs/profiles/>.
 	Profile *string `pulumi:"profile"`
+	// Disable DNS propagation checks and wait the
+	// specified number of seconds before validation proceeds. Defaults to 0 (no
+	// wait).
+	//
+	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
+	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
+	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
+	PropagationWait *int `pulumi:"propagationWait"`
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -1068,9 +1196,17 @@ type certificateArgs struct {
 	// endpoint, renewal behavior will fall back to comparing the certificate expiry
 	// time with the value in `minDaysRemaining`. This means for short-lived
 	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict; however, don't disable it altogether, as this may prevent the
-	// certificate from being renewed!
+	// conflict, or consider using `minDaysDynamic` instead.
 	UseRenewalInfo *bool `pulumi:"useRenewalInfo"`
+	// The desired validity duration for the
+	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+	// value triggers a certificate renewal.
+	//
+	// > Note that not all ACME CAs support user-set certificate durations; most
+	// famously, [Let's Encrypt does
+	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+	// Check with your CA to ensure this feature is supported before using it.
+	ValidityDays *int `pulumi:"validityDays"`
 }
 
 // The set of arguments for constructing a Certificate resource.
@@ -1105,12 +1241,17 @@ type CertificateArgs struct {
 	// The certificate's common name, the primary domain that the
 	// certificate will be recognized for. Forces a new resource when changed.
 	CommonName pulumi.StringPtrInput
+	// Controls if authorizations are explicitly
+	// deactivated after a certificate has been obtained, preventing their re-use.
+	// Default: `true`.
+	DeactivateAuthorizations pulumi.BoolPtrInput
 	// Disable the requirement for full
 	// propagation of the TXT challenge records before proceeding with validation.
 	// Defaults to `false`.
 	//
 	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers` and `disableCompletePropagation` settings.
+	// on the `recursiveNameservers`, `disableCompletePropagation`, and
+	// `propagationWait` settings.
 	DisableCompletePropagation pulumi.BoolPtrInput
 	// The DNS challenges to
 	// use in fulfilling the request.
@@ -1136,10 +1277,20 @@ type CertificateArgs struct {
 	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
 	// changed.
 	KeyType pulumi.StringPtrInput
+	// Derive the renewal threshold from the
+	// certificate lifetime instead of a static value. When set, the threshold is
+	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+	// or less. Default: `false.`
+	//
+	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
+	// at once.
+	MinDaysDynamic pulumi.BoolPtrInput
 	// The minimum amount of days remaining on the
 	// expiration of a certificate before a renewal is attempted. The default is
 	// `30`. A value of less than `0` means that the certificate will never be
 	// renewed.
+	//
+	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
 	MinDaysRemaining pulumi.IntPtrInput
 	// Enables the [OCSP Stapling Required][ocsp-stapling]
 	// TLS Security Policy extension. Certificates with this extension must include a
@@ -1189,6 +1340,14 @@ type CertificateArgs struct {
 	// > Let's Encrypt publishes details on their profiles at
 	// <https://letsencrypt.org/docs/profiles/>.
 	Profile pulumi.StringPtrInput
+	// Disable DNS propagation checks and wait the
+	// specified number of seconds before validation proceeds. Defaults to 0 (no
+	// wait).
+	//
+	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
+	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
+	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
+	PropagationWait pulumi.IntPtrInput
 	// The recursive nameservers that will be
 	// used to check for propagation of DNS challenge records, in addition to some
 	// in-provider checks such as zone detection. Defaults to your system-configured
@@ -1250,9 +1409,17 @@ type CertificateArgs struct {
 	// endpoint, renewal behavior will fall back to comparing the certificate expiry
 	// time with the value in `minDaysRemaining`. This means for short-lived
 	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict; however, don't disable it altogether, as this may prevent the
-	// certificate from being renewed!
+	// conflict, or consider using `minDaysDynamic` instead.
 	UseRenewalInfo pulumi.BoolPtrInput
+	// The desired validity duration for the
+	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+	// value triggers a certificate renewal.
+	//
+	// > Note that not all ACME CAs support user-set certificate durations; most
+	// famously, [Let's Encrypt does
+	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+	// Check with your CA to ensure this feature is supported before using it.
+	ValidityDays pulumi.IntPtrInput
 }
 
 func (CertificateArgs) ElementType() reflect.Type {
@@ -1369,6 +1536,10 @@ func (o CertificateOutput) CertificateNotAfter() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateNotAfter }).(pulumi.StringOutput)
 }
 
+func (o CertificateOutput) CertificateNotBefore() pulumi.StringOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateNotBefore }).(pulumi.StringOutput)
+}
+
 // The certificate, any intermediates, and the private key
 // archived as a PFX file (PKCS12 format, generally used by Microsoft products).
 // The data is base64 encoded (including padding), and its password is
@@ -1425,12 +1596,20 @@ func (o CertificateOutput) CommonName() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.CommonName }).(pulumi.StringPtrOutput)
 }
 
+// Controls if authorizations are explicitly
+// deactivated after a certificate has been obtained, preventing their re-use.
+// Default: `true`.
+func (o CertificateOutput) DeactivateAuthorizations() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.DeactivateAuthorizations }).(pulumi.BoolPtrOutput)
+}
+
 // Disable the requirement for full
 // propagation of the TXT challenge records before proceeding with validation.
 // Defaults to `false`.
 //
 // > See About DNS propagation checks for details
-// on the `recursiveNameservers` and `disableCompletePropagation` settings.
+// on the `recursiveNameservers`, `disableCompletePropagation`, and
+// `propagationWait` settings.
 func (o CertificateOutput) DisableCompletePropagation() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.DisableCompletePropagation }).(pulumi.BoolPtrOutput)
 }
@@ -1484,10 +1663,23 @@ func (o CertificateOutput) KeyType() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.KeyType }).(pulumi.StringPtrOutput)
 }
 
+// Derive the renewal threshold from the
+// certificate lifetime instead of a static value. When set, the threshold is
+// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+// or less. Default: `false.`
+//
+// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
+// at once.
+func (o CertificateOutput) MinDaysDynamic() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.MinDaysDynamic }).(pulumi.BoolPtrOutput)
+}
+
 // The minimum amount of days remaining on the
 // expiration of a certificate before a renewal is attempted. The default is
 // `30`. A value of less than `0` means that the certificate will never be
 // renewed.
+//
+// > `minDaysRemaining` must be lower than `validityDays` (if defined).
 func (o CertificateOutput) MinDaysRemaining() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.MinDaysRemaining }).(pulumi.IntPtrOutput)
 }
@@ -1558,6 +1750,17 @@ func (o CertificateOutput) PrivateKeyPem() pulumi.StringOutput {
 // <https://letsencrypt.org/docs/profiles/>.
 func (o CertificateOutput) Profile() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.Profile }).(pulumi.StringPtrOutput)
+}
+
+// Disable DNS propagation checks and wait the
+// specified number of seconds before validation proceeds. Defaults to 0 (no
+// wait).
+//
+// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
+// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
+// have no effect. `propagationWait` conflicts with `preCheckDelay`.
+func (o CertificateOutput) PropagationWait() pulumi.IntPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.PropagationWait }).(pulumi.IntPtrOutput)
 }
 
 // The recursive nameservers that will be
@@ -1674,10 +1877,21 @@ func (o CertificateOutput) TlsChallenge() CertificateTlsChallengePtrOutput {
 // endpoint, renewal behavior will fall back to comparing the certificate expiry
 // time with the value in `minDaysRemaining`. This means for short-lived
 // certificates, you may wish to turn this value down so that the settings do not
-// conflict; however, don't disable it altogether, as this may prevent the
-// certificate from being renewed!
+// conflict, or consider using `minDaysDynamic` instead.
 func (o CertificateOutput) UseRenewalInfo() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.UseRenewalInfo }).(pulumi.BoolPtrOutput)
+}
+
+// The desired validity duration for the
+// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+// value triggers a certificate renewal.
+//
+// > Note that not all ACME CAs support user-set certificate durations; most
+// famously, [Let's Encrypt does
+// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+// Check with your CA to ensure this feature is supported before using it.
+func (o CertificateOutput) ValidityDays() pulumi.IntPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.ValidityDays }).(pulumi.IntPtrOutput)
 }
 
 type CertificateArrayOutput struct{ *pulumi.OutputState }

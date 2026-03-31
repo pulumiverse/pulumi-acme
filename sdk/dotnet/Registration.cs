@@ -36,8 +36,8 @@ namespace Pulumiverse.Acme
     /// 
     /// ### Basic Example
     /// 
-    /// The following is the most basic example, supplying only a contact email address
-    /// to the resource.
+    /// The following is the most basic example. In this case, the account private key
+    /// is managed for you.
     /// 
     /// ```csharp
     /// using System.Collections.Generic;
@@ -47,10 +47,7 @@ namespace Pulumiverse.Acme
     /// 
     /// return await Deployment.RunAsync(() =&gt; 
     /// {
-    ///     var reg = new Acme.Registration("reg", new()
-    ///     {
-    ///         EmailAddress = "nobody@example.com",
-    ///     });
+    ///     var reg = new Acme.Registration("reg");
     /// 
     /// });
     /// ```
@@ -79,7 +76,6 @@ namespace Pulumiverse.Acme
     ///     var reg = new Acme.Registration("reg", new()
     ///     {
     ///         AccountKeyPem = privateKey.PrivateKeyPem,
-    ///         EmailAddress = "nobody@example.com",
     ///     });
     /// 
     /// });
@@ -103,7 +99,15 @@ namespace Pulumiverse.Acme
     ///   types. Supported settings: `P256` and `P384`. Default: `P384`.
     /// * `AccountKeyRsaBits` (Optional) - The key length to use for RSA key types.
     ///   Supported settings: `2048`, `3072`, and `4096`. Default: `4096`.
-    /// * `EmailAddress` (Required) - The contact email address for the account.
+    /// * `EmailAddress` (Optional) - The contact email address for the account.
+    /// 
+    /// &gt; Note that Let's Encrypt no longer sends expiry emails, and only uses this
+    /// field for possible email list onboarding (see
+    /// &lt;https://letsencrypt.org/2025/06/26/expiration-notification-service-has-ended&gt;).
+    /// As such, it is not recommended to set this field when using Let's Encrypt.
+    /// Other CAs may or may not require this field - consult the documentation of the
+    /// CA you are using in this case.
+    /// 
     /// * `ExternalAccountBinding` (Optional) - An external account binding for the
     ///   registration, usually used to link the registration with an account in a
     ///   commercial CA. Sub-options are:
@@ -139,7 +143,7 @@ namespace Pulumiverse.Acme
         public Output<int?> AccountKeyRsaBits { get; private set; } = null!;
 
         [Output("emailAddress")]
-        public Output<string> EmailAddress { get; private set; } = null!;
+        public Output<string?> EmailAddress { get; private set; } = null!;
 
         [Output("externalAccountBinding")]
         public Output<Outputs.RegistrationExternalAccountBinding?> ExternalAccountBinding { get; private set; } = null!;
@@ -155,7 +159,7 @@ namespace Pulumiverse.Acme
         /// <param name="name">The unique name of the resource</param>
         /// <param name="args">The arguments used to populate this resource's properties</param>
         /// <param name="options">A bag of options that control this resource's behavior</param>
-        public Registration(string name, RegistrationArgs args, CustomResourceOptions? options = null)
+        public Registration(string name, RegistrationArgs? args = null, CustomResourceOptions? options = null)
             : base("acme:index/registration:Registration", name, args ?? new RegistrationArgs(), MakeResourceOptions(options, ""))
         {
         }
@@ -219,8 +223,8 @@ namespace Pulumiverse.Acme
         [Input("accountKeyRsaBits")]
         public Input<int>? AccountKeyRsaBits { get; set; }
 
-        [Input("emailAddress", required: true)]
-        public Input<string> EmailAddress { get; set; } = null!;
+        [Input("emailAddress")]
+        public Input<string>? EmailAddress { get; set; }
 
         [Input("externalAccountBinding")]
         public Input<Inputs.RegistrationExternalAccountBindingArgs>? ExternalAccountBinding { get; set; }

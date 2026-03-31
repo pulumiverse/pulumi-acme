@@ -147,6 +147,15 @@ namespace Pulumiverse.Acme
     /// 
     /// Note that a value less than `0` supplied to `MinDaysRemaining` will cause
     /// renewal checks to be bypassed, and the certificate will never renew.
+    /// 
+    /// ### Dynamic renewal
+    /// 
+    /// When working with short certificate lifetimes (possibly set using
+    /// `ValidityDays`, or via short-lifetime ACME profiles), or
+    /// utilizing ARI using `UseRenewalInfo`, you may find it
+    /// easier to use `MinDaysDynamic` instead. When using this
+    /// over `MinDaysRemaining`, the certificate renewal threshold is automatically
+    /// set to 1/3 of its lifetime, or 1/2 if the lifetime is 10 days or less.
     /// </summary>
     [AcmeResourceType("acme:index/certificate:Certificate")]
     public partial class Certificate : global::Pulumi.CustomResource
@@ -181,6 +190,9 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Output("certificateNotAfter")]
         public Output<string> CertificateNotAfter { get; private set; } = null!;
+
+        [Output("certificateNotBefore")]
+        public Output<string> CertificateNotBefore { get; private set; } = null!;
 
         /// <summary>
         /// The certificate, any intermediates, and the private key
@@ -246,12 +258,21 @@ namespace Pulumiverse.Acme
         public Output<string?> CommonName { get; private set; } = null!;
 
         /// <summary>
+        /// Controls if authorizations are explicitly
+        /// deactivated after a certificate has been obtained, preventing their re-use.
+        /// Default: `True`.
+        /// </summary>
+        [Output("deactivateAuthorizations")]
+        public Output<bool?> DeactivateAuthorizations { get; private set; } = null!;
+
+        /// <summary>
         /// Disable the requirement for full
         /// propagation of the TXT challenge records before proceeding with validation.
         /// Defaults to `False`.
         /// 
         /// &gt; See About DNS propagation checks for details
-        /// on the `RecursiveNameservers` and `DisableCompletePropagation` settings.
+        /// on the `RecursiveNameservers`, `DisableCompletePropagation`, and
+        /// `PropagationWait` settings.
         /// </summary>
         [Output("disableCompletePropagation")]
         public Output<bool?> DisableCompletePropagation { get; private set; } = null!;
@@ -313,10 +334,24 @@ namespace Pulumiverse.Acme
         public Output<string?> KeyType { get; private set; } = null!;
 
         /// <summary>
+        /// Derive the renewal threshold from the
+        /// certificate lifetime instead of a static value. When set, the threshold is
+        /// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+        /// or less. Default: `false.`
+        /// 
+        /// &gt; `MinDaysDynamic` conflicts with `MinDaysRemaining` - only one may be set
+        /// at once.
+        /// </summary>
+        [Output("minDaysDynamic")]
+        public Output<bool?> MinDaysDynamic { get; private set; } = null!;
+
+        /// <summary>
         /// The minimum amount of days remaining on the
         /// expiration of a certificate before a renewal is attempted. The default is
         /// `30`. A value of less than `0` means that the certificate will never be
         /// renewed.
+        /// 
+        /// &gt; `MinDaysRemaining` must be lower than `ValidityDays` (if defined).
         /// </summary>
         [Output("minDaysRemaining")]
         public Output<int?> MinDaysRemaining { get; private set; } = null!;
@@ -393,6 +428,18 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Output("profile")]
         public Output<string?> Profile { get; private set; } = null!;
+
+        /// <summary>
+        /// Disable DNS propagation checks and wait the
+        /// specified number of seconds before validation proceeds. Defaults to 0 (no
+        /// wait).
+        /// 
+        /// &gt; The wait is applied _per-domain_. When `PropagationWait` is set, propagation
+        /// checks are skipped and `RecursiveNameservers` / `DisableCompletePropagation`
+        /// have no effect. `PropagationWait` conflicts with `PreCheckDelay`.
+        /// </summary>
+        [Output("propagationWait")]
+        public Output<int?> PropagationWait { get; private set; } = null!;
 
         /// <summary>
         /// The recursive nameservers that will be
@@ -521,11 +568,23 @@ namespace Pulumiverse.Acme
         /// endpoint, renewal behavior will fall back to comparing the certificate expiry
         /// time with the value in `MinDaysRemaining`. This means for short-lived
         /// certificates, you may wish to turn this value down so that the settings do not
-        /// conflict; however, don't disable it altogether, as this may prevent the
-        /// certificate from being renewed!
+        /// conflict, or consider using `MinDaysDynamic` instead.
         /// </summary>
         [Output("useRenewalInfo")]
         public Output<bool?> UseRenewalInfo { get; private set; } = null!;
+
+        /// <summary>
+        /// The desired validity duration for the
+        /// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+        /// value triggers a certificate renewal.
+        /// 
+        /// &gt; Note that not all ACME CAs support user-set certificate durations; most
+        /// famously, [Let's Encrypt does
+        /// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+        /// Check with your CA to ensure this feature is supported before using it.
+        /// </summary>
+        [Output("validityDays")]
+        public Output<int?> ValidityDays { get; private set; } = null!;
 
 
         /// <summary>
@@ -652,12 +711,21 @@ namespace Pulumiverse.Acme
         public Input<string>? CommonName { get; set; }
 
         /// <summary>
+        /// Controls if authorizations are explicitly
+        /// deactivated after a certificate has been obtained, preventing their re-use.
+        /// Default: `True`.
+        /// </summary>
+        [Input("deactivateAuthorizations")]
+        public Input<bool>? DeactivateAuthorizations { get; set; }
+
+        /// <summary>
         /// Disable the requirement for full
         /// propagation of the TXT challenge records before proceeding with validation.
         /// Defaults to `False`.
         /// 
         /// &gt; See About DNS propagation checks for details
-        /// on the `RecursiveNameservers` and `DisableCompletePropagation` settings.
+        /// on the `RecursiveNameservers`, `DisableCompletePropagation`, and
+        /// `PropagationWait` settings.
         /// </summary>
         [Input("disableCompletePropagation")]
         public Input<bool>? DisableCompletePropagation { get; set; }
@@ -717,10 +785,24 @@ namespace Pulumiverse.Acme
         public Input<string>? KeyType { get; set; }
 
         /// <summary>
+        /// Derive the renewal threshold from the
+        /// certificate lifetime instead of a static value. When set, the threshold is
+        /// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+        /// or less. Default: `false.`
+        /// 
+        /// &gt; `MinDaysDynamic` conflicts with `MinDaysRemaining` - only one may be set
+        /// at once.
+        /// </summary>
+        [Input("minDaysDynamic")]
+        public Input<bool>? MinDaysDynamic { get; set; }
+
+        /// <summary>
         /// The minimum amount of days remaining on the
         /// expiration of a certificate before a renewal is attempted. The default is
         /// `30`. A value of less than `0` means that the certificate will never be
         /// renewed.
+        /// 
+        /// &gt; `MinDaysRemaining` must be lower than `ValidityDays` (if defined).
         /// </summary>
         [Input("minDaysRemaining")]
         public Input<int>? MinDaysRemaining { get; set; }
@@ -788,6 +870,18 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("profile")]
         public Input<string>? Profile { get; set; }
+
+        /// <summary>
+        /// Disable DNS propagation checks and wait the
+        /// specified number of seconds before validation proceeds. Defaults to 0 (no
+        /// wait).
+        /// 
+        /// &gt; The wait is applied _per-domain_. When `PropagationWait` is set, propagation
+        /// checks are skipped and `RecursiveNameservers` / `DisableCompletePropagation`
+        /// have no effect. `PropagationWait` conflicts with `PreCheckDelay`.
+        /// </summary>
+        [Input("propagationWait")]
+        public Input<int>? PropagationWait { get; set; }
 
         [Input("recursiveNameservers")]
         private InputList<string>? _recursiveNameservers;
@@ -891,11 +985,23 @@ namespace Pulumiverse.Acme
         /// endpoint, renewal behavior will fall back to comparing the certificate expiry
         /// time with the value in `MinDaysRemaining`. This means for short-lived
         /// certificates, you may wish to turn this value down so that the settings do not
-        /// conflict; however, don't disable it altogether, as this may prevent the
-        /// certificate from being renewed!
+        /// conflict, or consider using `MinDaysDynamic` instead.
         /// </summary>
         [Input("useRenewalInfo")]
         public Input<bool>? UseRenewalInfo { get; set; }
+
+        /// <summary>
+        /// The desired validity duration for the
+        /// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+        /// value triggers a certificate renewal.
+        /// 
+        /// &gt; Note that not all ACME CAs support user-set certificate durations; most
+        /// famously, [Let's Encrypt does
+        /// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+        /// Check with your CA to ensure this feature is supported before using it.
+        /// </summary>
+        [Input("validityDays")]
+        public Input<int>? ValidityDays { get; set; }
 
         public CertificateArgs()
         {
@@ -945,6 +1051,9 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("certificateNotAfter")]
         public Input<string>? CertificateNotAfter { get; set; }
+
+        [Input("certificateNotBefore")]
+        public Input<string>? CertificateNotBefore { get; set; }
 
         [Input("certificateP12")]
         private Input<string>? _certificateP12;
@@ -1030,12 +1139,21 @@ namespace Pulumiverse.Acme
         public Input<string>? CommonName { get; set; }
 
         /// <summary>
+        /// Controls if authorizations are explicitly
+        /// deactivated after a certificate has been obtained, preventing their re-use.
+        /// Default: `True`.
+        /// </summary>
+        [Input("deactivateAuthorizations")]
+        public Input<bool>? DeactivateAuthorizations { get; set; }
+
+        /// <summary>
         /// Disable the requirement for full
         /// propagation of the TXT challenge records before proceeding with validation.
         /// Defaults to `False`.
         /// 
         /// &gt; See About DNS propagation checks for details
-        /// on the `RecursiveNameservers` and `DisableCompletePropagation` settings.
+        /// on the `RecursiveNameservers`, `DisableCompletePropagation`, and
+        /// `PropagationWait` settings.
         /// </summary>
         [Input("disableCompletePropagation")]
         public Input<bool>? DisableCompletePropagation { get; set; }
@@ -1103,10 +1221,24 @@ namespace Pulumiverse.Acme
         public Input<string>? KeyType { get; set; }
 
         /// <summary>
+        /// Derive the renewal threshold from the
+        /// certificate lifetime instead of a static value. When set, the threshold is
+        /// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
+        /// or less. Default: `false.`
+        /// 
+        /// &gt; `MinDaysDynamic` conflicts with `MinDaysRemaining` - only one may be set
+        /// at once.
+        /// </summary>
+        [Input("minDaysDynamic")]
+        public Input<bool>? MinDaysDynamic { get; set; }
+
+        /// <summary>
         /// The minimum amount of days remaining on the
         /// expiration of a certificate before a renewal is attempted. The default is
         /// `30`. A value of less than `0` means that the certificate will never be
         /// renewed.
+        /// 
+        /// &gt; `MinDaysRemaining` must be lower than `ValidityDays` (if defined).
         /// </summary>
         [Input("minDaysRemaining")]
         public Input<int>? MinDaysRemaining { get; set; }
@@ -1193,6 +1325,18 @@ namespace Pulumiverse.Acme
         /// </summary>
         [Input("profile")]
         public Input<string>? Profile { get; set; }
+
+        /// <summary>
+        /// Disable DNS propagation checks and wait the
+        /// specified number of seconds before validation proceeds. Defaults to 0 (no
+        /// wait).
+        /// 
+        /// &gt; The wait is applied _per-domain_. When `PropagationWait` is set, propagation
+        /// checks are skipped and `RecursiveNameservers` / `DisableCompletePropagation`
+        /// have no effect. `PropagationWait` conflicts with `PreCheckDelay`.
+        /// </summary>
+        [Input("propagationWait")]
+        public Input<int>? PropagationWait { get; set; }
 
         [Input("recursiveNameservers")]
         private InputList<string>? _recursiveNameservers;
@@ -1333,11 +1477,23 @@ namespace Pulumiverse.Acme
         /// endpoint, renewal behavior will fall back to comparing the certificate expiry
         /// time with the value in `MinDaysRemaining`. This means for short-lived
         /// certificates, you may wish to turn this value down so that the settings do not
-        /// conflict; however, don't disable it altogether, as this may prevent the
-        /// certificate from being renewed!
+        /// conflict, or consider using `MinDaysDynamic` instead.
         /// </summary>
         [Input("useRenewalInfo")]
         public Input<bool>? UseRenewalInfo { get; set; }
+
+        /// <summary>
+        /// The desired validity duration for the
+        /// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
+        /// value triggers a certificate renewal.
+        /// 
+        /// &gt; Note that not all ACME CAs support user-set certificate durations; most
+        /// famously, [Let's Encrypt does
+        /// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
+        /// Check with your CA to ensure this feature is supported before using it.
+        /// </summary>
+        [Input("validityDays")]
+        public Input<int>? ValidityDays { get; set; }
 
         public CertificateState()
         {
