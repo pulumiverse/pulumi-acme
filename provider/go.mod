@@ -6,7 +6,7 @@ replace github.com/hashicorp/terraform-plugin-sdk/v2 => github.com/pulumi/terraf
 
 require (
 	github.com/pulumi/pulumi-terraform-bridge/v3 v3.125.0
-	github.com/vancluever/terraform-provider-acme/v2 v2.48.0
+	github.com/vancluever/terraform-provider-acme/v2 v2.48.1
 )
 
 require (
@@ -128,7 +128,7 @@ require (
 	github.com/go-acme/alidns-20150109/v4 v4.7.0 // indirect
 	github.com/go-acme/esa-20240910/v2 v2.48.0 // indirect
 	github.com/go-acme/jdcloud-sdk-go v1.64.0 // indirect
-	github.com/go-acme/lego/v4 v4.35.1 // indirect
+	github.com/go-acme/lego/v4 v4.35.2 // indirect
 	github.com/go-acme/tencentclouddnspod v1.3.24 // indirect
 	github.com/go-acme/tencentedgdeone v1.3.38 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
@@ -181,7 +181,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.31.0 // indirect
 	github.com/hashicorp/terraform-plugin-log v0.10.0 // indirect
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.0 // indirect
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.1 // indirect
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
@@ -247,7 +247,7 @@ require (
 	github.com/nrdcg/namesilo v0.5.0 // indirect
 	github.com/nrdcg/nodion v0.1.0 // indirect
 	github.com/nrdcg/oci-go-sdk/common/v1065 v1065.113.0 // indirect
-	github.com/nrdcg/oci-go-sdk/dns/v1065 v1065.112.0 // indirect
+	github.com/nrdcg/oci-go-sdk/dns/v1065 v1065.113.0 // indirect
 	github.com/nrdcg/porkbun v0.4.0 // indirect
 	github.com/nrdcg/vegadns v0.3.0 // indirect
 	github.com/nzdjb/go-metaname v1.0.0 // indirect
@@ -340,7 +340,7 @@ require (
 	github.com/yandex-cloud/go-sdk/v2 v2.92.0 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	github.com/yuin/goldmark v1.7.13 // indirect
-	github.com/zclconf/go-cty v1.17.0 // indirect
+	github.com/zclconf/go-cty v1.18.1 // indirect
 	go.mongodb.org/mongo-driver v1.17.9 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/collector/featuregate v1.53.0 // indirect
