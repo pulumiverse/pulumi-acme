@@ -34,7 +34,8 @@ import (
 const (
 	// This variable controls the default name of the package in the package
 	// registries for nodejs and python:
-	mainPkg = "acme"
+	provider = "acme"
+	mainPkg  = provider
 	// modules:
 	mainMod = "index" // the acme module
 )
@@ -50,7 +51,7 @@ func Provider() tfbridge.ProviderInfo {
 	// Create a Pulumi provider mapping
 	prov := tfbridge.ProviderInfo{
 		P:    p,
-		Name: "acme",
+		Name: provider,
 		// DisplayName is a way to be able to change the casing of the provider
 		// name when being displayed on the Pulumi registry
 		DisplayName: "ACME",
@@ -67,7 +68,7 @@ func Provider() tfbridge.ProviderInfo {
 		// category/cloud tag helps with categorizing the package in the Pulumi Registry.
 		// For all available categories, see `Keywords` in
 		// https://www.pulumi.com/docs/guides/pulumi-packages/schema/#package.
-		Keywords:   []string{"pulumi", "acme", "category/cloud"},
+		Keywords:   []string{"pulumi", provider, "category/cloud"},
 		License:    "Apache-2.0",
 		Homepage:   "https://www.pulumi.com",
 		Repository: "https://github.com/pulumiverse/pulumi-acme",
@@ -77,7 +78,7 @@ func Provider() tfbridge.ProviderInfo {
 		GitHubOrg:               "vancluever",
 		TFProviderModuleVersion: "v2",
 
-		ResourcePrefix: "acme",
+		ResourcePrefix: mainPkg,
 		Version:        version.Version,
 		MetadataInfo:   tfbridge.NewProviderMetadata(metadata),
 
