@@ -14,9 +14,6 @@ namespace Pulumiverse.Acme.Outputs
     [OutputType]
     public sealed class CertificateHttpS3Challenge
     {
-        /// <summary>
-        /// The S3Bucket to publish the record to.
-        /// </summary>
         public readonly string S3Bucket;
 
         [OutputConstructor]

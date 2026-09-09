@@ -26,12 +26,32 @@ __all__ = [
 
 @pulumi.output_type
 class CertificateDnsChallenge(dict):
+    @staticmethod
+    def __key_warning(key: str):
+        suggest = None
+        if key == "matchDomains":
+            suggest = "match_domains"
+
+        if suggest:
+            pulumi.log.warn(f"Key '{key}' not found in CertificateDnsChallenge. Access the value via the '{suggest}' property getter instead.")
+
+    def __getitem__(self, key: str) -> Any:
+        CertificateDnsChallenge.__key_warning(key)
+        return super().__getitem__(key)
+
+    def get(self, key: str, default = None) -> Any:
+        CertificateDnsChallenge.__key_warning(key)
+        return super().get(key, default)
+
     def __init__(__self__, *,
                  provider: _builtins.str,
-                 config: Optional[Mapping[str, _builtins.str]] = None):
+                 config: Optional[Mapping[str, _builtins.str]] = None,
+                 match_domains: Optional[Sequence[_builtins.str]] = None):
         pulumi.set(__self__, "provider", provider)
         if config is not None:
             pulumi.set(__self__, "config", config)
+        if match_domains is not None:
+            pulumi.set(__self__, "match_domains", match_domains)
 
     @_builtins.property
     @pulumi.getter
@@ -42,6 +62,11 @@ class CertificateDnsChallenge(dict):
     @pulumi.getter
     def config(self) -> Optional[Mapping[str, _builtins.str]]:
         return pulumi.get(self, "config")
+
+    @_builtins.property
+    @pulumi.getter(name="matchDomains")
+    def match_domains(self) -> Optional[Sequence[_builtins.str]]:
+        return pulumi.get(self, "match_domains")
 
 
 @pulumi.output_type
@@ -66,22 +91,6 @@ class CertificateHttpChallenge(dict):
     def __init__(__self__, *,
                  port: Optional[_builtins.int] = None,
                  proxy_header: Optional[_builtins.str] = None):
-        """
-        :param _builtins.int port: The port that the challenge server listens on. Default: `80`.
-        :param _builtins.str proxy_header: The proxy header to match against. Default:
-               `Host`.
-               
-               The `proxy_header` option behaves differently depending on its definition:
-               
-               * When set to `Host`, standard host header validation is used.
-               * When set to `Forwarded`, the server looks in the `Forwarded` header for a
-               section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
-               resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
-               for more details.
-               * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
-               checked for the host entry in the same way the host header would normally be
-               checked.
-        """
         if port is not None:
             pulumi.set(__self__, "port", port)
         if proxy_header is not None:
@@ -90,29 +99,11 @@ class CertificateHttpChallenge(dict):
     @_builtins.property
     @pulumi.getter
     def port(self) -> Optional[_builtins.int]:
-        """
-        The port that the challenge server listens on. Default: `80`.
-        """
         return pulumi.get(self, "port")
 
     @_builtins.property
     @pulumi.getter(name="proxyHeader")
     def proxy_header(self) -> Optional[_builtins.str]:
-        """
-        The proxy header to match against. Default:
-        `Host`.
-
-        The `proxy_header` option behaves differently depending on its definition:
-
-        * When set to `Host`, standard host header validation is used.
-        * When set to `Forwarded`, the server looks in the `Forwarded` header for a
-        section matching `host=DOMAIN` where `DOMAIN` is the domain currently being
-        resolved by the challenge. See [RFC 7239](https://tools.ietf.org/html/rfc7239)
-        for more details.
-        * When set to an arbitrary header (example: `X-Forwarded-Host`), that header is
-        checked for the host entry in the same way the host header would normally be
-        checked.
-        """
         return pulumi.get(self, "proxy_header")
 
 
@@ -149,17 +140,11 @@ class CertificateHttpS3Challenge(dict):
 
     def __init__(__self__, *,
                  s3_bucket: _builtins.str):
-        """
-        :param _builtins.str s3_bucket: The s3_bucket to publish the record to.
-        """
         pulumi.set(__self__, "s3_bucket", s3_bucket)
 
     @_builtins.property
     @pulumi.getter(name="s3Bucket")
     def s3_bucket(self) -> _builtins.str:
-        """
-        The s3_bucket to publish the record to.
-        """
         return pulumi.get(self, "s3_bucket")
 
 
@@ -167,17 +152,11 @@ class CertificateHttpS3Challenge(dict):
 class CertificateHttpWebrootChallenge(dict):
     def __init__(__self__, *,
                  directory: _builtins.str):
-        """
-        :param _builtins.str directory: The directory to publish the record to.
-        """
         pulumi.set(__self__, "directory", directory)
 
     @_builtins.property
     @pulumi.getter
     def directory(self) -> _builtins.str:
-        """
-        The directory to publish the record to.
-        """
         return pulumi.get(self, "directory")
 
 
@@ -185,18 +164,12 @@ class CertificateHttpWebrootChallenge(dict):
 class CertificateTlsChallenge(dict):
     def __init__(__self__, *,
                  port: Optional[_builtins.int] = None):
-        """
-        :param _builtins.int port: The port that the challenge server listens on. Default: `443`.
-        """
         if port is not None:
             pulumi.set(__self__, "port", port)
 
     @_builtins.property
     @pulumi.getter
     def port(self) -> Optional[_builtins.int]:
-        """
-        The port that the challenge server listens on. Default: `443`.
-        """
         return pulumi.get(self, "port")
 
 

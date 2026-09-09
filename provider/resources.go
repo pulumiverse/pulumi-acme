@@ -21,7 +21,7 @@ import (
 	// Enable embedding of package metadata
 	_ "embed"
 
-	"github.com/vancluever/terraform-provider-acme/v2/acme"
+	"github.com/vancluever/terraform-provider-acme/v3/acme"
 
 	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfbridge"
 	"github.com/pulumi/pulumi-terraform-bridge/v3/pkg/tfbridge/tokens"

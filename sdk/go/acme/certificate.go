@@ -12,422 +12,52 @@ import (
 	"github.com/pulumiverse/pulumi-acme/sdk/go/acme/internal"
 )
 
-// ## # Certificate
-//
-// The `Certificate` resource can be used to create and manage an ACME TLS
-// certificate.
-//
-// ## Example
-//
-// The below example creates both an account and certificate within the same
-// configuration. The account is created using the
-// [`Registration`][resource-registration] resource.
-//
-// > When creating accounts and certificates within the same configuration, ensure
-// that you reference the
-// [`accountKeyPem`][resource-registration-account-key-pem] argument in the
-// `Registration` resource as the corresponding
-// `accountKeyPem` argument in the `Certificate`
-// resource. This will ensure that the account gets created before the certificate
-// and avoid errors.
-//
-// [resource-registration]: ./registration.md
-// [resource-registration-account-key-pem]: ./registration.md#account_key_pem
-//
-// ```go
-// package main
-//
-// import (
-//
-//	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-//	"github.com/pulumiverse/pulumi-acme/sdk/go/acme"
-//
-// )
-//
-//	func main() {
-//		pulumi.Run(func(ctx *pulumi.Context) error {
-//			reg, err := acme.NewRegistration(ctx, "reg", &acme.RegistrationArgs{
-//				EmailAddress: pulumi.String("nobody@example.com"),
-//			})
-//			if err != nil {
-//				return err
-//			}
-//			_, err = acme.NewCertificate(ctx, "certificate", &acme.CertificateArgs{
-//				AccountKeyPem: reg.AccountKeyPem,
-//				CommonName:    pulumi.String("www.example.com"),
-//				SubjectAlternativeNames: pulumi.StringArray{
-//					pulumi.String("www2.example.com"),
-//				},
-//				DnsChallenges: acme.CertificateDnsChallengeArray{
-//					&acme.CertificateDnsChallengeArgs{
-//						Provider: pulumi.String("route53"),
-//					},
-//				},
-//			})
-//			if err != nil {
-//				return err
-//			}
-//			return nil
-//		})
-//	}
-//
-// ```
-//
-// ### Using an external CSR
-//
-// The `Certificate` resource can also take an external CSR. In this example,
-// we create one using [`tlsCertRequest`][tls-cert-request] first, before
-// supplying it to the `certificateRequestPem`
-// argument.
-//
-// > **NOTE:** Some current ACME CA implementations (including Let's Encrypt)
-// strip most of the organization information out of a certificate request
-// subject.  You may wish to confirm with the CA what behavior to expect when
-// using the `certificateRequestPem` argument with this resource.
-//
-// > **NOTE:** It is not a good practice to use the same private key for both
-// your account and your certificate. Make sure you use different keys.
-//
-// ```go
-// package main
-//
-// import (
-//
-//	"github.com/pulumi/pulumi-tls/sdk/go/tls"
-//	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-//	"github.com/pulumiverse/pulumi-acme/sdk/go/acme"
-//
-// )
-//
-//	func main() {
-//		pulumi.Run(func(ctx *pulumi.Context) error {
-//			reg, err := acme.NewRegistration(ctx, "reg", &acme.RegistrationArgs{
-//				EmailAddress: pulumi.String("nobody@example.com"),
-//			})
-//			if err != nil {
-//				return err
-//			}
-//			certPrivateKey, err := tls.NewPrivateKey(ctx, "cert_private_key", &tls.PrivateKeyArgs{
-//				Algorithm: "RSA",
-//			})
-//			if err != nil {
-//				return err
-//			}
-//			req, err := tls.NewCertRequest(ctx, "req", &tls.CertRequestArgs{
-//				KeyAlgorithm:  "RSA",
-//				PrivateKeyPem: certPrivateKey.PrivateKeyPem,
-//				DnsNames: []string{
-//					"www.example.com",
-//					"www2.example.com",
-//				},
-//				Subject: []map[string]interface{}{
-//					map[string]interface{}{
-//						"commonName": "www.example.com",
-//					},
-//				},
-//			})
-//			if err != nil {
-//				return err
-//			}
-//			_, err = acme.NewCertificate(ctx, "certificate", &acme.CertificateArgs{
-//				AccountKeyPem:         reg.AccountKeyPem,
-//				CertificateRequestPem: req.CertRequestPem,
-//				DnsChallenges: acme.CertificateDnsChallengeArray{
-//					&acme.CertificateDnsChallengeArgs{
-//						Provider: pulumi.String("route53"),
-//					},
-//				},
-//			})
-//			if err != nil {
-//				return err
-//			}
-//			return nil
-//		})
-//	}
-//
-// ```
-//
-// ## Certificate renewal
-//
-// The `Certificate` resource handles automatic certificate renewal so long
-// as a plan or apply is done within the number of days specified in the
-// `minDaysRemaining` resource parameter. During refresh,
-// if Terraform detects that the certificate is within the expiry range specified
-// in `minDaysRemaining`, or is already expired, Terraform will mark the
-// certificate to be renewed on the next apply.
-//
-// Note that a value less than `0` supplied to `minDaysRemaining` will cause
-// renewal checks to be bypassed, and the certificate will never renew.
-//
-// ### Dynamic renewal
-//
-// When working with short certificate lifetimes (possibly set using
-// `validityDays`, or via short-lifetime ACME profiles), or
-// utilizing ARI using `useRenewalInfo`, you may find it
-// easier to use `minDaysDynamic` instead. When using this
-// over `minDaysRemaining`, the certificate renewal threshold is automatically
-// set to 1/3 of its lifetime, or 1/2 if the lifetime is 10 days or less.
-//
-// [tls-cert-request]: https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/cert_request
 type Certificate struct {
 	pulumi.CustomResourceState
 
-	// The private key of the account that is
-	// requesting the certificate. Forces a new resource when changed.
-	AccountKeyPem pulumi.StringOutput `pulumi:"accountKeyPem"`
-	// Controls the timeout in seconds for certificate requests
-	// that are made after challenges are complete. Defaults to 30 seconds.
-	//
-	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
-	// If you are looking to control timeouts related to a particular challenge (such
-	// as a DNS challenge), see that challenge provider's specific options.
-	CertTimeout pulumi.IntPtrOutput `pulumi:"certTimeout"`
-	// The common name of the certificate.
-	CertificateDomain pulumi.StringOutput `pulumi:"certificateDomain"`
-	// The expiry date of the certificate, laid out in
-	// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
-	CertificateNotAfter  pulumi.StringOutput `pulumi:"certificateNotAfter"`
-	CertificateNotBefore pulumi.StringOutput `pulumi:"certificateNotBefore"`
-	// The certificate, any intermediates, and the private key
-	// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
-	// The data is base64 encoded (including padding), and its password is
-	// configurable via the `certificateP12Password`
-	// argument. This field is empty if creating a certificate from a CSR.
-	CertificateP12 pulumi.StringOutput `pulumi:"certificateP12"`
-	// Password to be used when generating
-	// the PFX file stored in `certificateP12`. Defaults to an
-	// empty string.
-	CertificateP12Password pulumi.StringPtrOutput `pulumi:"certificateP12Password"`
-	// The certificate in PEM format. This does not include the
-	// `issuerPem`. This certificate can be concatenated with `issuerPem` to form
-	// a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
-	CertificatePem pulumi.StringOutput `pulumi:"certificatePem"`
-	// A pre-created certificate request, such as one
-	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format. Forces a new resource when changed.
-	//
-	// > One of `commonName`, `subjectAlternativeNames`, or
-	// `certificateRequestPem` must be specified. `certificateRequestPem`
-	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
-	// `certificateRequestPem` defined at the same time as `commonName` or
-	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
-	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
-	// case with the `classic` Let's Encrypt profile, the first domain defined in
-	// `subjectAlternativeNames` becomes the common name.
-	CertificateRequestPem pulumi.StringPtrOutput `pulumi:"certificateRequestPem"`
-	// The serial number, in string format, as reported by
-	// the CA.
-	CertificateSerial pulumi.StringOutput `pulumi:"certificateSerial"`
-	// The full URL of the certificate within the ACME CA.
-	CertificateUrl pulumi.StringOutput `pulumi:"certificateUrl"`
-	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Forces a new resource when changed.
-	CommonName pulumi.StringPtrOutput `pulumi:"commonName"`
-	// Controls if authorizations are explicitly
-	// deactivated after a certificate has been obtained, preventing their re-use.
-	// Default: `true`.
-	DeactivateAuthorizations pulumi.BoolPtrOutput `pulumi:"deactivateAuthorizations"`
-	// Disable the requirement for full
-	// propagation of the TXT challenge records before proceeding with validation.
-	// Defaults to `false`.
-	//
-	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers`, `disableCompletePropagation`, and
-	// `propagationWait` settings.
-	DisableCompletePropagation pulumi.BoolPtrOutput `pulumi:"disableCompletePropagation"`
-	// The DNS challenges to
-	// use in fulfilling the request.
-	DnsChallenges CertificateDnsChallengeArrayOutput `pulumi:"dnsChallenges"`
-	// Defines an HTTP challenge to use in fulfilling
-	// the request.
-	HttpChallenge CertificateHttpChallengePtrOutput `pulumi:"httpChallenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [Memcached](https://memcached.org/) cluster.
-	HttpMemcachedChallenge CertificateHttpMemcachedChallengePtrOutput `pulumi:"httpMemcachedChallenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [S3](https://aws.amazon.com/s3/) bucket.
-	HttpS3Challenge CertificateHttpS3ChallengePtrOutput `pulumi:"httpS3Challenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to place a file at a location that can be served by
-	// an out-of-band webserver.
-	HttpWebrootChallenge CertificateHttpWebrootChallengePtrOutput `pulumi:"httpWebrootChallenge"`
-	// The intermediate certificates of the issuer. Multiple
-	// certificates are concatenated in this field when there is more than one
-	// intermediate certificate in the chain.
-	IssuerPem pulumi.StringOutput `pulumi:"issuerPem"`
-	// The key type for the certificate's private key. Can be one of:
-	// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
-	// `8192` (for RSA keys of respective length). Required when not specifying a
-	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
-	// changed.
-	KeyType pulumi.StringPtrOutput `pulumi:"keyType"`
-	// Derive the renewal threshold from the
-	// certificate lifetime instead of a static value. When set, the threshold is
-	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
-	// or less. Default: `false.`
-	//
-	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
-	// at once.
-	MinDaysDynamic pulumi.BoolPtrOutput `pulumi:"minDaysDynamic"`
-	// The minimum amount of days remaining on the
-	// expiration of a certificate before a renewal is attempted. The default is
-	// `30`. A value of less than `0` means that the certificate will never be
-	// renewed.
-	//
-	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
-	MinDaysRemaining pulumi.IntPtrOutput `pulumi:"minDaysRemaining"`
-	// Enables the [OCSP Stapling Required][ocsp-stapling]
-	// TLS Security Policy extension. Certificates with this extension must include a
-	// valid OCSP Staple in the TLS handshake for the connection to succeed.
-	// Defaults to `false`. Note that this option has no effect when using an
-	// external CSR - it must be enabled in the CSR itself. Forces a new resource
-	// when changed.
-	//
-	// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
-	//
-	// > OCSP stapling requires specific webserver configuration to support the
-	// downloading of the staple from the CA's OCSP endpoints, and should be configured
-	// to tolerate prolonged outages of the OCSP service. Consider this when using
-	// `mustStaple`, and only enable it if you are sure your webserver or service
-	// provider can be configured correctly.
-	MustStaple pulumi.BoolPtrOutput `pulumi:"mustStaple"`
-	// Insert a delay after _every_ DNS challenge
-	// record to allow for extra time for DNS propagation before the certificate is
-	// requested. Use this option if you observe issues with requesting certificates
-	// even when DNS challenge records get added successfully. Units are in seconds.
-	// Defaults to 0 (no delay).
-	//
-	// > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
-	// Take your expected delay and divide it by the number of domains you have
-	// configured (`commonName` + `subjectAlternativeNames`).
-	PreCheckDelay pulumi.IntPtrOutput `pulumi:"preCheckDelay"`
-	// The common name of the root of a preferred
-	// alternate certificate chain offered by the CA. The certificates in
-	// `issuerPem` will reflect the chain requested, if available, otherwise the
-	// default chain will be provided. Forces a new resource when changed.
-	//
-	// > `preferredChain` can be used to request alternate chains on Let's Encrypt
-	// during the transition away from their old cross-signed intermediates. See [this
-	// article for more
-	// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
-	// In their example titled **"What about the alternate chain?"**, the root you
-	// would put in to the `preferredChain` field would be `ISRG Root X1`. The
-	// equivalent in the [staging
-	// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
-	// Pretend Pear X1`.
-	PreferredChain pulumi.StringPtrOutput `pulumi:"preferredChain"`
-	// The certificate's private key, in PEM format, if the
-	// certificate was generated from scratch and not with
-	// `certificateRequestPem`.  If
-	// `certificateRequestPem` was used, this will be blank.
-	PrivateKeyPem pulumi.StringOutput `pulumi:"privateKeyPem"`
-	// The ACME profile to use when requesting the
-	// certificate. This can be used to control generation parameters according to
-	// the specific CA. The default is blank (no profile); forces a new resource
-	// when changed.
-	//
-	// > Let's Encrypt publishes details on their profiles at
-	// <https://letsencrypt.org/docs/profiles/>.
-	Profile pulumi.StringPtrOutput `pulumi:"profile"`
-	// Disable DNS propagation checks and wait the
-	// specified number of seconds before validation proceeds. Defaults to 0 (no
-	// wait).
-	//
-	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
-	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
-	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
-	PropagationWait pulumi.IntPtrOutput `pulumi:"propagationWait"`
-	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records, in addition to some
-	// in-provider checks such as zone detection. Defaults to your system-configured
-	// DNS resolvers.
-	RecursiveNameservers pulumi.StringArrayOutput `pulumi:"recursiveNameservers"`
-	// A URL that can be optionally supplied by an
-	// ARI endpoint explaining the renewal window policy (see
-	// `useRenewalInfo`).
-	RenewalInfoExplanationUrl pulumi.StringOutput `pulumi:"renewalInfoExplanationUrl"`
-	// Ignores the retry interval
-	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
-	// be used for testing. Default: `false`.
-	RenewalInfoIgnoreRetryAfter pulumi.BoolPtrOutput `pulumi:"renewalInfoIgnoreRetryAfter"`
-	// The maximum amount of time, in seconds,
-	// that the resource is willing to sleep during apply to reach a selected
-	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
-	//
-	// > It's recommended to only use small values here (a few minutes maximum).
-	// Using extremely high values increases the risk of resource timeouts. To prevent
-	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
-	// minutes.
-	RenewalInfoMaxSleep pulumi.IntPtrOutput `pulumi:"renewalInfoMaxSleep"`
-	// A timestamp describing when ARI details will be
-	// refreshed if already fetched (see `useRenewalInfo`).
-	RenewalInfoRetryAfter pulumi.StringOutput `pulumi:"renewalInfoRetryAfter"`
-	// The end of the discovered ARI renewal window (see
-	// `useRenewalInfo`).
-	RenewalInfoWindowEnd pulumi.StringOutput `pulumi:"renewalInfoWindowEnd"`
-	// The selected time within the ARI renewal
-	// window that a certificate will be renewed, if
-	// `useRenewalInfo` is enabled.
-	RenewalInfoWindowSelected pulumi.StringOutput `pulumi:"renewalInfoWindowSelected"`
-	// The start of the discovered ARI renewal window
-	// (see `useRenewalInfo`).
-	RenewalInfoWindowStart pulumi.StringOutput `pulumi:"renewalInfoWindowStart"`
-	// Enables revocation of a certificate upon destroy,
-	// which includes when a resource is re-created. Default is `true`.
-	RevokeCertificateOnDestroy pulumi.BoolPtrOutput `pulumi:"revokeCertificateOnDestroy"`
-	// Some CA's require a reason for revocation to be provided.
-	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
-	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
-	// * unspecified
-	// * key-compromise
-	// * ca-compromise
-	// * affiliation-changed
-	// * superseded
-	// * cessation-of-operation
-	// * certificate-hold
-	// * remove-from-crl
-	// * privilege-withdrawn
-	// * aa-compromise
-	RevokeCertificateReason pulumi.StringPtrOutput `pulumi:"revokeCertificateReason"`
-	// The certificate's subject alternative names;
-	// domains that this certificate will also be recognized for. Forces a new
-	// resource when changed.
-	SubjectAlternativeNames pulumi.StringArrayOutput `pulumi:"subjectAlternativeNames"`
-	// Defines a TLS challenge to use in fulfilling the
-	// request.
-	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
-	// and `httpMemcachedChallenge` can be defined at once. See the section on
-	// Using HTTP and TLS challenges for more
-	// details on using these and `tlsChallenge`.
-	TlsChallenge CertificateTlsChallengePtrOutput `pulumi:"tlsChallenge"`
-	// When enabled, use information available from
-	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
-	// Default: `false`.
-	//
-	// > More detail on ARI can be found in [RFC
-	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
-	//
-	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
-	// selected time within an ARI renewal window value cannot be reached at plan time
-	// (based on the current time plus the value of
-	// `renewalInfoMaxSleep`), or if the CA has no ARI
-	// endpoint, renewal behavior will fall back to comparing the certificate expiry
-	// time with the value in `minDaysRemaining`. This means for short-lived
-	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict, or consider using `minDaysDynamic` instead.
-	UseRenewalInfo pulumi.BoolPtrOutput `pulumi:"useRenewalInfo"`
-	// The desired validity duration for the
-	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
-	// value triggers a certificate renewal.
-	//
-	// > Note that not all ACME CAs support user-set certificate durations; most
-	// famously, [Let's Encrypt does
-	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
-	// Check with your CA to ensure this feature is supported before using it.
-	ValidityDays pulumi.IntPtrOutput `pulumi:"validityDays"`
+	AccountKeyPem                   pulumi.StringOutput                        `pulumi:"accountKeyPem"`
+	CertTimeout                     pulumi.IntPtrOutput                        `pulumi:"certTimeout"`
+	CertificateDomain               pulumi.StringOutput                        `pulumi:"certificateDomain"`
+	CertificateNotAfter             pulumi.StringOutput                        `pulumi:"certificateNotAfter"`
+	CertificateNotBefore            pulumi.StringOutput                        `pulumi:"certificateNotBefore"`
+	CertificateP12                  pulumi.StringOutput                        `pulumi:"certificateP12"`
+	CertificateP12Password          pulumi.StringPtrOutput                     `pulumi:"certificateP12Password"`
+	CertificatePem                  pulumi.StringOutput                        `pulumi:"certificatePem"`
+	CertificateRequestPem           pulumi.StringPtrOutput                     `pulumi:"certificateRequestPem"`
+	CertificateSerial               pulumi.StringOutput                        `pulumi:"certificateSerial"`
+	CertificateUrl                  pulumi.StringOutput                        `pulumi:"certificateUrl"`
+	CommonName                      pulumi.StringPtrOutput                     `pulumi:"commonName"`
+	DeactivateAuthorizations        pulumi.BoolPtrOutput                       `pulumi:"deactivateAuthorizations"`
+	DisableAuthoritativePropagation pulumi.BoolPtrOutput                       `pulumi:"disableAuthoritativePropagation"`
+	DnsChallenges                   CertificateDnsChallengeArrayOutput         `pulumi:"dnsChallenges"`
+	HttpChallenge                   CertificateHttpChallengePtrOutput          `pulumi:"httpChallenge"`
+	HttpMemcachedChallenge          CertificateHttpMemcachedChallengePtrOutput `pulumi:"httpMemcachedChallenge"`
+	HttpS3Challenge                 CertificateHttpS3ChallengePtrOutput        `pulumi:"httpS3Challenge"`
+	HttpWebrootChallenge            CertificateHttpWebrootChallengePtrOutput   `pulumi:"httpWebrootChallenge"`
+	IssuerPem                       pulumi.StringOutput                        `pulumi:"issuerPem"`
+	KeyType                         pulumi.StringPtrOutput                     `pulumi:"keyType"`
+	MinDaysDynamic                  pulumi.BoolPtrOutput                       `pulumi:"minDaysDynamic"`
+	MinDaysRemaining                pulumi.IntPtrOutput                        `pulumi:"minDaysRemaining"`
+	MustStaple                      pulumi.BoolPtrOutput                       `pulumi:"mustStaple"`
+	PreCheckDelay                   pulumi.IntPtrOutput                        `pulumi:"preCheckDelay"`
+	PreferredChain                  pulumi.StringPtrOutput                     `pulumi:"preferredChain"`
+	PrivateKeyPem                   pulumi.StringOutput                        `pulumi:"privateKeyPem"`
+	Profile                         pulumi.StringPtrOutput                     `pulumi:"profile"`
+	PropagationWait                 pulumi.IntPtrOutput                        `pulumi:"propagationWait"`
+	RecursiveNameservers            pulumi.StringArrayOutput                   `pulumi:"recursiveNameservers"`
+	RenewalInfoExplanationUrl       pulumi.StringOutput                        `pulumi:"renewalInfoExplanationUrl"`
+	RenewalInfoIgnoreRetryAfter     pulumi.BoolPtrOutput                       `pulumi:"renewalInfoIgnoreRetryAfter"`
+	RenewalInfoMaxSleep             pulumi.IntPtrOutput                        `pulumi:"renewalInfoMaxSleep"`
+	RenewalInfoRetryAfter           pulumi.StringOutput                        `pulumi:"renewalInfoRetryAfter"`
+	RenewalInfoWindowEnd            pulumi.StringOutput                        `pulumi:"renewalInfoWindowEnd"`
+	RenewalInfoWindowSelected       pulumi.StringOutput                        `pulumi:"renewalInfoWindowSelected"`
+	RenewalInfoWindowStart          pulumi.StringOutput                        `pulumi:"renewalInfoWindowStart"`
+	RevokeCertificateOnDestroy      pulumi.BoolPtrOutput                       `pulumi:"revokeCertificateOnDestroy"`
+	RevokeCertificateReason         pulumi.StringPtrOutput                     `pulumi:"revokeCertificateReason"`
+	SubjectAlternativeNames         pulumi.StringArrayOutput                   `pulumi:"subjectAlternativeNames"`
+	TlsChallenge                    CertificateTlsChallengePtrOutput           `pulumi:"tlsChallenge"`
+	UseRenewalInfo                  pulumi.BoolPtrOutput                       `pulumi:"useRenewalInfo"`
+	ValidityDays                    pulumi.IntPtrOutput                        `pulumi:"validityDays"`
 }
 
 // NewCertificate registers a new resource with the given unique name, arguments, and options.
@@ -476,521 +106,95 @@ func GetCertificate(ctx *pulumi.Context,
 
 // Input properties used for looking up and filtering Certificate resources.
 type certificateState struct {
-	// The private key of the account that is
-	// requesting the certificate. Forces a new resource when changed.
-	AccountKeyPem *string `pulumi:"accountKeyPem"`
-	// Controls the timeout in seconds for certificate requests
-	// that are made after challenges are complete. Defaults to 30 seconds.
-	//
-	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
-	// If you are looking to control timeouts related to a particular challenge (such
-	// as a DNS challenge), see that challenge provider's specific options.
-	CertTimeout *int `pulumi:"certTimeout"`
-	// The common name of the certificate.
-	CertificateDomain *string `pulumi:"certificateDomain"`
-	// The expiry date of the certificate, laid out in
-	// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
-	CertificateNotAfter  *string `pulumi:"certificateNotAfter"`
-	CertificateNotBefore *string `pulumi:"certificateNotBefore"`
-	// The certificate, any intermediates, and the private key
-	// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
-	// The data is base64 encoded (including padding), and its password is
-	// configurable via the `certificateP12Password`
-	// argument. This field is empty if creating a certificate from a CSR.
-	CertificateP12 *string `pulumi:"certificateP12"`
-	// Password to be used when generating
-	// the PFX file stored in `certificateP12`. Defaults to an
-	// empty string.
-	CertificateP12Password *string `pulumi:"certificateP12Password"`
-	// The certificate in PEM format. This does not include the
-	// `issuerPem`. This certificate can be concatenated with `issuerPem` to form
-	// a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
-	CertificatePem *string `pulumi:"certificatePem"`
-	// A pre-created certificate request, such as one
-	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format. Forces a new resource when changed.
-	//
-	// > One of `commonName`, `subjectAlternativeNames`, or
-	// `certificateRequestPem` must be specified. `certificateRequestPem`
-	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
-	// `certificateRequestPem` defined at the same time as `commonName` or
-	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
-	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
-	// case with the `classic` Let's Encrypt profile, the first domain defined in
-	// `subjectAlternativeNames` becomes the common name.
-	CertificateRequestPem *string `pulumi:"certificateRequestPem"`
-	// The serial number, in string format, as reported by
-	// the CA.
-	CertificateSerial *string `pulumi:"certificateSerial"`
-	// The full URL of the certificate within the ACME CA.
-	CertificateUrl *string `pulumi:"certificateUrl"`
-	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Forces a new resource when changed.
-	CommonName *string `pulumi:"commonName"`
-	// Controls if authorizations are explicitly
-	// deactivated after a certificate has been obtained, preventing their re-use.
-	// Default: `true`.
-	DeactivateAuthorizations *bool `pulumi:"deactivateAuthorizations"`
-	// Disable the requirement for full
-	// propagation of the TXT challenge records before proceeding with validation.
-	// Defaults to `false`.
-	//
-	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers`, `disableCompletePropagation`, and
-	// `propagationWait` settings.
-	DisableCompletePropagation *bool `pulumi:"disableCompletePropagation"`
-	// The DNS challenges to
-	// use in fulfilling the request.
-	DnsChallenges []CertificateDnsChallenge `pulumi:"dnsChallenges"`
-	// Defines an HTTP challenge to use in fulfilling
-	// the request.
-	HttpChallenge *CertificateHttpChallenge `pulumi:"httpChallenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [Memcached](https://memcached.org/) cluster.
-	HttpMemcachedChallenge *CertificateHttpMemcachedChallenge `pulumi:"httpMemcachedChallenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [S3](https://aws.amazon.com/s3/) bucket.
-	HttpS3Challenge *CertificateHttpS3Challenge `pulumi:"httpS3Challenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to place a file at a location that can be served by
-	// an out-of-band webserver.
-	HttpWebrootChallenge *CertificateHttpWebrootChallenge `pulumi:"httpWebrootChallenge"`
-	// The intermediate certificates of the issuer. Multiple
-	// certificates are concatenated in this field when there is more than one
-	// intermediate certificate in the chain.
-	IssuerPem *string `pulumi:"issuerPem"`
-	// The key type for the certificate's private key. Can be one of:
-	// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
-	// `8192` (for RSA keys of respective length). Required when not specifying a
-	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
-	// changed.
-	KeyType *string `pulumi:"keyType"`
-	// Derive the renewal threshold from the
-	// certificate lifetime instead of a static value. When set, the threshold is
-	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
-	// or less. Default: `false.`
-	//
-	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
-	// at once.
-	MinDaysDynamic *bool `pulumi:"minDaysDynamic"`
-	// The minimum amount of days remaining on the
-	// expiration of a certificate before a renewal is attempted. The default is
-	// `30`. A value of less than `0` means that the certificate will never be
-	// renewed.
-	//
-	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
-	MinDaysRemaining *int `pulumi:"minDaysRemaining"`
-	// Enables the [OCSP Stapling Required][ocsp-stapling]
-	// TLS Security Policy extension. Certificates with this extension must include a
-	// valid OCSP Staple in the TLS handshake for the connection to succeed.
-	// Defaults to `false`. Note that this option has no effect when using an
-	// external CSR - it must be enabled in the CSR itself. Forces a new resource
-	// when changed.
-	//
-	// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
-	//
-	// > OCSP stapling requires specific webserver configuration to support the
-	// downloading of the staple from the CA's OCSP endpoints, and should be configured
-	// to tolerate prolonged outages of the OCSP service. Consider this when using
-	// `mustStaple`, and only enable it if you are sure your webserver or service
-	// provider can be configured correctly.
-	MustStaple *bool `pulumi:"mustStaple"`
-	// Insert a delay after _every_ DNS challenge
-	// record to allow for extra time for DNS propagation before the certificate is
-	// requested. Use this option if you observe issues with requesting certificates
-	// even when DNS challenge records get added successfully. Units are in seconds.
-	// Defaults to 0 (no delay).
-	//
-	// > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
-	// Take your expected delay and divide it by the number of domains you have
-	// configured (`commonName` + `subjectAlternativeNames`).
-	PreCheckDelay *int `pulumi:"preCheckDelay"`
-	// The common name of the root of a preferred
-	// alternate certificate chain offered by the CA. The certificates in
-	// `issuerPem` will reflect the chain requested, if available, otherwise the
-	// default chain will be provided. Forces a new resource when changed.
-	//
-	// > `preferredChain` can be used to request alternate chains on Let's Encrypt
-	// during the transition away from their old cross-signed intermediates. See [this
-	// article for more
-	// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
-	// In their example titled **"What about the alternate chain?"**, the root you
-	// would put in to the `preferredChain` field would be `ISRG Root X1`. The
-	// equivalent in the [staging
-	// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
-	// Pretend Pear X1`.
-	PreferredChain *string `pulumi:"preferredChain"`
-	// The certificate's private key, in PEM format, if the
-	// certificate was generated from scratch and not with
-	// `certificateRequestPem`.  If
-	// `certificateRequestPem` was used, this will be blank.
-	PrivateKeyPem *string `pulumi:"privateKeyPem"`
-	// The ACME profile to use when requesting the
-	// certificate. This can be used to control generation parameters according to
-	// the specific CA. The default is blank (no profile); forces a new resource
-	// when changed.
-	//
-	// > Let's Encrypt publishes details on their profiles at
-	// <https://letsencrypt.org/docs/profiles/>.
-	Profile *string `pulumi:"profile"`
-	// Disable DNS propagation checks and wait the
-	// specified number of seconds before validation proceeds. Defaults to 0 (no
-	// wait).
-	//
-	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
-	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
-	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
-	PropagationWait *int `pulumi:"propagationWait"`
-	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records, in addition to some
-	// in-provider checks such as zone detection. Defaults to your system-configured
-	// DNS resolvers.
-	RecursiveNameservers []string `pulumi:"recursiveNameservers"`
-	// A URL that can be optionally supplied by an
-	// ARI endpoint explaining the renewal window policy (see
-	// `useRenewalInfo`).
-	RenewalInfoExplanationUrl *string `pulumi:"renewalInfoExplanationUrl"`
-	// Ignores the retry interval
-	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
-	// be used for testing. Default: `false`.
-	RenewalInfoIgnoreRetryAfter *bool `pulumi:"renewalInfoIgnoreRetryAfter"`
-	// The maximum amount of time, in seconds,
-	// that the resource is willing to sleep during apply to reach a selected
-	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
-	//
-	// > It's recommended to only use small values here (a few minutes maximum).
-	// Using extremely high values increases the risk of resource timeouts. To prevent
-	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
-	// minutes.
-	RenewalInfoMaxSleep *int `pulumi:"renewalInfoMaxSleep"`
-	// A timestamp describing when ARI details will be
-	// refreshed if already fetched (see `useRenewalInfo`).
-	RenewalInfoRetryAfter *string `pulumi:"renewalInfoRetryAfter"`
-	// The end of the discovered ARI renewal window (see
-	// `useRenewalInfo`).
-	RenewalInfoWindowEnd *string `pulumi:"renewalInfoWindowEnd"`
-	// The selected time within the ARI renewal
-	// window that a certificate will be renewed, if
-	// `useRenewalInfo` is enabled.
-	RenewalInfoWindowSelected *string `pulumi:"renewalInfoWindowSelected"`
-	// The start of the discovered ARI renewal window
-	// (see `useRenewalInfo`).
-	RenewalInfoWindowStart *string `pulumi:"renewalInfoWindowStart"`
-	// Enables revocation of a certificate upon destroy,
-	// which includes when a resource is re-created. Default is `true`.
-	RevokeCertificateOnDestroy *bool `pulumi:"revokeCertificateOnDestroy"`
-	// Some CA's require a reason for revocation to be provided.
-	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
-	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
-	// * unspecified
-	// * key-compromise
-	// * ca-compromise
-	// * affiliation-changed
-	// * superseded
-	// * cessation-of-operation
-	// * certificate-hold
-	// * remove-from-crl
-	// * privilege-withdrawn
-	// * aa-compromise
-	RevokeCertificateReason *string `pulumi:"revokeCertificateReason"`
-	// The certificate's subject alternative names;
-	// domains that this certificate will also be recognized for. Forces a new
-	// resource when changed.
-	SubjectAlternativeNames []string `pulumi:"subjectAlternativeNames"`
-	// Defines a TLS challenge to use in fulfilling the
-	// request.
-	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
-	// and `httpMemcachedChallenge` can be defined at once. See the section on
-	// Using HTTP and TLS challenges for more
-	// details on using these and `tlsChallenge`.
-	TlsChallenge *CertificateTlsChallenge `pulumi:"tlsChallenge"`
-	// When enabled, use information available from
-	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
-	// Default: `false`.
-	//
-	// > More detail on ARI can be found in [RFC
-	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
-	//
-	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
-	// selected time within an ARI renewal window value cannot be reached at plan time
-	// (based on the current time plus the value of
-	// `renewalInfoMaxSleep`), or if the CA has no ARI
-	// endpoint, renewal behavior will fall back to comparing the certificate expiry
-	// time with the value in `minDaysRemaining`. This means for short-lived
-	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict, or consider using `minDaysDynamic` instead.
-	UseRenewalInfo *bool `pulumi:"useRenewalInfo"`
-	// The desired validity duration for the
-	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
-	// value triggers a certificate renewal.
-	//
-	// > Note that not all ACME CAs support user-set certificate durations; most
-	// famously, [Let's Encrypt does
-	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
-	// Check with your CA to ensure this feature is supported before using it.
-	ValidityDays *int `pulumi:"validityDays"`
+	AccountKeyPem                   *string                            `pulumi:"accountKeyPem"`
+	CertTimeout                     *int                               `pulumi:"certTimeout"`
+	CertificateDomain               *string                            `pulumi:"certificateDomain"`
+	CertificateNotAfter             *string                            `pulumi:"certificateNotAfter"`
+	CertificateNotBefore            *string                            `pulumi:"certificateNotBefore"`
+	CertificateP12                  *string                            `pulumi:"certificateP12"`
+	CertificateP12Password          *string                            `pulumi:"certificateP12Password"`
+	CertificatePem                  *string                            `pulumi:"certificatePem"`
+	CertificateRequestPem           *string                            `pulumi:"certificateRequestPem"`
+	CertificateSerial               *string                            `pulumi:"certificateSerial"`
+	CertificateUrl                  *string                            `pulumi:"certificateUrl"`
+	CommonName                      *string                            `pulumi:"commonName"`
+	DeactivateAuthorizations        *bool                              `pulumi:"deactivateAuthorizations"`
+	DisableAuthoritativePropagation *bool                              `pulumi:"disableAuthoritativePropagation"`
+	DnsChallenges                   []CertificateDnsChallenge          `pulumi:"dnsChallenges"`
+	HttpChallenge                   *CertificateHttpChallenge          `pulumi:"httpChallenge"`
+	HttpMemcachedChallenge          *CertificateHttpMemcachedChallenge `pulumi:"httpMemcachedChallenge"`
+	HttpS3Challenge                 *CertificateHttpS3Challenge        `pulumi:"httpS3Challenge"`
+	HttpWebrootChallenge            *CertificateHttpWebrootChallenge   `pulumi:"httpWebrootChallenge"`
+	IssuerPem                       *string                            `pulumi:"issuerPem"`
+	KeyType                         *string                            `pulumi:"keyType"`
+	MinDaysDynamic                  *bool                              `pulumi:"minDaysDynamic"`
+	MinDaysRemaining                *int                               `pulumi:"minDaysRemaining"`
+	MustStaple                      *bool                              `pulumi:"mustStaple"`
+	PreCheckDelay                   *int                               `pulumi:"preCheckDelay"`
+	PreferredChain                  *string                            `pulumi:"preferredChain"`
+	PrivateKeyPem                   *string                            `pulumi:"privateKeyPem"`
+	Profile                         *string                            `pulumi:"profile"`
+	PropagationWait                 *int                               `pulumi:"propagationWait"`
+	RecursiveNameservers            []string                           `pulumi:"recursiveNameservers"`
+	RenewalInfoExplanationUrl       *string                            `pulumi:"renewalInfoExplanationUrl"`
+	RenewalInfoIgnoreRetryAfter     *bool                              `pulumi:"renewalInfoIgnoreRetryAfter"`
+	RenewalInfoMaxSleep             *int                               `pulumi:"renewalInfoMaxSleep"`
+	RenewalInfoRetryAfter           *string                            `pulumi:"renewalInfoRetryAfter"`
+	RenewalInfoWindowEnd            *string                            `pulumi:"renewalInfoWindowEnd"`
+	RenewalInfoWindowSelected       *string                            `pulumi:"renewalInfoWindowSelected"`
+	RenewalInfoWindowStart          *string                            `pulumi:"renewalInfoWindowStart"`
+	RevokeCertificateOnDestroy      *bool                              `pulumi:"revokeCertificateOnDestroy"`
+	RevokeCertificateReason         *string                            `pulumi:"revokeCertificateReason"`
+	SubjectAlternativeNames         []string                           `pulumi:"subjectAlternativeNames"`
+	TlsChallenge                    *CertificateTlsChallenge           `pulumi:"tlsChallenge"`
+	UseRenewalInfo                  *bool                              `pulumi:"useRenewalInfo"`
+	ValidityDays                    *int                               `pulumi:"validityDays"`
 }
 
 type CertificateState struct {
-	// The private key of the account that is
-	// requesting the certificate. Forces a new resource when changed.
-	AccountKeyPem pulumi.StringPtrInput
-	// Controls the timeout in seconds for certificate requests
-	// that are made after challenges are complete. Defaults to 30 seconds.
-	//
-	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
-	// If you are looking to control timeouts related to a particular challenge (such
-	// as a DNS challenge), see that challenge provider's specific options.
-	CertTimeout pulumi.IntPtrInput
-	// The common name of the certificate.
-	CertificateDomain pulumi.StringPtrInput
-	// The expiry date of the certificate, laid out in
-	// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
-	CertificateNotAfter  pulumi.StringPtrInput
-	CertificateNotBefore pulumi.StringPtrInput
-	// The certificate, any intermediates, and the private key
-	// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
-	// The data is base64 encoded (including padding), and its password is
-	// configurable via the `certificateP12Password`
-	// argument. This field is empty if creating a certificate from a CSR.
-	CertificateP12 pulumi.StringPtrInput
-	// Password to be used when generating
-	// the PFX file stored in `certificateP12`. Defaults to an
-	// empty string.
-	CertificateP12Password pulumi.StringPtrInput
-	// The certificate in PEM format. This does not include the
-	// `issuerPem`. This certificate can be concatenated with `issuerPem` to form
-	// a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
-	CertificatePem pulumi.StringPtrInput
-	// A pre-created certificate request, such as one
-	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format. Forces a new resource when changed.
-	//
-	// > One of `commonName`, `subjectAlternativeNames`, or
-	// `certificateRequestPem` must be specified. `certificateRequestPem`
-	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
-	// `certificateRequestPem` defined at the same time as `commonName` or
-	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
-	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
-	// case with the `classic` Let's Encrypt profile, the first domain defined in
-	// `subjectAlternativeNames` becomes the common name.
-	CertificateRequestPem pulumi.StringPtrInput
-	// The serial number, in string format, as reported by
-	// the CA.
-	CertificateSerial pulumi.StringPtrInput
-	// The full URL of the certificate within the ACME CA.
-	CertificateUrl pulumi.StringPtrInput
-	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Forces a new resource when changed.
-	CommonName pulumi.StringPtrInput
-	// Controls if authorizations are explicitly
-	// deactivated after a certificate has been obtained, preventing their re-use.
-	// Default: `true`.
-	DeactivateAuthorizations pulumi.BoolPtrInput
-	// Disable the requirement for full
-	// propagation of the TXT challenge records before proceeding with validation.
-	// Defaults to `false`.
-	//
-	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers`, `disableCompletePropagation`, and
-	// `propagationWait` settings.
-	DisableCompletePropagation pulumi.BoolPtrInput
-	// The DNS challenges to
-	// use in fulfilling the request.
-	DnsChallenges CertificateDnsChallengeArrayInput
-	// Defines an HTTP challenge to use in fulfilling
-	// the request.
-	HttpChallenge CertificateHttpChallengePtrInput
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [Memcached](https://memcached.org/) cluster.
-	HttpMemcachedChallenge CertificateHttpMemcachedChallengePtrInput
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [S3](https://aws.amazon.com/s3/) bucket.
-	HttpS3Challenge CertificateHttpS3ChallengePtrInput
-	// Defines an alternate type of HTTP
-	// challenge that can be used to place a file at a location that can be served by
-	// an out-of-band webserver.
-	HttpWebrootChallenge CertificateHttpWebrootChallengePtrInput
-	// The intermediate certificates of the issuer. Multiple
-	// certificates are concatenated in this field when there is more than one
-	// intermediate certificate in the chain.
-	IssuerPem pulumi.StringPtrInput
-	// The key type for the certificate's private key. Can be one of:
-	// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
-	// `8192` (for RSA keys of respective length). Required when not specifying a
-	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
-	// changed.
-	KeyType pulumi.StringPtrInput
-	// Derive the renewal threshold from the
-	// certificate lifetime instead of a static value. When set, the threshold is
-	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
-	// or less. Default: `false.`
-	//
-	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
-	// at once.
-	MinDaysDynamic pulumi.BoolPtrInput
-	// The minimum amount of days remaining on the
-	// expiration of a certificate before a renewal is attempted. The default is
-	// `30`. A value of less than `0` means that the certificate will never be
-	// renewed.
-	//
-	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
-	MinDaysRemaining pulumi.IntPtrInput
-	// Enables the [OCSP Stapling Required][ocsp-stapling]
-	// TLS Security Policy extension. Certificates with this extension must include a
-	// valid OCSP Staple in the TLS handshake for the connection to succeed.
-	// Defaults to `false`. Note that this option has no effect when using an
-	// external CSR - it must be enabled in the CSR itself. Forces a new resource
-	// when changed.
-	//
-	// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
-	//
-	// > OCSP stapling requires specific webserver configuration to support the
-	// downloading of the staple from the CA's OCSP endpoints, and should be configured
-	// to tolerate prolonged outages of the OCSP service. Consider this when using
-	// `mustStaple`, and only enable it if you are sure your webserver or service
-	// provider can be configured correctly.
-	MustStaple pulumi.BoolPtrInput
-	// Insert a delay after _every_ DNS challenge
-	// record to allow for extra time for DNS propagation before the certificate is
-	// requested. Use this option if you observe issues with requesting certificates
-	// even when DNS challenge records get added successfully. Units are in seconds.
-	// Defaults to 0 (no delay).
-	//
-	// > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
-	// Take your expected delay and divide it by the number of domains you have
-	// configured (`commonName` + `subjectAlternativeNames`).
-	PreCheckDelay pulumi.IntPtrInput
-	// The common name of the root of a preferred
-	// alternate certificate chain offered by the CA. The certificates in
-	// `issuerPem` will reflect the chain requested, if available, otherwise the
-	// default chain will be provided. Forces a new resource when changed.
-	//
-	// > `preferredChain` can be used to request alternate chains on Let's Encrypt
-	// during the transition away from their old cross-signed intermediates. See [this
-	// article for more
-	// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
-	// In their example titled **"What about the alternate chain?"**, the root you
-	// would put in to the `preferredChain` field would be `ISRG Root X1`. The
-	// equivalent in the [staging
-	// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
-	// Pretend Pear X1`.
-	PreferredChain pulumi.StringPtrInput
-	// The certificate's private key, in PEM format, if the
-	// certificate was generated from scratch and not with
-	// `certificateRequestPem`.  If
-	// `certificateRequestPem` was used, this will be blank.
-	PrivateKeyPem pulumi.StringPtrInput
-	// The ACME profile to use when requesting the
-	// certificate. This can be used to control generation parameters according to
-	// the specific CA. The default is blank (no profile); forces a new resource
-	// when changed.
-	//
-	// > Let's Encrypt publishes details on their profiles at
-	// <https://letsencrypt.org/docs/profiles/>.
-	Profile pulumi.StringPtrInput
-	// Disable DNS propagation checks and wait the
-	// specified number of seconds before validation proceeds. Defaults to 0 (no
-	// wait).
-	//
-	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
-	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
-	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
-	PropagationWait pulumi.IntPtrInput
-	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records, in addition to some
-	// in-provider checks such as zone detection. Defaults to your system-configured
-	// DNS resolvers.
-	RecursiveNameservers pulumi.StringArrayInput
-	// A URL that can be optionally supplied by an
-	// ARI endpoint explaining the renewal window policy (see
-	// `useRenewalInfo`).
-	RenewalInfoExplanationUrl pulumi.StringPtrInput
-	// Ignores the retry interval
-	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
-	// be used for testing. Default: `false`.
-	RenewalInfoIgnoreRetryAfter pulumi.BoolPtrInput
-	// The maximum amount of time, in seconds,
-	// that the resource is willing to sleep during apply to reach a selected
-	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
-	//
-	// > It's recommended to only use small values here (a few minutes maximum).
-	// Using extremely high values increases the risk of resource timeouts. To prevent
-	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
-	// minutes.
-	RenewalInfoMaxSleep pulumi.IntPtrInput
-	// A timestamp describing when ARI details will be
-	// refreshed if already fetched (see `useRenewalInfo`).
-	RenewalInfoRetryAfter pulumi.StringPtrInput
-	// The end of the discovered ARI renewal window (see
-	// `useRenewalInfo`).
-	RenewalInfoWindowEnd pulumi.StringPtrInput
-	// The selected time within the ARI renewal
-	// window that a certificate will be renewed, if
-	// `useRenewalInfo` is enabled.
-	RenewalInfoWindowSelected pulumi.StringPtrInput
-	// The start of the discovered ARI renewal window
-	// (see `useRenewalInfo`).
-	RenewalInfoWindowStart pulumi.StringPtrInput
-	// Enables revocation of a certificate upon destroy,
-	// which includes when a resource is re-created. Default is `true`.
-	RevokeCertificateOnDestroy pulumi.BoolPtrInput
-	// Some CA's require a reason for revocation to be provided.
-	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
-	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
-	// * unspecified
-	// * key-compromise
-	// * ca-compromise
-	// * affiliation-changed
-	// * superseded
-	// * cessation-of-operation
-	// * certificate-hold
-	// * remove-from-crl
-	// * privilege-withdrawn
-	// * aa-compromise
-	RevokeCertificateReason pulumi.StringPtrInput
-	// The certificate's subject alternative names;
-	// domains that this certificate will also be recognized for. Forces a new
-	// resource when changed.
-	SubjectAlternativeNames pulumi.StringArrayInput
-	// Defines a TLS challenge to use in fulfilling the
-	// request.
-	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
-	// and `httpMemcachedChallenge` can be defined at once. See the section on
-	// Using HTTP and TLS challenges for more
-	// details on using these and `tlsChallenge`.
-	TlsChallenge CertificateTlsChallengePtrInput
-	// When enabled, use information available from
-	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
-	// Default: `false`.
-	//
-	// > More detail on ARI can be found in [RFC
-	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
-	//
-	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
-	// selected time within an ARI renewal window value cannot be reached at plan time
-	// (based on the current time plus the value of
-	// `renewalInfoMaxSleep`), or if the CA has no ARI
-	// endpoint, renewal behavior will fall back to comparing the certificate expiry
-	// time with the value in `minDaysRemaining`. This means for short-lived
-	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict, or consider using `minDaysDynamic` instead.
-	UseRenewalInfo pulumi.BoolPtrInput
-	// The desired validity duration for the
-	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
-	// value triggers a certificate renewal.
-	//
-	// > Note that not all ACME CAs support user-set certificate durations; most
-	// famously, [Let's Encrypt does
-	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
-	// Check with your CA to ensure this feature is supported before using it.
-	ValidityDays pulumi.IntPtrInput
+	AccountKeyPem                   pulumi.StringPtrInput
+	CertTimeout                     pulumi.IntPtrInput
+	CertificateDomain               pulumi.StringPtrInput
+	CertificateNotAfter             pulumi.StringPtrInput
+	CertificateNotBefore            pulumi.StringPtrInput
+	CertificateP12                  pulumi.StringPtrInput
+	CertificateP12Password          pulumi.StringPtrInput
+	CertificatePem                  pulumi.StringPtrInput
+	CertificateRequestPem           pulumi.StringPtrInput
+	CertificateSerial               pulumi.StringPtrInput
+	CertificateUrl                  pulumi.StringPtrInput
+	CommonName                      pulumi.StringPtrInput
+	DeactivateAuthorizations        pulumi.BoolPtrInput
+	DisableAuthoritativePropagation pulumi.BoolPtrInput
+	DnsChallenges                   CertificateDnsChallengeArrayInput
+	HttpChallenge                   CertificateHttpChallengePtrInput
+	HttpMemcachedChallenge          CertificateHttpMemcachedChallengePtrInput
+	HttpS3Challenge                 CertificateHttpS3ChallengePtrInput
+	HttpWebrootChallenge            CertificateHttpWebrootChallengePtrInput
+	IssuerPem                       pulumi.StringPtrInput
+	KeyType                         pulumi.StringPtrInput
+	MinDaysDynamic                  pulumi.BoolPtrInput
+	MinDaysRemaining                pulumi.IntPtrInput
+	MustStaple                      pulumi.BoolPtrInput
+	PreCheckDelay                   pulumi.IntPtrInput
+	PreferredChain                  pulumi.StringPtrInput
+	PrivateKeyPem                   pulumi.StringPtrInput
+	Profile                         pulumi.StringPtrInput
+	PropagationWait                 pulumi.IntPtrInput
+	RecursiveNameservers            pulumi.StringArrayInput
+	RenewalInfoExplanationUrl       pulumi.StringPtrInput
+	RenewalInfoIgnoreRetryAfter     pulumi.BoolPtrInput
+	RenewalInfoMaxSleep             pulumi.IntPtrInput
+	RenewalInfoRetryAfter           pulumi.StringPtrInput
+	RenewalInfoWindowEnd            pulumi.StringPtrInput
+	RenewalInfoWindowSelected       pulumi.StringPtrInput
+	RenewalInfoWindowStart          pulumi.StringPtrInput
+	RevokeCertificateOnDestroy      pulumi.BoolPtrInput
+	RevokeCertificateReason         pulumi.StringPtrInput
+	SubjectAlternativeNames         pulumi.StringArrayInput
+	TlsChallenge                    CertificateTlsChallengePtrInput
+	UseRenewalInfo                  pulumi.BoolPtrInput
+	ValidityDays                    pulumi.IntPtrInput
 }
 
 func (CertificateState) ElementType() reflect.Type {
@@ -998,428 +202,68 @@ func (CertificateState) ElementType() reflect.Type {
 }
 
 type certificateArgs struct {
-	// The private key of the account that is
-	// requesting the certificate. Forces a new resource when changed.
-	AccountKeyPem string `pulumi:"accountKeyPem"`
-	// Controls the timeout in seconds for certificate requests
-	// that are made after challenges are complete. Defaults to 30 seconds.
-	//
-	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
-	// If you are looking to control timeouts related to a particular challenge (such
-	// as a DNS challenge), see that challenge provider's specific options.
-	CertTimeout *int `pulumi:"certTimeout"`
-	// Password to be used when generating
-	// the PFX file stored in `certificateP12`. Defaults to an
-	// empty string.
-	CertificateP12Password *string `pulumi:"certificateP12Password"`
-	// A pre-created certificate request, such as one
-	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format. Forces a new resource when changed.
-	//
-	// > One of `commonName`, `subjectAlternativeNames`, or
-	// `certificateRequestPem` must be specified. `certificateRequestPem`
-	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
-	// `certificateRequestPem` defined at the same time as `commonName` or
-	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
-	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
-	// case with the `classic` Let's Encrypt profile, the first domain defined in
-	// `subjectAlternativeNames` becomes the common name.
-	CertificateRequestPem *string `pulumi:"certificateRequestPem"`
-	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Forces a new resource when changed.
-	CommonName *string `pulumi:"commonName"`
-	// Controls if authorizations are explicitly
-	// deactivated after a certificate has been obtained, preventing their re-use.
-	// Default: `true`.
-	DeactivateAuthorizations *bool `pulumi:"deactivateAuthorizations"`
-	// Disable the requirement for full
-	// propagation of the TXT challenge records before proceeding with validation.
-	// Defaults to `false`.
-	//
-	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers`, `disableCompletePropagation`, and
-	// `propagationWait` settings.
-	DisableCompletePropagation *bool `pulumi:"disableCompletePropagation"`
-	// The DNS challenges to
-	// use in fulfilling the request.
-	DnsChallenges []CertificateDnsChallenge `pulumi:"dnsChallenges"`
-	// Defines an HTTP challenge to use in fulfilling
-	// the request.
-	HttpChallenge *CertificateHttpChallenge `pulumi:"httpChallenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [Memcached](https://memcached.org/) cluster.
-	HttpMemcachedChallenge *CertificateHttpMemcachedChallenge `pulumi:"httpMemcachedChallenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [S3](https://aws.amazon.com/s3/) bucket.
-	HttpS3Challenge *CertificateHttpS3Challenge `pulumi:"httpS3Challenge"`
-	// Defines an alternate type of HTTP
-	// challenge that can be used to place a file at a location that can be served by
-	// an out-of-band webserver.
-	HttpWebrootChallenge *CertificateHttpWebrootChallenge `pulumi:"httpWebrootChallenge"`
-	// The key type for the certificate's private key. Can be one of:
-	// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
-	// `8192` (for RSA keys of respective length). Required when not specifying a
-	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
-	// changed.
-	KeyType *string `pulumi:"keyType"`
-	// Derive the renewal threshold from the
-	// certificate lifetime instead of a static value. When set, the threshold is
-	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
-	// or less. Default: `false.`
-	//
-	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
-	// at once.
-	MinDaysDynamic *bool `pulumi:"minDaysDynamic"`
-	// The minimum amount of days remaining on the
-	// expiration of a certificate before a renewal is attempted. The default is
-	// `30`. A value of less than `0` means that the certificate will never be
-	// renewed.
-	//
-	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
-	MinDaysRemaining *int `pulumi:"minDaysRemaining"`
-	// Enables the [OCSP Stapling Required][ocsp-stapling]
-	// TLS Security Policy extension. Certificates with this extension must include a
-	// valid OCSP Staple in the TLS handshake for the connection to succeed.
-	// Defaults to `false`. Note that this option has no effect when using an
-	// external CSR - it must be enabled in the CSR itself. Forces a new resource
-	// when changed.
-	//
-	// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
-	//
-	// > OCSP stapling requires specific webserver configuration to support the
-	// downloading of the staple from the CA's OCSP endpoints, and should be configured
-	// to tolerate prolonged outages of the OCSP service. Consider this when using
-	// `mustStaple`, and only enable it if you are sure your webserver or service
-	// provider can be configured correctly.
-	MustStaple *bool `pulumi:"mustStaple"`
-	// Insert a delay after _every_ DNS challenge
-	// record to allow for extra time for DNS propagation before the certificate is
-	// requested. Use this option if you observe issues with requesting certificates
-	// even when DNS challenge records get added successfully. Units are in seconds.
-	// Defaults to 0 (no delay).
-	//
-	// > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
-	// Take your expected delay and divide it by the number of domains you have
-	// configured (`commonName` + `subjectAlternativeNames`).
-	PreCheckDelay *int `pulumi:"preCheckDelay"`
-	// The common name of the root of a preferred
-	// alternate certificate chain offered by the CA. The certificates in
-	// `issuerPem` will reflect the chain requested, if available, otherwise the
-	// default chain will be provided. Forces a new resource when changed.
-	//
-	// > `preferredChain` can be used to request alternate chains on Let's Encrypt
-	// during the transition away from their old cross-signed intermediates. See [this
-	// article for more
-	// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
-	// In their example titled **"What about the alternate chain?"**, the root you
-	// would put in to the `preferredChain` field would be `ISRG Root X1`. The
-	// equivalent in the [staging
-	// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
-	// Pretend Pear X1`.
-	PreferredChain *string `pulumi:"preferredChain"`
-	// The ACME profile to use when requesting the
-	// certificate. This can be used to control generation parameters according to
-	// the specific CA. The default is blank (no profile); forces a new resource
-	// when changed.
-	//
-	// > Let's Encrypt publishes details on their profiles at
-	// <https://letsencrypt.org/docs/profiles/>.
-	Profile *string `pulumi:"profile"`
-	// Disable DNS propagation checks and wait the
-	// specified number of seconds before validation proceeds. Defaults to 0 (no
-	// wait).
-	//
-	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
-	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
-	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
-	PropagationWait *int `pulumi:"propagationWait"`
-	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records, in addition to some
-	// in-provider checks such as zone detection. Defaults to your system-configured
-	// DNS resolvers.
-	RecursiveNameservers []string `pulumi:"recursiveNameservers"`
-	// Ignores the retry interval
-	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
-	// be used for testing. Default: `false`.
-	RenewalInfoIgnoreRetryAfter *bool `pulumi:"renewalInfoIgnoreRetryAfter"`
-	// The maximum amount of time, in seconds,
-	// that the resource is willing to sleep during apply to reach a selected
-	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
-	//
-	// > It's recommended to only use small values here (a few minutes maximum).
-	// Using extremely high values increases the risk of resource timeouts. To prevent
-	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
-	// minutes.
-	RenewalInfoMaxSleep *int `pulumi:"renewalInfoMaxSleep"`
-	// Enables revocation of a certificate upon destroy,
-	// which includes when a resource is re-created. Default is `true`.
-	RevokeCertificateOnDestroy *bool `pulumi:"revokeCertificateOnDestroy"`
-	// Some CA's require a reason for revocation to be provided.
-	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
-	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
-	// * unspecified
-	// * key-compromise
-	// * ca-compromise
-	// * affiliation-changed
-	// * superseded
-	// * cessation-of-operation
-	// * certificate-hold
-	// * remove-from-crl
-	// * privilege-withdrawn
-	// * aa-compromise
-	RevokeCertificateReason *string `pulumi:"revokeCertificateReason"`
-	// The certificate's subject alternative names;
-	// domains that this certificate will also be recognized for. Forces a new
-	// resource when changed.
-	SubjectAlternativeNames []string `pulumi:"subjectAlternativeNames"`
-	// Defines a TLS challenge to use in fulfilling the
-	// request.
-	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
-	// and `httpMemcachedChallenge` can be defined at once. See the section on
-	// Using HTTP and TLS challenges for more
-	// details on using these and `tlsChallenge`.
-	TlsChallenge *CertificateTlsChallenge `pulumi:"tlsChallenge"`
-	// When enabled, use information available from
-	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
-	// Default: `false`.
-	//
-	// > More detail on ARI can be found in [RFC
-	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
-	//
-	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
-	// selected time within an ARI renewal window value cannot be reached at plan time
-	// (based on the current time plus the value of
-	// `renewalInfoMaxSleep`), or if the CA has no ARI
-	// endpoint, renewal behavior will fall back to comparing the certificate expiry
-	// time with the value in `minDaysRemaining`. This means for short-lived
-	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict, or consider using `minDaysDynamic` instead.
-	UseRenewalInfo *bool `pulumi:"useRenewalInfo"`
-	// The desired validity duration for the
-	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
-	// value triggers a certificate renewal.
-	//
-	// > Note that not all ACME CAs support user-set certificate durations; most
-	// famously, [Let's Encrypt does
-	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
-	// Check with your CA to ensure this feature is supported before using it.
-	ValidityDays *int `pulumi:"validityDays"`
+	AccountKeyPem                   string                             `pulumi:"accountKeyPem"`
+	CertTimeout                     *int                               `pulumi:"certTimeout"`
+	CertificateP12Password          *string                            `pulumi:"certificateP12Password"`
+	CertificateRequestPem           *string                            `pulumi:"certificateRequestPem"`
+	CommonName                      *string                            `pulumi:"commonName"`
+	DeactivateAuthorizations        *bool                              `pulumi:"deactivateAuthorizations"`
+	DisableAuthoritativePropagation *bool                              `pulumi:"disableAuthoritativePropagation"`
+	DnsChallenges                   []CertificateDnsChallenge          `pulumi:"dnsChallenges"`
+	HttpChallenge                   *CertificateHttpChallenge          `pulumi:"httpChallenge"`
+	HttpMemcachedChallenge          *CertificateHttpMemcachedChallenge `pulumi:"httpMemcachedChallenge"`
+	HttpS3Challenge                 *CertificateHttpS3Challenge        `pulumi:"httpS3Challenge"`
+	HttpWebrootChallenge            *CertificateHttpWebrootChallenge   `pulumi:"httpWebrootChallenge"`
+	KeyType                         *string                            `pulumi:"keyType"`
+	MinDaysDynamic                  *bool                              `pulumi:"minDaysDynamic"`
+	MinDaysRemaining                *int                               `pulumi:"minDaysRemaining"`
+	MustStaple                      *bool                              `pulumi:"mustStaple"`
+	PreCheckDelay                   *int                               `pulumi:"preCheckDelay"`
+	PreferredChain                  *string                            `pulumi:"preferredChain"`
+	Profile                         *string                            `pulumi:"profile"`
+	PropagationWait                 *int                               `pulumi:"propagationWait"`
+	RecursiveNameservers            []string                           `pulumi:"recursiveNameservers"`
+	RenewalInfoIgnoreRetryAfter     *bool                              `pulumi:"renewalInfoIgnoreRetryAfter"`
+	RenewalInfoMaxSleep             *int                               `pulumi:"renewalInfoMaxSleep"`
+	RevokeCertificateOnDestroy      *bool                              `pulumi:"revokeCertificateOnDestroy"`
+	RevokeCertificateReason         *string                            `pulumi:"revokeCertificateReason"`
+	SubjectAlternativeNames         []string                           `pulumi:"subjectAlternativeNames"`
+	TlsChallenge                    *CertificateTlsChallenge           `pulumi:"tlsChallenge"`
+	UseRenewalInfo                  *bool                              `pulumi:"useRenewalInfo"`
+	ValidityDays                    *int                               `pulumi:"validityDays"`
 }
 
 // The set of arguments for constructing a Certificate resource.
 type CertificateArgs struct {
-	// The private key of the account that is
-	// requesting the certificate. Forces a new resource when changed.
-	AccountKeyPem pulumi.StringInput
-	// Controls the timeout in seconds for certificate requests
-	// that are made after challenges are complete. Defaults to 30 seconds.
-	//
-	// > As mentioned, `certTimeout` does nothing until all challenges are complete.
-	// If you are looking to control timeouts related to a particular challenge (such
-	// as a DNS challenge), see that challenge provider's specific options.
-	CertTimeout pulumi.IntPtrInput
-	// Password to be used when generating
-	// the PFX file stored in `certificateP12`. Defaults to an
-	// empty string.
-	CertificateP12Password pulumi.StringPtrInput
-	// A pre-created certificate request, such as one
-	// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-	// in PEM format. Forces a new resource when changed.
-	//
-	// > One of `commonName`, `subjectAlternativeNames`, or
-	// `certificateRequestPem` must be specified. `certificateRequestPem`
-	// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
-	// `certificateRequestPem` defined at the same time as `commonName` or
-	// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
-	// blank while `subjectAlternativeNames` is defined, and vice versa; in this
-	// case with the `classic` Let's Encrypt profile, the first domain defined in
-	// `subjectAlternativeNames` becomes the common name.
-	CertificateRequestPem pulumi.StringPtrInput
-	// The certificate's common name, the primary domain that the
-	// certificate will be recognized for. Forces a new resource when changed.
-	CommonName pulumi.StringPtrInput
-	// Controls if authorizations are explicitly
-	// deactivated after a certificate has been obtained, preventing their re-use.
-	// Default: `true`.
-	DeactivateAuthorizations pulumi.BoolPtrInput
-	// Disable the requirement for full
-	// propagation of the TXT challenge records before proceeding with validation.
-	// Defaults to `false`.
-	//
-	// > See About DNS propagation checks for details
-	// on the `recursiveNameservers`, `disableCompletePropagation`, and
-	// `propagationWait` settings.
-	DisableCompletePropagation pulumi.BoolPtrInput
-	// The DNS challenges to
-	// use in fulfilling the request.
-	DnsChallenges CertificateDnsChallengeArrayInput
-	// Defines an HTTP challenge to use in fulfilling
-	// the request.
-	HttpChallenge CertificateHttpChallengePtrInput
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [Memcached](https://memcached.org/) cluster.
-	HttpMemcachedChallenge CertificateHttpMemcachedChallengePtrInput
-	// Defines an alternate type of HTTP
-	// challenge that can be used to serve up challenges to a
-	// [S3](https://aws.amazon.com/s3/) bucket.
-	HttpS3Challenge CertificateHttpS3ChallengePtrInput
-	// Defines an alternate type of HTTP
-	// challenge that can be used to place a file at a location that can be served by
-	// an out-of-band webserver.
-	HttpWebrootChallenge CertificateHttpWebrootChallengePtrInput
-	// The key type for the certificate's private key. Can be one of:
-	// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
-	// `8192` (for RSA keys of respective length). Required when not specifying a
-	// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
-	// changed.
-	KeyType pulumi.StringPtrInput
-	// Derive the renewal threshold from the
-	// certificate lifetime instead of a static value. When set, the threshold is
-	// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
-	// or less. Default: `false.`
-	//
-	// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
-	// at once.
-	MinDaysDynamic pulumi.BoolPtrInput
-	// The minimum amount of days remaining on the
-	// expiration of a certificate before a renewal is attempted. The default is
-	// `30`. A value of less than `0` means that the certificate will never be
-	// renewed.
-	//
-	// > `minDaysRemaining` must be lower than `validityDays` (if defined).
-	MinDaysRemaining pulumi.IntPtrInput
-	// Enables the [OCSP Stapling Required][ocsp-stapling]
-	// TLS Security Policy extension. Certificates with this extension must include a
-	// valid OCSP Staple in the TLS handshake for the connection to succeed.
-	// Defaults to `false`. Note that this option has no effect when using an
-	// external CSR - it must be enabled in the CSR itself. Forces a new resource
-	// when changed.
-	//
-	// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
-	//
-	// > OCSP stapling requires specific webserver configuration to support the
-	// downloading of the staple from the CA's OCSP endpoints, and should be configured
-	// to tolerate prolonged outages of the OCSP service. Consider this when using
-	// `mustStaple`, and only enable it if you are sure your webserver or service
-	// provider can be configured correctly.
-	MustStaple pulumi.BoolPtrInput
-	// Insert a delay after _every_ DNS challenge
-	// record to allow for extra time for DNS propagation before the certificate is
-	// requested. Use this option if you observe issues with requesting certificates
-	// even when DNS challenge records get added successfully. Units are in seconds.
-	// Defaults to 0 (no delay).
-	//
-	// > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
-	// Take your expected delay and divide it by the number of domains you have
-	// configured (`commonName` + `subjectAlternativeNames`).
-	PreCheckDelay pulumi.IntPtrInput
-	// The common name of the root of a preferred
-	// alternate certificate chain offered by the CA. The certificates in
-	// `issuerPem` will reflect the chain requested, if available, otherwise the
-	// default chain will be provided. Forces a new resource when changed.
-	//
-	// > `preferredChain` can be used to request alternate chains on Let's Encrypt
-	// during the transition away from their old cross-signed intermediates. See [this
-	// article for more
-	// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
-	// In their example titled **"What about the alternate chain?"**, the root you
-	// would put in to the `preferredChain` field would be `ISRG Root X1`. The
-	// equivalent in the [staging
-	// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
-	// Pretend Pear X1`.
-	PreferredChain pulumi.StringPtrInput
-	// The ACME profile to use when requesting the
-	// certificate. This can be used to control generation parameters according to
-	// the specific CA. The default is blank (no profile); forces a new resource
-	// when changed.
-	//
-	// > Let's Encrypt publishes details on their profiles at
-	// <https://letsencrypt.org/docs/profiles/>.
-	Profile pulumi.StringPtrInput
-	// Disable DNS propagation checks and wait the
-	// specified number of seconds before validation proceeds. Defaults to 0 (no
-	// wait).
-	//
-	// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
-	// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
-	// have no effect. `propagationWait` conflicts with `preCheckDelay`.
-	PropagationWait pulumi.IntPtrInput
-	// The recursive nameservers that will be
-	// used to check for propagation of DNS challenge records, in addition to some
-	// in-provider checks such as zone detection. Defaults to your system-configured
-	// DNS resolvers.
-	RecursiveNameservers pulumi.StringArrayInput
-	// Ignores the retry interval
-	// supplied by the ARI endpoint for re-fetching renewal window data. Should only
-	// be used for testing. Default: `false`.
-	RenewalInfoIgnoreRetryAfter pulumi.BoolPtrInput
-	// The maximum amount of time, in seconds,
-	// that the resource is willing to sleep during apply to reach a selected
-	// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
-	//
-	// > It's recommended to only use small values here (a few minutes maximum).
-	// Using extremely high values increases the risk of resource timeouts. To prevent
-	// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
-	// minutes.
-	RenewalInfoMaxSleep pulumi.IntPtrInput
-	// Enables revocation of a certificate upon destroy,
-	// which includes when a resource is re-created. Default is `true`.
-	RevokeCertificateOnDestroy pulumi.BoolPtrInput
-	// Some CA's require a reason for revocation to be provided.
-	// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
-	// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
-	// * unspecified
-	// * key-compromise
-	// * ca-compromise
-	// * affiliation-changed
-	// * superseded
-	// * cessation-of-operation
-	// * certificate-hold
-	// * remove-from-crl
-	// * privilege-withdrawn
-	// * aa-compromise
-	RevokeCertificateReason pulumi.StringPtrInput
-	// The certificate's subject alternative names;
-	// domains that this certificate will also be recognized for. Forces a new
-	// resource when changed.
-	SubjectAlternativeNames pulumi.StringArrayInput
-	// Defines a TLS challenge to use in fulfilling the
-	// request.
-	//
-	// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
-	// and `httpMemcachedChallenge` can be defined at once. See the section on
-	// Using HTTP and TLS challenges for more
-	// details on using these and `tlsChallenge`.
-	TlsChallenge CertificateTlsChallengePtrInput
-	// When enabled, use information available from
-	// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
-	// Default: `false`.
-	//
-	// > More detail on ARI can be found in [RFC
-	// 9773](https://datatracker.ietf.org/doc/rfc9773/).
-	//
-	// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
-	// selected time within an ARI renewal window value cannot be reached at plan time
-	// (based on the current time plus the value of
-	// `renewalInfoMaxSleep`), or if the CA has no ARI
-	// endpoint, renewal behavior will fall back to comparing the certificate expiry
-	// time with the value in `minDaysRemaining`. This means for short-lived
-	// certificates, you may wish to turn this value down so that the settings do not
-	// conflict, or consider using `minDaysDynamic` instead.
-	UseRenewalInfo pulumi.BoolPtrInput
-	// The desired validity duration for the
-	// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
-	// value triggers a certificate renewal.
-	//
-	// > Note that not all ACME CAs support user-set certificate durations; most
-	// famously, [Let's Encrypt does
-	// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
-	// Check with your CA to ensure this feature is supported before using it.
-	ValidityDays pulumi.IntPtrInput
+	AccountKeyPem                   pulumi.StringInput
+	CertTimeout                     pulumi.IntPtrInput
+	CertificateP12Password          pulumi.StringPtrInput
+	CertificateRequestPem           pulumi.StringPtrInput
+	CommonName                      pulumi.StringPtrInput
+	DeactivateAuthorizations        pulumi.BoolPtrInput
+	DisableAuthoritativePropagation pulumi.BoolPtrInput
+	DnsChallenges                   CertificateDnsChallengeArrayInput
+	HttpChallenge                   CertificateHttpChallengePtrInput
+	HttpMemcachedChallenge          CertificateHttpMemcachedChallengePtrInput
+	HttpS3Challenge                 CertificateHttpS3ChallengePtrInput
+	HttpWebrootChallenge            CertificateHttpWebrootChallengePtrInput
+	KeyType                         pulumi.StringPtrInput
+	MinDaysDynamic                  pulumi.BoolPtrInput
+	MinDaysRemaining                pulumi.IntPtrInput
+	MustStaple                      pulumi.BoolPtrInput
+	PreCheckDelay                   pulumi.IntPtrInput
+	PreferredChain                  pulumi.StringPtrInput
+	Profile                         pulumi.StringPtrInput
+	PropagationWait                 pulumi.IntPtrInput
+	RecursiveNameservers            pulumi.StringArrayInput
+	RenewalInfoIgnoreRetryAfter     pulumi.BoolPtrInput
+	RenewalInfoMaxSleep             pulumi.IntPtrInput
+	RevokeCertificateOnDestroy      pulumi.BoolPtrInput
+	RevokeCertificateReason         pulumi.StringPtrInput
+	SubjectAlternativeNames         pulumi.StringArrayInput
+	TlsChallenge                    CertificateTlsChallengePtrInput
+	UseRenewalInfo                  pulumi.BoolPtrInput
+	ValidityDays                    pulumi.IntPtrInput
 }
 
 func (CertificateArgs) ElementType() reflect.Type {
@@ -1509,29 +353,18 @@ func (o CertificateOutput) ToCertificateOutputWithContext(ctx context.Context) C
 	return o
 }
 
-// The private key of the account that is
-// requesting the certificate. Forces a new resource when changed.
 func (o CertificateOutput) AccountKeyPem() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.AccountKeyPem }).(pulumi.StringOutput)
 }
 
-// Controls the timeout in seconds for certificate requests
-// that are made after challenges are complete. Defaults to 30 seconds.
-//
-// > As mentioned, `certTimeout` does nothing until all challenges are complete.
-// If you are looking to control timeouts related to a particular challenge (such
-// as a DNS challenge), see that challenge provider's specific options.
 func (o CertificateOutput) CertTimeout() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.CertTimeout }).(pulumi.IntPtrOutput)
 }
 
-// The common name of the certificate.
 func (o CertificateOutput) CertificateDomain() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateDomain }).(pulumi.StringOutput)
 }
 
-// The expiry date of the certificate, laid out in
-// RFC3339 format (`2006-01-02T15:04:05Z07:00`).
 func (o CertificateOutput) CertificateNotAfter() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateNotAfter }).(pulumi.StringOutput)
 }
@@ -1540,356 +373,154 @@ func (o CertificateOutput) CertificateNotBefore() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateNotBefore }).(pulumi.StringOutput)
 }
 
-// The certificate, any intermediates, and the private key
-// archived as a PFX file (PKCS12 format, generally used by Microsoft products).
-// The data is base64 encoded (including padding), and its password is
-// configurable via the `certificateP12Password`
-// argument. This field is empty if creating a certificate from a CSR.
 func (o CertificateOutput) CertificateP12() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateP12 }).(pulumi.StringOutput)
 }
 
-// Password to be used when generating
-// the PFX file stored in `certificateP12`. Defaults to an
-// empty string.
 func (o CertificateOutput) CertificateP12Password() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.CertificateP12Password }).(pulumi.StringPtrOutput)
 }
 
-// The certificate in PEM format. This does not include the
-// `issuerPem`. This certificate can be concatenated with `issuerPem` to form
-// a full chain, e.g. `"${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"`
 func (o CertificateOutput) CertificatePem() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificatePem }).(pulumi.StringOutput)
 }
 
-// A pre-created certificate request, such as one
-// from [`tlsCertRequest`][tls-cert-request], or one from an external source,
-// in PEM format. Forces a new resource when changed.
-//
-// > One of `commonName`, `subjectAlternativeNames`, or
-// `certificateRequestPem` must be specified. `certificateRequestPem`
-// conflicts with `commonName` and `subjectAlternativeNames`; You cannot have
-// `certificateRequestPem` defined at the same time as `commonName` or
-// `subjectAlternativeNames`, and vice versa. Finally, `commonName` can be
-// blank while `subjectAlternativeNames` is defined, and vice versa; in this
-// case with the `classic` Let's Encrypt profile, the first domain defined in
-// `subjectAlternativeNames` becomes the common name.
 func (o CertificateOutput) CertificateRequestPem() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.CertificateRequestPem }).(pulumi.StringPtrOutput)
 }
 
-// The serial number, in string format, as reported by
-// the CA.
 func (o CertificateOutput) CertificateSerial() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateSerial }).(pulumi.StringOutput)
 }
 
-// The full URL of the certificate within the ACME CA.
 func (o CertificateOutput) CertificateUrl() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.CertificateUrl }).(pulumi.StringOutput)
 }
 
-// The certificate's common name, the primary domain that the
-// certificate will be recognized for. Forces a new resource when changed.
 func (o CertificateOutput) CommonName() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.CommonName }).(pulumi.StringPtrOutput)
 }
 
-// Controls if authorizations are explicitly
-// deactivated after a certificate has been obtained, preventing their re-use.
-// Default: `true`.
 func (o CertificateOutput) DeactivateAuthorizations() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.DeactivateAuthorizations }).(pulumi.BoolPtrOutput)
 }
 
-// Disable the requirement for full
-// propagation of the TXT challenge records before proceeding with validation.
-// Defaults to `false`.
-//
-// > See About DNS propagation checks for details
-// on the `recursiveNameservers`, `disableCompletePropagation`, and
-// `propagationWait` settings.
-func (o CertificateOutput) DisableCompletePropagation() pulumi.BoolPtrOutput {
-	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.DisableCompletePropagation }).(pulumi.BoolPtrOutput)
+func (o CertificateOutput) DisableAuthoritativePropagation() pulumi.BoolPtrOutput {
+	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.DisableAuthoritativePropagation }).(pulumi.BoolPtrOutput)
 }
 
-// The DNS challenges to
-// use in fulfilling the request.
 func (o CertificateOutput) DnsChallenges() CertificateDnsChallengeArrayOutput {
 	return o.ApplyT(func(v *Certificate) CertificateDnsChallengeArrayOutput { return v.DnsChallenges }).(CertificateDnsChallengeArrayOutput)
 }
 
-// Defines an HTTP challenge to use in fulfilling
-// the request.
 func (o CertificateOutput) HttpChallenge() CertificateHttpChallengePtrOutput {
 	return o.ApplyT(func(v *Certificate) CertificateHttpChallengePtrOutput { return v.HttpChallenge }).(CertificateHttpChallengePtrOutput)
 }
 
-// Defines an alternate type of HTTP
-// challenge that can be used to serve up challenges to a
-// [Memcached](https://memcached.org/) cluster.
 func (o CertificateOutput) HttpMemcachedChallenge() CertificateHttpMemcachedChallengePtrOutput {
 	return o.ApplyT(func(v *Certificate) CertificateHttpMemcachedChallengePtrOutput { return v.HttpMemcachedChallenge }).(CertificateHttpMemcachedChallengePtrOutput)
 }
 
-// Defines an alternate type of HTTP
-// challenge that can be used to serve up challenges to a
-// [S3](https://aws.amazon.com/s3/) bucket.
 func (o CertificateOutput) HttpS3Challenge() CertificateHttpS3ChallengePtrOutput {
 	return o.ApplyT(func(v *Certificate) CertificateHttpS3ChallengePtrOutput { return v.HttpS3Challenge }).(CertificateHttpS3ChallengePtrOutput)
 }
 
-// Defines an alternate type of HTTP
-// challenge that can be used to place a file at a location that can be served by
-// an out-of-band webserver.
 func (o CertificateOutput) HttpWebrootChallenge() CertificateHttpWebrootChallengePtrOutput {
 	return o.ApplyT(func(v *Certificate) CertificateHttpWebrootChallengePtrOutput { return v.HttpWebrootChallenge }).(CertificateHttpWebrootChallengePtrOutput)
 }
 
-// The intermediate certificates of the issuer. Multiple
-// certificates are concatenated in this field when there is more than one
-// intermediate certificate in the chain.
 func (o CertificateOutput) IssuerPem() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.IssuerPem }).(pulumi.StringOutput)
 }
 
-// The key type for the certificate's private key. Can be one of:
-// `P256` and `P384` (for ECDSA keys of respective length) or `2048`, `4096`, and
-// `8192` (for RSA keys of respective length). Required when not specifying a
-// CSR. The default is `2048` (RSA key of 2048 bits). Forces a new resource when
-// changed.
 func (o CertificateOutput) KeyType() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.KeyType }).(pulumi.StringPtrOutput)
 }
 
-// Derive the renewal threshold from the
-// certificate lifetime instead of a static value. When set, the threshold is
-// set to 1/3 of the certificate's lifetime, or 1/2 if the lifetime is 10 days
-// or less. Default: `false.`
-//
-// > `minDaysDynamic` conflicts with `minDaysRemaining` - only one may be set
-// at once.
 func (o CertificateOutput) MinDaysDynamic() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.MinDaysDynamic }).(pulumi.BoolPtrOutput)
 }
 
-// The minimum amount of days remaining on the
-// expiration of a certificate before a renewal is attempted. The default is
-// `30`. A value of less than `0` means that the certificate will never be
-// renewed.
-//
-// > `minDaysRemaining` must be lower than `validityDays` (if defined).
 func (o CertificateOutput) MinDaysRemaining() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.MinDaysRemaining }).(pulumi.IntPtrOutput)
 }
 
-// Enables the [OCSP Stapling Required][ocsp-stapling]
-// TLS Security Policy extension. Certificates with this extension must include a
-// valid OCSP Staple in the TLS handshake for the connection to succeed.
-// Defaults to `false`. Note that this option has no effect when using an
-// external CSR - it must be enabled in the CSR itself. Forces a new resource
-// when changed.
-//
-// > OCSP stapling requires specific webserver configuration to support the
-// downloading of the staple from the CA's OCSP endpoints, and should be configured
-// to tolerate prolonged outages of the OCSP service. Consider this when using
-// `mustStaple`, and only enable it if you are sure your webserver or service
-// provider can be configured correctly.
-//
-// [ocsp-stapling]: https://letsencrypt.org/docs/integration-guide/#implement-ocsp-stapling
 func (o CertificateOutput) MustStaple() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.MustStaple }).(pulumi.BoolPtrOutput)
 }
 
-// Insert a delay after _every_ DNS challenge
-// record to allow for extra time for DNS propagation before the certificate is
-// requested. Use this option if you observe issues with requesting certificates
-// even when DNS challenge records get added successfully. Units are in seconds.
-// Defaults to 0 (no delay).
-//
-// > Be careful with `preCheckDelay` since the delay is executed _per-domain_.
-// Take your expected delay and divide it by the number of domains you have
-// configured (`commonName` + `subjectAlternativeNames`).
 func (o CertificateOutput) PreCheckDelay() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.PreCheckDelay }).(pulumi.IntPtrOutput)
 }
 
-// The common name of the root of a preferred
-// alternate certificate chain offered by the CA. The certificates in
-// `issuerPem` will reflect the chain requested, if available, otherwise the
-// default chain will be provided. Forces a new resource when changed.
-//
-// > `preferredChain` can be used to request alternate chains on Let's Encrypt
-// during the transition away from their old cross-signed intermediates. See [this
-// article for more
-// details](https://letsencrypt.org/2020/12/21/extending-android-compatibility.html).
-// In their example titled **"What about the alternate chain?"**, the root you
-// would put in to the `preferredChain` field would be `ISRG Root X1`. The
-// equivalent in the [staging
-// environment](https://letsencrypt.org/docs/staging-environment/) is `(STAGING)
-// Pretend Pear X1`.
 func (o CertificateOutput) PreferredChain() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.PreferredChain }).(pulumi.StringPtrOutput)
 }
 
-// The certificate's private key, in PEM format, if the
-// certificate was generated from scratch and not with
-// `certificateRequestPem`.  If
-// `certificateRequestPem` was used, this will be blank.
 func (o CertificateOutput) PrivateKeyPem() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.PrivateKeyPem }).(pulumi.StringOutput)
 }
 
-// The ACME profile to use when requesting the
-// certificate. This can be used to control generation parameters according to
-// the specific CA. The default is blank (no profile); forces a new resource
-// when changed.
-//
-// > Let's Encrypt publishes details on their profiles at
-// <https://letsencrypt.org/docs/profiles/>.
 func (o CertificateOutput) Profile() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.Profile }).(pulumi.StringPtrOutput)
 }
 
-// Disable DNS propagation checks and wait the
-// specified number of seconds before validation proceeds. Defaults to 0 (no
-// wait).
-//
-// > The wait is applied _per-domain_. When `propagationWait` is set, propagation
-// checks are skipped and `recursiveNameservers` / `disableCompletePropagation`
-// have no effect. `propagationWait` conflicts with `preCheckDelay`.
 func (o CertificateOutput) PropagationWait() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.PropagationWait }).(pulumi.IntPtrOutput)
 }
 
-// The recursive nameservers that will be
-// used to check for propagation of DNS challenge records, in addition to some
-// in-provider checks such as zone detection. Defaults to your system-configured
-// DNS resolvers.
 func (o CertificateOutput) RecursiveNameservers() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringArrayOutput { return v.RecursiveNameservers }).(pulumi.StringArrayOutput)
 }
 
-// A URL that can be optionally supplied by an
-// ARI endpoint explaining the renewal window policy (see
-// `useRenewalInfo`).
 func (o CertificateOutput) RenewalInfoExplanationUrl() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoExplanationUrl }).(pulumi.StringOutput)
 }
 
-// Ignores the retry interval
-// supplied by the ARI endpoint for re-fetching renewal window data. Should only
-// be used for testing. Default: `false`.
 func (o CertificateOutput) RenewalInfoIgnoreRetryAfter() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.RenewalInfoIgnoreRetryAfter }).(pulumi.BoolPtrOutput)
 }
 
-// The maximum amount of time, in seconds,
-// that the resource is willing to sleep during apply to reach a selected
-// renewal window time when `useRenewalInfo` is set to `true`. Default: `0`.
-//
-// > It's recommended to only use small values here (a few minutes maximum).
-// Using extremely high values increases the risk of resource timeouts. To prevent
-// hard resource timeouts, the maximum value allowed here is 900 seconds, or 15
-// minutes.
 func (o CertificateOutput) RenewalInfoMaxSleep() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.RenewalInfoMaxSleep }).(pulumi.IntPtrOutput)
 }
 
-// A timestamp describing when ARI details will be
-// refreshed if already fetched (see `useRenewalInfo`).
 func (o CertificateOutput) RenewalInfoRetryAfter() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoRetryAfter }).(pulumi.StringOutput)
 }
 
-// The end of the discovered ARI renewal window (see
-// `useRenewalInfo`).
 func (o CertificateOutput) RenewalInfoWindowEnd() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoWindowEnd }).(pulumi.StringOutput)
 }
 
-// The selected time within the ARI renewal
-// window that a certificate will be renewed, if
-// `useRenewalInfo` is enabled.
 func (o CertificateOutput) RenewalInfoWindowSelected() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoWindowSelected }).(pulumi.StringOutput)
 }
 
-// The start of the discovered ARI renewal window
-// (see `useRenewalInfo`).
 func (o CertificateOutput) RenewalInfoWindowStart() pulumi.StringOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringOutput { return v.RenewalInfoWindowStart }).(pulumi.StringOutput)
 }
 
-// Enables revocation of a certificate upon destroy,
-// which includes when a resource is re-created. Default is `true`.
 func (o CertificateOutput) RevokeCertificateOnDestroy() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.RevokeCertificateOnDestroy }).(pulumi.BoolPtrOutput)
 }
 
-// Some CA's require a reason for revocation to be provided.
-// Use this reason (from [RFC 5280, section 5.3.1](https://www.rfc-editor.org/rfc/rfc5280#section-5.3.1).
-// By default, no reason provided in revocation requests. The reason is a string, when provided should be one of:
-// * unspecified
-// * key-compromise
-// * ca-compromise
-// * affiliation-changed
-// * superseded
-// * cessation-of-operation
-// * certificate-hold
-// * remove-from-crl
-// * privilege-withdrawn
-// * aa-compromise
 func (o CertificateOutput) RevokeCertificateReason() pulumi.StringPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringPtrOutput { return v.RevokeCertificateReason }).(pulumi.StringPtrOutput)
 }
 
-// The certificate's subject alternative names;
-// domains that this certificate will also be recognized for. Forces a new
-// resource when changed.
 func (o CertificateOutput) SubjectAlternativeNames() pulumi.StringArrayOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.StringArrayOutput { return v.SubjectAlternativeNames }).(pulumi.StringArrayOutput)
 }
 
-// Defines a TLS challenge to use in fulfilling the
-// request.
-//
-// > Only one of `httpChallenge`, `httpWebrootChallenge`, `httpS3Challenge`
-// and `httpMemcachedChallenge` can be defined at once. See the section on
-// Using HTTP and TLS challenges for more
-// details on using these and `tlsChallenge`.
 func (o CertificateOutput) TlsChallenge() CertificateTlsChallengePtrOutput {
 	return o.ApplyT(func(v *Certificate) CertificateTlsChallengePtrOutput { return v.TlsChallenge }).(CertificateTlsChallengePtrOutput)
 }
 
-// When enabled, use information available from
-// the CA's ACME Renewal Information (ARI) endpoint for renewing certificates.
-// Default: `false`.
-//
-// > More detail on ARI can be found in [RFC
-// 9773](https://datatracker.ietf.org/doc/rfc9773/).
-//
-// > Note that `useRenewalInfo` does not disable `minDaysRemaining`! If the
-// selected time within an ARI renewal window value cannot be reached at plan time
-// (based on the current time plus the value of
-// `renewalInfoMaxSleep`), or if the CA has no ARI
-// endpoint, renewal behavior will fall back to comparing the certificate expiry
-// time with the value in `minDaysRemaining`. This means for short-lived
-// certificates, you may wish to turn this value down so that the settings do not
-// conflict, or consider using `minDaysDynamic` instead.
 func (o CertificateOutput) UseRenewalInfo() pulumi.BoolPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.BoolPtrOutput { return v.UseRenewalInfo }).(pulumi.BoolPtrOutput)
 }
 
-// The desired validity duration for the
-// certificate, in days (e.g., `7` for 7 days, `90` for 90 days). Changing this
-// value triggers a certificate renewal.
-//
-// > Note that not all ACME CAs support user-set certificate durations; most
-// famously, [Let's Encrypt does
-// not](https://github.com/letsencrypt/boulder/blob/main/docs/acme-divergences.md#section-74).
-// Check with your CA to ensure this feature is supported before using it.
 func (o CertificateOutput) ValidityDays() pulumi.IntPtrOutput {
 	return o.ApplyT(func(v *Certificate) pulumi.IntPtrOutput { return v.ValidityDays }).(pulumi.IntPtrOutput)
 }

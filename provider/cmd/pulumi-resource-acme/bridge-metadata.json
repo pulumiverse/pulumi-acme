@@ -5,7 +5,14 @@
                 "current": "acme:index/certificate:Certificate",
                 "fields": {
                     "dns_challenge": {
-                        "maxItemsOne": false
+                        "maxItemsOne": false,
+                        "elem": {
+                            "fields": {
+                                "match_domains": {
+                                    "maxItemsOne": false
+                                }
+                            }
+                        }
                     },
                     "http_challenge": {
                         "maxItemsOne": true

@@ -13,9 +13,6 @@ namespace Pulumiverse.Acme.Inputs
 
     public sealed class CertificateHttpWebrootChallengeArgs : global::Pulumi.ResourceArgs
     {
-        /// <summary>
-        /// The directory to publish the record to.
-        /// </summary>
         [Input("directory", required: true)]
         public Input<string> Directory { get; set; } = null!;
 
