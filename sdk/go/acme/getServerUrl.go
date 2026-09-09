@@ -11,50 +11,6 @@ import (
 	"github.com/pulumiverse/pulumi-acme/sdk/go/acme/internal"
 )
 
-// ## # getServerUrl
-//
-// The `getServerUrl` data source can be used to retrieve the CA server URL
-// that the provider is currently configured for.
-//
-// ## Example
-//
-// The following example populates the `serverUrl` output with the currently
-// configured CA server URL.
-//
-// ```go
-// package main
-//
-// import (
-//
-//	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-//	"github.com/pulumiverse/pulumi-acme/sdk/go/acme"
-//
-// )
-//
-//	func main() {
-//		pulumi.Run(func(ctx *pulumi.Context) error {
-//			url, err := acme.GetServerUrl(ctx, map[string]interface{}{}, nil)
-//			if err != nil {
-//				return err
-//			}
-//			ctx.Export("serverUrl", url.ServerUrl)
-//			return nil
-//		})
-//	}
-//
-// ```
-//
-// #### Argument Reference
-//
-// This data source takes no arguments.
-//
-// #### Attribute Reference
-//
-// The following attributes are exported:
-//
-//   - `id`: the CA server URL that the provider is currently configured for.
-//   - `serverUrl`: the CA server URL that the provider is currently configured
-//     for. Same as `id`.
 func GetServerUrl(ctx *pulumi.Context, opts ...pulumi.InvokeOption) (*GetServerUrlResult, error) {
 	opts = internal.PkgInvokeDefaultOpts(opts)
 	var rv GetServerUrlResult

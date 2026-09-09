@@ -15,15 +15,19 @@ namespace Pulumiverse.Acme.Outputs
     public sealed class CertificateDnsChallenge
     {
         public readonly ImmutableDictionary<string, string>? Config;
+        public readonly ImmutableArray<string> MatchDomains;
         public readonly string Provider;
 
         [OutputConstructor]
         private CertificateDnsChallenge(
             ImmutableDictionary<string, string>? config,
 
+            ImmutableArray<string> matchDomains,
+
             string provider)
         {
             Config = config;
+            MatchDomains = matchDomains;
             Provider = provider;
         }
     }

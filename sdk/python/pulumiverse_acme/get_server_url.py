@@ -60,35 +60,7 @@ class AwaitableGetServerUrlResult(GetServerUrlResult):
 
 def get_server_url(opts: Optional[pulumi.InvokeOptions] = None) -> AwaitableGetServerUrlResult:
     """
-    ## # get_server_url
-
-    The `get_server_url` data source can be used to retrieve the CA server URL
-    that the provider is currently configured for.
-
-    ## Example
-
-    The following example populates the `server_url` output with the currently
-    configured CA server URL.
-
-    ```python
-    import pulumi
-    import pulumi_acme as acme
-
-    url = acme.get_server_url()
-    pulumi.export("serverUrl", url.server_url)
-    ```
-
-    #### Argument Reference
-
-    This data source takes no arguments.
-
-    #### Attribute Reference
-
-    The following attributes are exported:
-
-    * `id`: the CA server URL that the provider is currently configured for.
-    * `server_url`: the CA server URL that the provider is currently configured
-      for. Same as `id`.
+    Use this data source to access information about an existing resource.
     """
     __args__ = dict()
     opts = pulumi.InvokeOptions.merge(_utilities.get_invoke_opts_defaults(), opts)
@@ -99,35 +71,7 @@ def get_server_url(opts: Optional[pulumi.InvokeOptions] = None) -> AwaitableGetS
         server_url=pulumi.get(__ret__, 'server_url'))
 def get_server_url_output(opts: Optional[Union[pulumi.InvokeOptions, pulumi.InvokeOutputOptions]] = None) -> pulumi.Output[GetServerUrlResult]:
     """
-    ## # get_server_url
-
-    The `get_server_url` data source can be used to retrieve the CA server URL
-    that the provider is currently configured for.
-
-    ## Example
-
-    The following example populates the `server_url` output with the currently
-    configured CA server URL.
-
-    ```python
-    import pulumi
-    import pulumi_acme as acme
-
-    url = acme.get_server_url()
-    pulumi.export("serverUrl", url.server_url)
-    ```
-
-    #### Argument Reference
-
-    This data source takes no arguments.
-
-    #### Attribute Reference
-
-    The following attributes are exported:
-
-    * `id`: the CA server URL that the provider is currently configured for.
-    * `server_url`: the CA server URL that the provider is currently configured
-      for. Same as `id`.
+    Use this data source to access information about an existing resource.
     """
     __args__ = dict()
     opts = pulumi.InvokeOutputOptions.merge(_utilities.get_invoke_opts_defaults(), opts)

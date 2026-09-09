@@ -25,6 +25,14 @@ namespace Pulumiverse.Acme.Inputs
             }
         }
 
+        [Input("matchDomains")]
+        private InputList<string>? _matchDomains;
+        public InputList<string> MatchDomains
+        {
+            get => _matchDomains ?? (_matchDomains = new InputList<string>());
+            set => _matchDomains = value;
+        }
+
         [Input("provider", required: true)]
         public Input<string> Provider { get; set; } = null!;
 
