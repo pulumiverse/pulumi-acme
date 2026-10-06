@@ -1,12 +1,12 @@
 module github.com/pulumiverse/pulumi-acme/provider
 
-go 1.26.5
+go 1.27.1
 
 replace github.com/hashicorp/terraform-plugin-sdk/v2 => github.com/pulumi/terraform-plugin-sdk/v2 v2.0.0-20260318212141-5525259d096b
 
 require (
 	github.com/pulumi/pulumi-terraform-bridge/v3 v3.125.0
-	github.com/vancluever/terraform-provider-acme/v3 v3.2.0
+	github.com/vancluever/terraform-provider-acme/v3 v3.2.1
 )
 
 require (
@@ -120,7 +120,7 @@ require (
 	github.com/go-acme/alidns-20150109/v5 v5.6.1 // indirect
 	github.com/go-acme/esa-20240910/v3 v3.13.0 // indirect
 	github.com/go-acme/jdcloud-sdk-go v1.64.0 // indirect
-	github.com/go-acme/lego/v5 v5.5.1 // indirect
+	github.com/go-acme/lego/v5 v5.5.2 // indirect
 	github.com/go-acme/tencentclouddnspod v1.3.131 // indirect
 	github.com/go-acme/tencentedgdeone v1.3.170 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
@@ -166,7 +166,7 @@ require (
 	github.com/hashicorp/go-plugin v1.8.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.8 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
-	github.com/hashicorp/go-uuid v1.0.3 // indirect
+	github.com/hashicorp/go-uuid v1.0.4 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hashicorp/hcl/v2 v2.24.0 // indirect
