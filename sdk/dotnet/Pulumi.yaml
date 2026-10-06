@@ -1,3 +1,0 @@
-name: acme
-description: A Pulumi resource provider for acme.
-language: dotnet
